@@ -63,22 +63,51 @@
 /* Right-aligned elements */
 .navbar-right {
   display: flex;
-  align-items: center;
+  align-items: center; /* Align items vertically */
   justify-content: flex-end;
+  gap: 20px; /* Space between the elements */
 }
 
-/* User Icon */
+/* User Icon (SVG) */
 .user-icon {
-  margin-right: 20px;
-  font-size: 25px;
-  color: #333;
+  display: flex;
+  align-items: center; /* Vertically align the icon */
 }
 
-/* Phone Number */
+.user-icon svg {
+  width: 30px; /* Set width for the icon */
+  height: 30px; /* Set height for the icon */
+  color: #333; /* Default color */
+  transition: color 0.3s ease; /* Smooth color transition */
+}
+
+.user-icon svg:hover {
+  color: #148992; /* Change color on hover */
+}
+
+/* Phone Number with SVG Icon */
 .phone-number {
-  margin-right: 20px;
+  display: flex;
+  align-items: center; /* Align the icon and text vertically */
+  gap: 10px; /* Space between the icon and the phone number */
   font-size: 16px;
   color: #333;
+  transition: color 0.3s ease;
+}
+
+.phone-number svg {
+  width: 30px; /* Set width for the icon */
+  height: 30px; /* Set height for the icon */
+  transition: fill 0.3s ease; /* Smooth transition for the icon color */
+  color: inherit; /* Ensures the icon inherits the text color */
+}
+
+.phone-number:hover {
+  color: #148992; /* Change text color on hover */
+}
+
+.phone-number:hover svg {
+  fill: #148992; /* Change icon color on hover */
 }
 
 /* Book Now Button */
@@ -147,7 +176,7 @@
     align-items: center;
     justify-content: start;
     transform: translateX(100%); /* Initially hide off-screen to the right */
-    transition: transform .4s cubic-bezier(0.42, 0, 0.58, 1); /* Smooth transition */
+    transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1); /* Smooth transition */
   }
 
   .navbar-links.active {
@@ -171,7 +200,7 @@
     display: none !important; /* Hide these on mobile */
   }
 
-  .user-icon{
-    margin-right: 3rem;
+  .user-icon {
+    margin-right: 3rem; /* Adjust user icon margin */
   }
 }
