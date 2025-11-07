@@ -1,0 +1,112 @@
+/* General Styles for Hero Slider */
+.hero-slider {
+  position: relative;
+  width: 100%;
+  height: 90vh;
+  overflow: hidden;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.8s ease-in-out;
+}
+
+.hero-caption {
+  position: absolute;
+  bottom: 20%;
+  left: 50%;
+  width: 60%;
+  transform: translateX(-50%) translateY(30px);
+  opacity: 0;
+  color: white;
+  font-size: 3rem;
+  font-family: "Jost";
+  font-weight: normal;
+  font-style: normal;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1rem 1.4rem;
+  border-radius: 5px;
+  transition: all 0.6s ease;
+}
+
+/* Text animation */
+.hero-caption.slide-up {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Arrows Styling */
+.arrow {
+  position: absolute;
+  bottom: 20%;
+  transform: translateY(-50%);
+  font-size: 2.5rem; /* Reduced size */
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.3s ease;
+}
+
+/* Left arrow and right arrow positioning */
+.left-arrow {
+  left: 20px;
+}
+
+.right-arrow {
+  right: 20px;
+}
+
+/* Square background for arrows */
+.arrow {
+  width: 40px; /* Reduced square width */
+  height: 40px; /* Reduced square height */
+  text-align: center; /* Centers the arrow symbol horizontally */
+  line-height: 40px; /* Centers the arrow symbol vertically */
+  border-radius: 0; /* Square background (no rounding) */
+}
+
+/* Hover effect for arrows */
+.arrow:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* Mobile and Tablet-specific styles (up to 768px) */
+@media (max-width: 768px) {
+  .hero-caption {
+    font-size: 1.4rem; /* Adjusted smaller font size for mobile */
+    padding: 0.75rem 0.5rem;
+    width: 45%;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .arrow {
+    width: 35px; /* Slightly smaller arrows on mobile */
+    height: 35px;
+    font-size: 1.8rem; /* Reduced font size of the arrows */
+  }
+
+  /* Position arrows inline with caption */
+  .left-arrow,
+  .right-arrow {
+    top: 50%; /* Align vertically at the center of the caption */
+    transform: translateY(-50%);
+  }
+
+  /* Hide arrows on mobile */
+  .arrow {
+    display: none; /* If you want to hide arrows on mobile */
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-caption {
+    width: 85%;
+  }
+}
