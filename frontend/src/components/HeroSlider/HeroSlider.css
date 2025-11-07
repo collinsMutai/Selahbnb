@@ -1,5 +1,6 @@
 /* General Styles for Hero Slider */
 .hero-slider {
+  margin-top: 85px;
   position: relative;
   width: 100%;
   height: 90vh;
