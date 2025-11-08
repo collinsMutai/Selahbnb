@@ -1,3 +1,7 @@
+
+#overview {
+  scroll-margin-top: 80px; /* Adjust this value based on your header height */
+}
 /* Gallery Container */
 .gallery-container {
   margin: 20px;

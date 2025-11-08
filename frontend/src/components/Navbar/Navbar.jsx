@@ -40,20 +40,20 @@ const Navbar = () => {
               className="navbar-link"
               end
               onClick={handleLinkClick}
-              activeClassName="active" // Apply 'active' class when link is active
+              activeClassName="active"
             >
               Home
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/about"
+            {/* Link to #overview */}
+            <a
+              href="#overview"
               className="navbar-link"
               onClick={handleLinkClick}
-              activeClassName="active"
             >
-              About
-            </NavLink>
+              Overview
+            </a>
           </li>
           <li>
             <NavLink

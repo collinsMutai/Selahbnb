@@ -58,7 +58,7 @@ const PropertyGallery = () => {
       : properties.filter((property) => property.category === selectedCategory);
 
   return (
-    <div className="gallery-container">
+    <div className="gallery-container" id="overview">
       {/* Section Heading */}
       <h2 className="gallery-heading">Exterior & Interior</h2>
 
