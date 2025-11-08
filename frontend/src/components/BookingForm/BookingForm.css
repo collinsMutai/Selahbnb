@@ -1,0 +1,257 @@
+/* General form container */
+.booking-form-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+/* Input container styling */
+.input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Input icon styling */
+.input-icon {
+  margin-right: 10px;
+  color: #3c9d8e;
+  font-size: 18px;
+}
+
+/* Input field styling */
+input[type='text'],
+input[type='tel'],
+input[type='date'] {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  padding-right: 35px; /* To accommodate the Chevron icon inside */
+}
+
+/* Chevron Icon */
+.dropdown-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #3c9d8e;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+/* Chevron rotation when dropdown is visible */
+.rotate {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #3c9d8e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #2b7a66;
+}
+
+/* Dropdown menu visibility */
+.dropdown-menu {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  padding: 10px;
+}
+
+/* Each dropdown item */
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.dropdown-item label {
+  font-size: 16px;
+}
+
+/* Quantity control buttons */
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-controls button {
+  padding: 5px 10px;
+  background-color: #3c9d8e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.quantity-controls button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+.quantity-controls span {
+  font-size: 16px;
+}
+
+/* Inline Date Inputs */
+.input-container-inline {
+  display: flex;
+  gap: 20px; /* Space between Check-in and Check-out */
+  justify-content: space-between; /* Ensure they are spaced correctly */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .booking-form-container {
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  .input-container {
+    margin-bottom: 15px;
+  }
+
+  .submit-btn {
+    padding: 10px;
+  }
+
+  .input-container-inline {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
+
+/* Styling for Date Picker input */
+.date-input {
+  width: 80%; /* Reduced width for date inputs */
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.3s ease;
+  padding-right: 35px; /* To accommodate the Chevron icon inside */
+}
+
+.date-input:focus {
+  border-color: #3c9d8e;
+}
+
+/* React Datepicker specific styles */
+.react-datepicker__input-container input {
+  width: 80%; /* Same width for the date input in datepicker */
+  padding: 12px 15px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+}
+
+/* Date Picker Popup */
+.date-picker-popup {
+  position: absolute;
+  top: 80px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 15px;
+  z-index: 10;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+}
+
+.calendar-day {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.calendar-day:hover {
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.calendar-day:focus {
+  outline: none;
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.react-datepicker__header {
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.react-datepicker__current-month {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.react-datepicker__day:hover {
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.react-datepicker__day:focus {
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.react-datepicker__day--selected {
+  background-color: #3c9d8e;
+  color: white;
+}
+
+.react-datepicker__day--today {
+  background-color: #3c9d8e;
+  color: white;
+}

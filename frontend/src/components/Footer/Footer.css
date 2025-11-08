@@ -47,6 +47,7 @@
 
 .footer-links a:hover {
   text-decoration: underline;
+  color: #3c9d8e;
 }
 
 /* Right section (Email and Phone aligned horizontally with Left) */
