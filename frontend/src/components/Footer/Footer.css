@@ -114,6 +114,7 @@
 
   .footer-left,
   .footer-right {
+    flex-direction: column;
     align-items: center;
     margin-bottom: 20px;
   }
