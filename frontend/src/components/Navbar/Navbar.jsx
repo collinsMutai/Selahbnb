@@ -57,12 +57,12 @@ const Navbar = () => {
           </li>
           <li>
             <NavLink
-              to="/services"
+              to="/places"
               className="navbar-link"
               onClick={handleLinkClick}
               activeClassName="active"
             >
-              Services
+              Places
             </NavLink>
           </li>
           <li>

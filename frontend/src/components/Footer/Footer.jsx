@@ -10,10 +10,11 @@ const Footer = () => {
         <div className="footer-left">
           <h2 className="footer-logo">Selah</h2>
           <div className="footer-links">
-            <a href="/overview">Overview</a>
-            <a href="/services">Services</a>
-            <a href="/blog">Blog</a>
+            <a href="/">Home</a>
+            <a href="#overview">Overview</a>
+            <a href="/places">Places</a>
             <a href="/contact">Contact</a>
+            <a href="/blog">Book Now</a>
           </div>
         </div>
         
