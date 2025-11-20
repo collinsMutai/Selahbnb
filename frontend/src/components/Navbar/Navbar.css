@@ -72,6 +72,7 @@
 .user-icon {
   display: flex;
   align-items: center; /* Vertically align the icon */
+  cursor: pointer; /* Make user icon clickable */
 }
 
 .user-icon svg {
@@ -161,6 +162,42 @@
 
 .hamburger.active .hamburger-line:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Google Login Modal */
+.google-login-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
+}
+
+.close-modal-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #ff5555;
+  border: none;
+  color: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.close-modal-btn:hover {
+  background-color: #e60000;
 }
 
 /* Media Queries for Mobile */

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google"; // Import GoogleLogin from @react-oauth/google
 import "./Navbar.css";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to toggle mobile menu
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen); // Toggle the state to show/hide the mobile menu
@@ -12,6 +14,40 @@ const Navbar = () => {
   // Close menu after navigating to a link
   const handleLinkClick = () => {
     setIsMenuOpen(false); // Close the menu when a link is clicked
+  };
+
+  // Handle Google login success
+  const handleGoogleLoginSuccess = async (response) => {
+    console.log("Google login response:", response);
+    const { credential } = response; // Extract the credential token from the response
+
+    // Send the token to the backend for verification and user authentication
+    try {
+      const res = await fetch("http://localhost:5000/api/users/google-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: credential }), // Send the token to backend
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        // Handle the response (e.g., store the JWT token and user data)
+        console.log("User authenticated:", data);
+        localStorage.setItem("token", data.token); // Store the token
+        setIsModalOpen(false); // Close the modal after successful login
+      } else {
+        console.error("Authentication failed:", data.message);
+      }
+    } catch (error) {
+      console.error("Error sending Google login token to backend:", error);
+    }
+  };
+
+  // Handle Google login failure
+  const handleGoogleLoginFailure = (error) => {
+    console.log("Google login failed:", error);
   };
 
   return (
@@ -46,7 +82,6 @@ const Navbar = () => {
             </NavLink>
           </li>
           <li>
-            {/* Link to #overview */}
             <a
               href="#overview"
               className="navbar-link"
@@ -79,7 +114,7 @@ const Navbar = () => {
 
         {/* Right-aligned section */}
         <div className="navbar-right">
-          <div className="user-icon">
+          <div className="user-icon" onClick={() => setIsModalOpen(true)}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -90,7 +125,7 @@ const Navbar = () => {
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
@@ -122,6 +157,26 @@ const Navbar = () => {
           </div>
         </div>
       </div>
+
+      {/* Google Login Modal */}
+      {isModalOpen && (
+        <div className="google-login-modal">
+          <div className="modal-content">
+            <h2>Continue with Google</h2>
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onFailure={handleGoogleLoginFailure}
+              useOneTap // Optional: One-tap login
+              clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID} // Use your Google client ID here
+              buttonText="Continue with Google"
+              cookiePolicy="single_host_origin"
+            />
+            <button onClick={() => setIsModalOpen(false)} className="close-modal-btn">
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

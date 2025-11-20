@@ -1,9 +1,10 @@
 // controllers/userController.js
+import { OAuth2Client } from 'google-auth-library';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Booking from "../models/Booking.js"; // Import the Booking model
-
+const client = new OAuth2Client(process.env.CLIENT_ID);
 // Register a new user
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -37,6 +38,57 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+// Google Login function
+export const googleLogin = async (req, res) => {
+  const { token } = req.body; // Get the token from frontend
+  
+  try {
+    // Verify the token with Google
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.CLIENT_ID, // Your Google Client ID
+    });
+    
+    const payload = ticket.getPayload(); // Get user info from payload
+    const { email, name, picture } = payload; // Destructure the fields
+
+    // Check if the user already exists
+    let user = await User.findOne({ email });
+    if (!user) {
+      // If the user does not exist, create a new user
+      user = await User.create({ 
+        email, 
+        name, 
+        password: null, // Password is not needed for Google login
+        role: "user", 
+        profilePicture: picture // Store Google profile picture
+      });
+    } else {
+      // If the user exists, update their profile picture (optional)
+      user.profilePicture = picture;
+      await user.save();
+    }
+
+    // Create a JWT token for the logged-in user
+    const jwtToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    res.json({
+      token: jwtToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profilePicture: user.profilePicture,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during Google login", error: error.message });
+  }
+};
+
 
 // Get User Profile and Check if Host
 export const getUserProfile = async (req, res) => {

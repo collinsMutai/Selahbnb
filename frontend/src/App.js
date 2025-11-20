@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";  // This page should have the #overview section
+import Home from "./pages/Home"; // This page should have the #overview section
 import Contact from "./pages/Contact";
 import "./App.css";
 import Navbar from "./components/Navbar/Navbar";
