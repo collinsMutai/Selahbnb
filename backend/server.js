@@ -6,6 +6,8 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import listingRoutes from "./routes/listingRoutes.js";
 import tourPlaceRoutes from "./routes/tourPlaceRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
+
 
 dotenv.config();
 connectDB();
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/tourplaces", tourPlaceRoutes);
+app.use("/api/bookings", bookingRoutes);
+
 
 
 const PORT = process.env.PORT || 5000;

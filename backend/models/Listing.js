@@ -9,8 +9,10 @@ const listingSchema = new mongoose.Schema(
     imageUrl: { type: String },
     description: { type: String },
     host: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: "Booking" }] // Add bookings reference
   },
   { timestamps: true }
 );
+
 
 export default mongoose.model("Listing", listingSchema);
