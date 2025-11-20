@@ -1,14 +1,15 @@
 /* Booking Section */
 .booking-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100vh;
-  padding: 0 50px;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  min-height: 100vh; /* Ensure the section takes full height */
+  padding: 0 20px;
   background-image: url('../../images/bedroom1_img1.avif'); /* Background image */
   background-size: cover;
   background-position: center;
   background-attachment: fixed; /* Keep background fixed */
+  position: relative;
 }
 
 /* Darker overlay on background image */
@@ -18,7 +19,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85); /* Darker overlay with opacity 0.85 */
+  background-color: rgba(0, 0, 0, 0.5); /* Darker overlay with opacity */
   z-index: 1;
 }
 
@@ -29,7 +30,9 @@
   justify-content: space-between;
   width: 100%;
   z-index: 2;
-  flex-wrap: wrap; /* Allow content to wrap for mobile */
+  flex-wrap: wrap; /* Allow content to wrap on smaller screens */
+  gap: 20px; /* Add gap between elements */
+  max-width: 1200px; /* Prevent excessive width */
 }
 
 /* Text section on the left */
@@ -37,6 +40,7 @@
   width: 45%;
   color: white;
   padding: 30px;
+  margin-top: 10px; /* Adjust margin for better alignment */
 }
 
 .booking-text h2 {
@@ -47,7 +51,6 @@
   letter-spacing: 1px;
   line-height: 1.2;
   color: #fff;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Stronger text shadow */
 }
 
 .booking-text p {
@@ -55,8 +58,8 @@
   line-height: 1.6;
   color: #f4f4f4;
   margin-bottom: 25px;
-  max-width: 80%;
-  margin-left: auto;
+  /* max-width: 80%;
+  margin-left: auto; */
   margin-right: auto;
 }
 
@@ -70,8 +73,7 @@
   font-family: Arial, sans-serif;
 }
 
-/* Form heading */
-h2 {
+.booking-form-container h2 {
   text-align: center;
   color: #333;
   font-size: 24px;
@@ -199,6 +201,8 @@ input[type="date"] {
   .booking-section {
     flex-direction: column;
     padding: 20px;
+    min-height: auto; /* Let the content define the height */
+    justify-content: center; /* Center content vertically */
   }
 
   /* Text section */
@@ -206,7 +210,7 @@ input[type="date"] {
     width: 100%;
     text-align: center;
     padding: 15px;
-    margin-bottom: 30px;
+    margin-bottom: 30px; /* Added space below text */
   }
 
   .booking-text h2 {

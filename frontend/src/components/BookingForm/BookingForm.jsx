@@ -39,14 +39,10 @@ const BookingForm = () => {
         setAdults(action === "increase" ? adults + 1 : Math.max(adults - 1, 0));
         break;
       case "children":
-        setChildren(
-          action === "increase" ? children + 1 : Math.max(children - 1, 0)
-        );
+        setChildren(action === "increase" ? children + 1 : Math.max(children - 1, 0));
         break;
       case "infants":
-        setInfants(
-          action === "increase" ? infants + 1 : Math.max(infants - 1, 0)
-        );
+        setInfants(action === "increase" ? infants + 1 : Math.max(infants - 1, 0));
         break;
       case "pets":
         setPets(action === "increase" ? pets + 1 : Math.max(pets - 1, 0));
@@ -61,7 +57,15 @@ const BookingForm = () => {
   };
 
   const handleCheckOutChange = (date) => {
-    setFormData({ ...formData, checkOut: date });
+    // Ensure check-out is at least 2 days after check-in
+    const minCheckOutDate = new Date(formData.checkIn);
+    minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
+
+    if (date >= minCheckOutDate) {
+      setFormData({ ...formData, checkOut: date });
+    } else {
+      alert("Check-out must be at least 2 nights after check-in.");
+    }
   };
 
   const handleSubmit = (e) => {
@@ -71,6 +75,11 @@ const BookingForm = () => {
   };
 
   const today = new Date();
+
+  // Calculate the minimum check-out date dynamically based on check-in
+  const minCheckOutDate = formData.checkIn
+    ? new Date(formData.checkIn).setDate(formData.checkIn.getDate() + 2)
+    : today;
 
   return (
     <div
@@ -150,7 +159,7 @@ const BookingForm = () => {
                   className="date-input"
                   popperPlacement="bottom"
                   withPortal
-                  minDate={formData.checkIn || today}
+                  minDate={minCheckOutDate}
                   disabled={!formData.checkIn}
                 />
               </div>
