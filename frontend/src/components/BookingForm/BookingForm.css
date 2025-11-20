@@ -1,15 +1,76 @@
-/* General form container */
-.booking-form-container {
+/* Booking Section */
+.booking-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100vh;
+  padding: 0 50px;
+  background-image: url('../../images/bedroom1_img1.avif'); /* Background image */
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Keep background fixed */
+}
+
+/* Darker overlay on background image */
+.booking-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85); /* Darker overlay with opacity 0.85 */
+  z-index: 1;
+}
+
+/* Main content section */
+.booking-content {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+  z-index: 2;
+  flex-wrap: wrap; /* Allow content to wrap for mobile */
+}
+
+/* Text section on the left */
+.booking-text {
+  width: 45%;
+  color: white;
+  padding: 30px;
+}
+
+.booking-text h2 {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.2;
+  color: #fff;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); /* Stronger text shadow */
+}
+
+.booking-text p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #f4f4f4;
+  margin-bottom: 25px;
+  max-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form container */
+.booking-form-container {
+  width: 45%;
   padding: 20px;
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.9); /* White background with some opacity */
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
 }
 
+/* Form heading */
 h2 {
   text-align: center;
   color: #333;
@@ -33,9 +94,9 @@ h2 {
 }
 
 /* Input field styling */
-input[type='text'],
-input[type='tel'],
-input[type='date'] {
+input[type="text"],
+input[type="tel"],
+input[type="date"] {
   width: 100%;
   padding: 12px 15px;
   font-size: 16px;
@@ -43,7 +104,7 @@ input[type='date'] {
   border-radius: 4px;
   outline: none;
   transition: border-color 0.3s ease;
-  padding-right: 35px; /* To accommodate the Chevron icon inside */
+  padding-right: 35px; /* Accommodate Chevron icon inside */
 }
 
 /* Chevron Icon */
@@ -56,11 +117,6 @@ input[type='date'] {
   color: #3c9d8e;
   cursor: pointer;
   transition: transform 0.3s ease;
-}
-
-/* Chevron rotation when dropdown is visible */
-.rotate {
-  transform: translateY(-50%) rotate(180deg);
 }
 
 /* Submit Button */
@@ -140,8 +196,33 @@ input[type='date'] {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .booking-form-container {
+  .booking-section {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  /* Text section */
+  .booking-text {
+    width: 100%;
+    text-align: center;
     padding: 15px;
+    margin-bottom: 30px;
+  }
+
+  .booking-text h2 {
+    font-size: 28px;
+  }
+
+  .booking-text p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* Form section */
+  .booking-form-container {
+    width: 100%;
+    padding: 20px;
+    margin-bottom: 30px; /* Ensure spacing between form and any content below */
   }
 
   h2 {
