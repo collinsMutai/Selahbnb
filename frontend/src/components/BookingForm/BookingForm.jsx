@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUser,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./BookingForm.css";
@@ -9,15 +14,23 @@ import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the pat
 
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [adults, setAdults] = useState(0);
-  const [children, setChildren] = useState(0);
-  const [infants, setInfants] = useState(0);
-  const [pets, setPets] = useState(0);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     checkIn: null,
     checkOut: null,
+    adults: 0,
+    children: 0,
+    infants: 0,
+    pets: 0,
+  });
+
+  const [errors, setErrors] = useState({
+    name: "",
+    phone: "",
+    checkIn: "",
+    checkOut: "",
+    guests: "",
   });
 
   const handleInputChange = (e) => {
@@ -34,22 +47,14 @@ const BookingForm = () => {
   };
 
   const changeQuantity = (type, action) => {
-    switch (type) {
-      case "adults":
-        setAdults(action === "increase" ? adults + 1 : Math.max(adults - 1, 0));
-        break;
-      case "children":
-        setChildren(action === "increase" ? children + 1 : Math.max(children - 1, 0));
-        break;
-      case "infants":
-        setInfants(action === "increase" ? infants + 1 : Math.max(infants - 1, 0));
-        break;
-      case "pets":
-        setPets(action === "increase" ? pets + 1 : Math.max(pets - 1, 0));
-        break;
-      default:
-        break;
-    }
+    setFormData((prevData) => {
+      const newValue =
+        action === "increase" ? prevData[type] + 1 : Math.max(prevData[type] - 1, 0);
+      return {
+        ...prevData,
+        [type]: newValue,
+      };
+    });
   };
 
   const handleCheckInChange = (date) => {
@@ -57,7 +62,6 @@ const BookingForm = () => {
   };
 
   const handleCheckOutChange = (date) => {
-    // Ensure check-out is at least 2 days after check-in
     const minCheckOutDate = new Date(formData.checkIn);
     minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
 
@@ -68,10 +72,61 @@ const BookingForm = () => {
     }
   };
 
+  const validateForm = () => {
+    const newErrors = {
+      name: "",
+      phone: "",
+      checkIn: "",
+      checkOut: "",
+      guests: "",
+    };
+    let isValid = true;
+
+    // Validate Name
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    }
+
+    // Validate Phone
+    const phoneRegex = /^[0-9]{10}$/; // Basic phone validation (10 digits)
+    if (!phoneRegex.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+      isValid = false;
+    }
+
+    // Validate Check-in and Check-out
+    if (!formData.checkIn) {
+      newErrors.checkIn = "Check-in date is required";
+      isValid = false;
+    }
+
+    if (!formData.checkOut) {
+      newErrors.checkOut = "Check-out date is required";
+      isValid = false;
+    } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
+      newErrors.checkOut = "Check-out date must be at least 2 days after check-in";
+      isValid = false;
+    }
+
+    // Validate Guests
+    if (formData.adults <= 0) {
+      newErrors.guests = "At least one adult is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
-    // Additional submit logic goes here
+
+    // Perform validation before submitting the form
+    if (validateForm()) {
+      console.log(formData); // Logs the entire formData including guests
+      // Add further submit logic (e.g., API call, etc.)
+    }
   };
 
   const today = new Date();
@@ -99,10 +154,15 @@ const BookingForm = () => {
         <div className="booking-text">
           <h2>Book Your Stay at Selah</h2>
           <p>
-            Your Tranquil Retreat in Colorado Springs is Just a Few Clicks Away. Escape to Selah and experience the perfect blend of nature, relaxation, and adventure! Whether you're planning a weekend getaway, a romantic retreat, or an adventure-filled vacation, our peaceful home offers everything you need to unwind and explore the beauty of Colorado Springs.
+            Your Tranquil Retreat in Colorado Springs is Just a Few Clicks Away.
+            Escape to Selah and experience the perfect blend of nature,
+            relaxation, and adventure! Whether you're planning a weekend
+            getaway, a romantic retreat, or an adventure-filled vacation, our
+            peaceful home offers everything you need to unwind and explore the
+            beauty of Colorado Springs.
           </p>
         </div>
-        
+
         {/* Booking Form on the Right */}
         <div className="booking-form-container">
           <h2>Book Your Stay</h2>
@@ -117,6 +177,7 @@ const BookingForm = () => {
                 onChange={handleInputChange}
                 placeholder="Full Name"
               />
+              {errors.name && <p className="error-text">{errors.name}</p>}
             </div>
 
             {/* Phone */}
@@ -129,6 +190,7 @@ const BookingForm = () => {
                 onChange={handleInputChange}
                 placeholder="Phone Number"
               />
+              {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
             {/* Inline Date Inputs */}
@@ -146,6 +208,7 @@ const BookingForm = () => {
                   withPortal
                   minDate={today}
                 />
+                {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
               </div>
 
               {/* Check-out Date */}
@@ -162,6 +225,7 @@ const BookingForm = () => {
                   minDate={minCheckOutDate}
                   disabled={!formData.checkIn}
                 />
+                {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
               </div>
             </div>
 
@@ -170,7 +234,7 @@ const BookingForm = () => {
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
                 type="text"
-                value={`Adults: ${adults}, Children: ${children}, Infants: ${infants}, Pets: ${pets}`}
+                value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
                 readOnly
                 placeholder="Select People"
               />
@@ -179,7 +243,7 @@ const BookingForm = () => {
               />
               {isDropdownVisible && (
                 <div className="dropdown-menu">
-                  {/* Dropdown Items for Adjusting Number of Guests */}
+                  {/* Adults */}
                   <div className="dropdown-item">
                     <label>Adults</label>
                     <div className="quantity-controls">
@@ -192,7 +256,7 @@ const BookingForm = () => {
                       >
                         −
                       </button>
-                      <span>{adults}</span>
+                      <span>{formData.adults}</span>
                       <button
                         type="button"
                         onClick={(e) => {
@@ -204,10 +268,90 @@ const BookingForm = () => {
                       </button>
                     </div>
                   </div>
-                  {/* Similar items for Children, Infants, and Pets */}
+
+                  {/* Children */}
+                  <div className="dropdown-item">
+                    <label>Children</label>
+                    <div className="quantity-controls">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("children", "decrease");
+                        }}
+                      >
+                        −
+                      </button>
+                      <span>{formData.children}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("children", "increase");
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Infants */}
+                  <div className="dropdown-item">
+                    <label>Infants</label>
+                    <div className="quantity-controls">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("infants", "decrease");
+                        }}
+                      >
+                        −
+                      </button>
+                      <span>{formData.infants}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("infants", "increase");
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Pets */}
+                  <div className="dropdown-item">
+                    <label>Pets</label>
+                    <div className="quantity-controls">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("pets", "decrease");
+                        }}
+                      >
+                        −
+                      </button>
+                      <span>{formData.pets}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          changeQuantity("pets", "increase");
+                        }}
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
+
+            {/* Guests Validation */}
+            {errors.guests && <p className="error-text">{errors.guests}</p>}
 
             {/* Submit Button */}
             <button type="submit" className="submit-btn">
