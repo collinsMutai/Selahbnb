@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { NavLink } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import jwt_decode from "jwt-decode"; // Decode JWT tokens
+import { jwtDecode } from "jwt-decode"; // Decode JWT tokens
+import axios from "axios"; // Axios for API calls
 import "./Navbar.css";
 
 const Navbar = () => {
@@ -10,24 +11,56 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Check if the user is logged in when the component mounts
-  useEffect(() => {
+  // Function to get and decode the token, checking for expiration
+  const getToken = useCallback(() => {
     const token = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("user");
 
-    if (token && storedUser) {
-      setIsLoggedIn(true); // User is logged in
-      setUser(JSON.parse(storedUser)); // Set user data
+    if (token) {
+      // Check if the token is correctly formatted
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        console.error("Invalid token format");
+        handleLogout();
+        return null;
+      }
+
+      try {
+        const decoded = jwtDecode(token); // Decode the token
+        const currentTime = Date.now() / 1000; // Current time in seconds
+        if (decoded.exp < currentTime) {
+          // If the token is expired, refresh it
+          refreshToken();
+          return null; // Return null to trigger token refresh
+        }
+        return token; // If the token is still valid, return it
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        handleLogout(); // If decoding the token fails, log out the user
+        return null;
+      }
     }
+
+    return null; // If no token exists
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen); // Toggle the state to show/hide the mobile menu
-  };
+  // Refresh the token using the refresh token (from cookies)
+  const refreshToken = useCallback(async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/refresh-token", {}, { withCredentials: true });
+      const newAccessToken = response.data.accessToken; // Get the new access token from the response
 
-  const handleLinkClick = () => {
-    setIsMenuOpen(false); // Close the menu when a link is clicked
-  };
+      // Save the new access token in localStorage
+      localStorage.setItem("token", newAccessToken);
+
+      // Decode and set user info from the new token
+      const decoded = jwtDecode(newAccessToken);
+      setIsLoggedIn(true);
+      setUser(decoded);
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      handleLogout(); // If refreshing the token fails, log out the user
+    }
+  }, []);
 
   // Handle Google login success
   const handleGoogleLoginSuccess = async (response) => {
@@ -44,8 +77,9 @@ const Navbar = () => {
 
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        // Save the new access token in localStorage
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.user)); // Save user data
 
         setIsLoggedIn(true); // User is logged in
         setUser(data.user); // Set user data
@@ -70,6 +104,28 @@ const Navbar = () => {
     setIsLoggedIn(false); // Set login state to false
     setUser(null); // Clear user data
     setIsModalOpen(false); // Close the modal
+  };
+
+  // Check if the user is logged in and if the token is valid when the component mounts
+  useEffect(() => {
+    const token = getToken(); // Get token from localStorage or refresh it
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
+      setIsLoggedIn(true); // User is logged in
+      setUser(JSON.parse(storedUser)); // Set user data
+    } else {
+      console.log("Token is expired or not found, refreshing...");
+      refreshToken(); // Trigger token refresh if needed
+    }
+  }, [getToken, refreshToken]); // Trigger the effect whenever getToken or refreshToken changes
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen); // Toggle the state to show/hide the mobile menu
+  };
+
+  const handleLinkClick = () => {
+    setIsMenuOpen(false); // Close the menu when a link is clicked
   };
 
   // Toggle modal visibility
