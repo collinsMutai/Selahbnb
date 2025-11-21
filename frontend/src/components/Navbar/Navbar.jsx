@@ -11,6 +11,26 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
+   // Refresh the token using the refresh token (from cookies)
+  const refreshToken = useCallback(async () => {
+    try {
+      const response = await axios.post("http://localhost:5000/api/refresh-token", {}, { withCredentials: true });
+      const newAccessToken = response.data.accessToken; // Get the new access token from the response
+
+      // Save the new access token in localStorage
+      localStorage.setItem("token", newAccessToken);
+
+      // Decode and set user info from the new token
+      const decoded = jwtDecode(newAccessToken);
+      setIsLoggedIn(true);
+      setUser(decoded);
+    } catch (error) {
+      console.error("Error refreshing token:", error);
+      handleLogout(); // If refreshing the token fails, log out the user
+    }
+  }, []);
+
+
   // Function to get and decode the token, checking for expiration
   const getToken = useCallback(() => {
     const token = localStorage.getItem("token");
@@ -41,27 +61,9 @@ const Navbar = () => {
     }
 
     return null; // If no token exists
-  }, []);
+  }, [refreshToken]);
 
-  // Refresh the token using the refresh token (from cookies)
-  const refreshToken = useCallback(async () => {
-    try {
-      const response = await axios.post("http://localhost:5000/api/refresh-token", {}, { withCredentials: true });
-      const newAccessToken = response.data.accessToken; // Get the new access token from the response
-
-      // Save the new access token in localStorage
-      localStorage.setItem("token", newAccessToken);
-
-      // Decode and set user info from the new token
-      const decoded = jwtDecode(newAccessToken);
-      setIsLoggedIn(true);
-      setUser(decoded);
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      handleLogout(); // If refreshing the token fails, log out the user
-    }
-  }, []);
-
+ 
   // Handle Google login success
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response; // Extract the credential token

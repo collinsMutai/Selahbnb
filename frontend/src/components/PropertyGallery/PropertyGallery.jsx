@@ -1,22 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./PropertyGallery.css"; // Import the external CSS file
 
 const PropertyGallery = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [properties, setProperties] = useState([]);
 
-  // Load images and set them to the state when the component mounts
-  useEffect(() => {
-    const images = loadImages();
-    setProperties(images);
-  }, []);
-
   // Function to dynamically load images from 'src/images' folder
-  function loadImages() {
+  const loadImages = useCallback(() => {
     const context = require.context(
       "../../images",
       false,
-      /\.(jpg|jpeg|png|gif|avif)$/
+      /\.(jpg|jpeg|png|gif|avif)$/ // Specify the image formats you want to import
     );
 
     // Extract image paths and metadata
@@ -28,7 +22,7 @@ const PropertyGallery = () => {
       };
     });
     return images;
-  }
+  }, []); // Empty dependency array ensures `loadImages` is stable across renders
 
   // Helper function to categorize images based on their filenames
   function getCategory(imageName) {
@@ -45,6 +39,12 @@ const PropertyGallery = () => {
     if (lowercasedName.includes("exterior")) return "Exterior";
     return "Other"; // Default category
   }
+
+  // Load images and set them to the state when the component mounts
+  useEffect(() => {
+    const images = loadImages();
+    setProperties(images);
+  }, [loadImages]); // Add `loadImages` as a dependency here
 
   // Function to filter properties based on selected category
   const filterProperties = (category) => {
