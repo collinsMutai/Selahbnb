@@ -2,7 +2,7 @@
 .navbar {
   width: 100%;
   background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Adds a subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
   padding: 30px 20px;
   position: fixed;
   top: 0;
@@ -34,52 +34,52 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  flex-direction: row; /* Display links in a row by default on larger screens */
+  flex-direction: row; /* Links in a row by default on larger screens */
   justify-content: center; /* Center the links horizontally */
   width: auto;
 }
 
 .navbar-links li {
-  padding: 10px 20px; /* Add horizontal padding between the links */
+  padding: 10px 20px; /* Horizontal padding between links */
 }
 
 .navbar-link {
   text-decoration: none;
-  color: black; /* Black text for links */
+  color: black; /* Default text color */
   font-size: 16px;
   font-weight: 500;
   transition: color 0.3s ease;
 }
 
 .navbar-link:hover {
-  color: #148992; /* Hover link color */
+  color: #148992; /* Link color on hover */
 }
 
 .navbar-link.active {
   color: #148992; /* Active link color */
-  font-weight: bold; /* Optional: Make the active link bold */
+  font-weight: bold; /* Bold active links */
 }
 
-/* Right-aligned elements */
+/* Right-aligned elements (e.g., user icon, phone number) */
 .navbar-right {
   display: flex;
-  align-items: center; /* Align items vertically */
+  align-items: center;
   justify-content: flex-end;
-  gap: 20px; /* Space between the elements */
+  gap: 20px; /* Space between elements */
 }
 
 /* User Icon (SVG) */
 .user-icon {
   display: flex;
-  align-items: center; /* Vertically align the icon */
-  cursor: pointer; /* Make user icon clickable */
+  align-items: center;
+  cursor: pointer;
 }
 
 .user-icon svg {
-  width: 30px; /* Set width for the icon */
-  height: 30px; /* Set height for the icon */
+  width: 30px;
+  height: 30px;
   color: #333; /* Default color */
-  transition: color 0.3s ease; /* Smooth color transition */
+  transition: color 0.3s ease;
 }
 
 .user-icon svg:hover {
@@ -89,22 +89,22 @@
 /* Phone Number with SVG Icon */
 .phone-number {
   display: flex;
-  align-items: center; /* Align the icon and text vertically */
-  gap: 10px; /* Space between the icon and the phone number */
+  align-items: center;
+  gap: 10px; /* Space between the icon and phone number */
   font-size: 16px;
   color: #333;
   transition: color 0.3s ease;
 }
 
 .phone-number svg {
-  width: 30px; /* Set width for the icon */
-  height: 30px; /* Set height for the icon */
-  transition: fill 0.3s ease; /* Smooth transition for the icon color */
-  color: inherit; /* Ensures the icon inherits the text color */
+  width: 30px;
+  height: 30px;
+  transition: fill 0.3s ease;
+  color: inherit; /* Inherit text color */
 }
 
 .phone-number:hover {
-  color: #148992; /* Change text color on hover */
+  color: #148992;
 }
 
 .phone-number:hover svg {
@@ -113,7 +113,7 @@
 
 /* Book Now Button */
 .book-now-btn {
-  background-color: #148992; /* Button background color */
+  background-color: #148992;
   color: white;
   font-size: 16px;
   font-weight: 600;
@@ -125,28 +125,28 @@
 }
 
 .book-now-btn:hover {
-  background-color: #116f71; /* Darker shade for hover effect */
+  background-color: #116f71; /* Darker shade on hover */
 }
 
 .book-now-btn:focus {
   outline: none;
 }
 
-/* Hamburger Icon */
+/* Hamburger Icon (Mobile) */
 .hamburger {
   display: none;
   cursor: pointer;
   flex-direction: column;
   justify-content: space-between;
-  height: 15px; /* Increased height */
-  width: 15px;  /* Square shape */
-  background-color: #148992; /* Background color */
-  border-radius: 10px; /* Rounded corners */
-  padding: 10px; /* Padding to center the lines inside */
+  height: 15px;
+  width: 15px;
+  background-color: #148992;
+  border-radius: 10px;
+  padding: 10px;
 }
 
 .hamburger-line {
-  background-color: white; /* White lines for contrast */
+  background-color: white;
   height: 3px;
   width: 100%;
   transition: all 0.3s ease;
@@ -171,7 +171,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Transparent dark overlay */
+  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -183,7 +183,7 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  width: 300px; /* Set the width of the modal */
+  width: 300px;
 }
 
 .close-modal-btn {
@@ -197,7 +197,7 @@
 }
 
 .close-modal-btn:hover {
-  background-color: #e60000;
+  background-color: #e60000; /* Darker red on hover */
 }
 
 /* Logout Modal (Top-right position) */
@@ -205,12 +205,12 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  background-color: rgba(0, 0, 0, 0.5); /* Transparent dark overlay */
+  background-color: rgba(0, 0, 0, 0.5); /* Transparent overlay */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  padding: 10px; /* Padding to separate modal from edges */
+  padding: 10px;
 }
 
 .logout-modal .modal-content {
@@ -218,12 +218,12 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  width: 250px; /* Set a smaller width for the modal */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow to modal */
+  width: 250px; /* Slightly smaller modal width */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .logout-btn {
-  background-color: #ff5555; /* Red color for logout button */
+  background-color: #ff5555;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -232,7 +232,7 @@
 }
 
 .logout-btn:hover {
-  background-color: #e60000; /* Darker red on hover */
+  background-color: #e60000;
 }
 
 /* Media Queries for Mobile */
@@ -247,23 +247,22 @@
     flex-direction: column;
     align-items: center;
     justify-content: start;
-    transform: translateX(100%); /* Initially hide off-screen to the right */
-    transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1); /* Smooth transition */
+    transform: translateX(100%); /* Hide off-screen initially */
+    transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   }
 
   .navbar-links.active {
-    transform: translateX(0); /* Slide in the menu from the right */
+    transform: translateX(0); /* Slide in on mobile */
   }
 
-  /* Add padding between links */
   .navbar-links li {
-    padding: 20px 0; /* Add top and bottom padding for links */
-    width: 100%; /* Make sure each link takes the full width */
-    text-align: center; /* Center align the text */
+    padding: 20px 0;
+    width: 100%; /* Make links full width */
+    text-align: center; /* Center align links */
   }
 
   .hamburger {
-    display: flex; /* Display the hamburger icon */
+    display: flex; /* Display hamburger icon */
   }
 
   /* Right-aligned section (hide on mobile) */
@@ -273,6 +272,6 @@
   }
 
   .user-icon {
-    margin-right: 3rem; /* Adjust user icon margin */
+    margin-right: 3rem;
   }
 }

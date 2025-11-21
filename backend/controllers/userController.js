@@ -25,15 +25,38 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
   try {
+    // Check if user exists
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    // Generate JWT Access Token (expires in 1 hour)
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+    // Generate JWT Refresh Token (expires in 7 days)
+    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // Set the refresh token in an HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production', // Set to true in production to use https
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
+      sameSite: 'Strict',
+    });
+
+    // Return the access token in response
+    res.json({
+      accessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -52,33 +75,43 @@ export const googleLogin = async (req, res) => {
     });
 
     const payload = ticket.getPayload(); // Get user info from payload
-    const { email, name, picture } = payload; // Destructure necessary fields
+    const { email, name, picture } = payload;
 
-    // Try to find and update the user in one atomic operation
+    // Try to find and update the user
     let user = await User.findOneAndUpdate(
       { email },
       { profilePicture: picture }, // Update the profile picture
-      { new: true, upsert: true } // Create user if they don't exist, and return the updated user
+      { new: true, upsert: true } // Create user if they don't exist
     );
 
-    // If user doesn't exist, 'upsert' will create a new user.
     if (!user) {
       user = new User({
         email,
         name,
-        password: null, // Password is not needed for Google login
+        password: null, // No password needed for Google login
         role: 'user',
-        profilePicture: picture, // Store Google profile picture
+        profilePicture: picture,
       });
-      await user.save(); // Save the new user to the database
+      await user.save(); // Save the new user
     }
 
-    // Create JWT token for the logged-in user
-    const jwtToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    // Generate JWT Access Token (expires in 1 hour)
+    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // Respond with the JWT token and user info
+    // Generate JWT Refresh Token (expires in 7 days)
+    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    // Set the refresh token in an HTTP-only cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
+      sameSite: 'Strict',
+    });
+
+    // Return the access token and user data in response
     res.json({
-      token: jwtToken,
+      accessToken,
       user: {
         id: user._id,
         name: user.name,
@@ -91,7 +124,6 @@ export const googleLogin = async (req, res) => {
     res.status(500).json({ message: "Error during Google login", error: error.message });
   }
 };
-
 
 
 
@@ -200,3 +232,31 @@ export const deleteUser = async (req, res) => {
 };
 
 
+// Refresh the Access Token
+export const refreshAccessToken = async (req, res) => {
+  try {
+    // Get the refresh token from the cookie
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    // Verify the refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+
+    // Generate a new access token
+    const newAccessToken = jwt.sign({ id: decoded.id, role: decoded.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    // Return the new access token
+    res.json({ accessToken: newAccessToken });
+  } catch (error) {
+    res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
+};
+
+// Logout the user
+export const logout = (req, res) => {
+  res.clearCookie('refreshToken'); // Clear the refresh token from cookies
+  res.json({ message: "Logged out successfully" });
+};

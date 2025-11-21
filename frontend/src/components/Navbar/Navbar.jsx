@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google"; // Import GoogleLogin from @react-oauth/google
+import jwt_decode from "jwt-decode"; // Decode JWT tokens (if you need to extract user info from token)
 import "./Navbar.css";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to toggle mobile menu
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Check if user is logged in
+  const [user, setUser] = useState(null); // Store the user data
 
   // Check if the user is logged in when the component mounts
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+    const storedUser = localStorage.getItem("user");
+
+    if (token && storedUser) {
       setIsLoggedIn(true); // User is logged in
+      setUser(JSON.parse(storedUser)); // Set user data
     }
   }, []);
 
@@ -41,9 +46,12 @@ const Navbar = () => {
 
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem("token", data.token); // Store the token
+        // Store tokens and user info in localStorage
+        localStorage.setItem("token", data.token); // Store the access token
         localStorage.setItem("user", JSON.stringify(data.user)); // Store user data
+
         setIsLoggedIn(true); // User is logged in
+        setUser(data.user); // Set user data
         setIsModalOpen(false); // Close the login modal
       } else {
         console.error("Authentication failed:", data.message);
@@ -63,6 +71,7 @@ const Navbar = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setIsLoggedIn(false); // Set login state to false
+    setUser(null); // Clear user data
     setIsModalOpen(false); // Close the modal
   };
 
@@ -193,7 +202,7 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                <h2>Welcome, {JSON.parse(localStorage.getItem("user")).name}</h2>
+                <h2>Welcome, {user?.name || "User"}</h2>
                 <button onClick={handleLogout} className="logout-btn">
                   Logout
                 </button>
