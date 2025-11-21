@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google"; // Import GoogleLogin from @react-oauth/google
 import "./Navbar.css";
@@ -6,6 +6,15 @@ import "./Navbar.css";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State to toggle mobile menu
   const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Check if user is logged in
+
+  // Check if the user is logged in when the component mounts
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true); // User is logged in
+    }
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen); // Toggle the state to show/hide the mobile menu
@@ -18,7 +27,6 @@ const Navbar = () => {
 
   // Handle Google login success
   const handleGoogleLoginSuccess = async (response) => {
-    console.log("Google login response:", response);
     const { credential } = response; // Extract the credential token from the response
 
     // Send the token to the backend for verification and user authentication
@@ -33,10 +41,10 @@ const Navbar = () => {
 
       const data = await res.json();
       if (res.ok) {
-        // Handle the response (e.g., store the JWT token and user data)
-        console.log("User authenticated:", data);
         localStorage.setItem("token", data.token); // Store the token
-        setIsModalOpen(false); // Close the modal after successful login
+        localStorage.setItem("user", JSON.stringify(data.user)); // Store user data
+        setIsLoggedIn(true); // User is logged in
+        setIsModalOpen(false); // Close the login modal
       } else {
         console.error("Authentication failed:", data.message);
       }
@@ -48,6 +56,14 @@ const Navbar = () => {
   // Handle Google login failure
   const handleGoogleLoginFailure = (error) => {
     console.log("Google login failed:", error);
+  };
+
+  // Handle Logout
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setIsLoggedIn(false); // Set login state to false
+    setIsModalOpen(false); // Close the modal
   };
 
   return (
@@ -82,11 +98,7 @@ const Navbar = () => {
             </NavLink>
           </li>
           <li>
-            <a
-              href="#overview"
-              className="navbar-link"
-              onClick={handleLinkClick}
-            >
+            <a href="#overview" className="navbar-link" onClick={handleLinkClick}>
               Overview
             </a>
           </li>
@@ -114,7 +126,10 @@ const Navbar = () => {
 
         {/* Right-aligned section */}
         <div className="navbar-right">
-          <div className="user-icon" onClick={() => setIsModalOpen(true)}>
+          <div
+            className="user-icon"
+            onClick={() => setIsModalOpen(true)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -122,9 +137,9 @@ const Navbar = () => {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               className="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
             >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -158,22 +173,32 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Google Login Modal */}
+      {/* Modal based on login state */}
       {isModalOpen && (
         <div className="google-login-modal">
           <div className="modal-content">
-            <h2>Continue with Google</h2>
-            <GoogleLogin
-              onSuccess={handleGoogleLoginSuccess}
-              onFailure={handleGoogleLoginFailure}
-              useOneTap // Optional: One-tap login
-              clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID} // Use your Google client ID here
-              buttonText="Continue with Google"
-              cookiePolicy="single_host_origin"
-            />
-            <button onClick={() => setIsModalOpen(false)} className="close-modal-btn">
-              Close
-            </button>
+            {!isLoggedIn ? (
+              <>
+                <h2>Continue with Google</h2>
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onFailure={handleGoogleLoginFailure}
+                  clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
+                  buttonText="Continue with Google"
+                  cookiePolicy="single_host_origin"
+                />
+                <button onClick={() => setIsModalOpen(false)} className="close-modal-btn">
+                  Close
+                </button>
+              </>
+            ) : (
+              <>
+                <h2>Welcome, {JSON.parse(localStorage.getItem("user")).name}</h2>
+                <button onClick={handleLogout} className="logout-btn">
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

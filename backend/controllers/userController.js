@@ -42,38 +42,41 @@ export const loginUser = async (req, res) => {
 
 // Google Login function
 export const googleLogin = async (req, res) => {
-  const { token } = req.body; // Get the token from frontend
-  
+  const { token } = req.body;
+
   try {
     // Verify the token with Google
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.CLIENT_ID, // Your Google Client ID
     });
-    
-    const payload = ticket.getPayload(); // Get user info from payload
-    const { email, name, picture } = payload; // Destructure the fields
 
-    // Check if the user already exists
-    let user = await User.findOne({ email });
+    const payload = ticket.getPayload(); // Get user info from payload
+    const { email, name, picture } = payload; // Destructure necessary fields
+
+    // Try to find and update the user in one atomic operation
+    let user = await User.findOneAndUpdate(
+      { email },
+      { profilePicture: picture }, // Update the profile picture
+      { new: true, upsert: true } // Create user if they don't exist, and return the updated user
+    );
+
+    // If user doesn't exist, 'upsert' will create a new user.
     if (!user) {
-      // If the user does not exist, create a new user
-      user = await User.create({ 
-        email, 
-        name, 
+      user = new User({
+        email,
+        name,
         password: null, // Password is not needed for Google login
-        role: "user", 
-        profilePicture: picture // Store Google profile picture
+        role: 'user',
+        profilePicture: picture, // Store Google profile picture
       });
-    } else {
-      // If the user exists, update their profile picture (optional)
-      user.profilePicture = picture;
-      await user.save();
+      await user.save(); // Save the new user to the database
     }
 
-    // Create a JWT token for the logged-in user
+    // Create JWT token for the logged-in user
     const jwtToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+    // Respond with the JWT token and user info
     res.json({
       token: jwtToken,
       user: {
@@ -88,6 +91,8 @@ export const googleLogin = async (req, res) => {
     res.status(500).json({ message: "Error during Google login", error: error.message });
   }
 };
+
+
 
 
 // Get User Profile and Check if Host

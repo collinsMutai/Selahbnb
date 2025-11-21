@@ -164,14 +164,14 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* Google Login Modal */
+/* Google Login Modal (Centered) */
 .google-login-modal {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Transparent dark overlay */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -183,7 +183,7 @@
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  width: 300px;
+  width: 300px; /* Set the width of the modal */
 }
 
 .close-modal-btn {
@@ -198,6 +198,41 @@
 
 .close-modal-btn:hover {
   background-color: #e60000;
+}
+
+/* Logout Modal (Top-right position) */
+.logout-modal {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.5); /* Transparent dark overlay */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 10px; /* Padding to separate modal from edges */
+}
+
+.logout-modal .modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 250px; /* Set a smaller width for the modal */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow to modal */
+}
+
+.logout-btn {
+  background-color: #ff5555; /* Red color for logout button */
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #e60000; /* Darker red on hover */
 }
 
 /* Media Queries for Mobile */
