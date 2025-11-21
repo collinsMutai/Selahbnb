@@ -1,10 +1,6 @@
 import React, { useState } from "react";
-import {
-  FaUser,
-  FaPhoneAlt,
-  FaCalendarAlt,
-  FaChevronDown,
-} from "react-icons/fa";
+import moment from "moment-timezone"; // Import Moment.js with Timezone support
+import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "./BookingForm.css";
@@ -15,11 +11,11 @@ import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the pat
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    checkIn: null,
-    checkOut: null,
-    adults: 0,
+    name: "cccvvv",
+    phone: "6718897890",
+    checkIn: "2025-11-20T21:00:00.000Z", // Example UTC time
+    checkOut: "2025-11-22T21:00:00.000Z", // Example UTC time
+    adults: 1,
     children: 0,
     infants: 0,
     pets: 0,
@@ -57,18 +53,13 @@ const BookingForm = () => {
     });
   };
 
-  const handleCheckInChange = (date) => {
-    setFormData({ ...formData, checkIn: date });
-  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-  const handleCheckOutChange = (date) => {
-    const minCheckOutDate = new Date(formData.checkIn);
-    minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
-
-    if (date >= minCheckOutDate) {
-      setFormData({ ...formData, checkOut: date });
-    } else {
-      alert("Check-out must be at least 2 nights after check-in.");
+    // Perform validation before submitting the form
+    if (validateForm()) {
+      console.log(formData); // Logs the entire formData including guests
+      // Add further submit logic (e.g., API call, etc.)
     }
   };
 
@@ -119,22 +110,14 @@ const BookingForm = () => {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    // Perform validation before submitting the form
-    if (validateForm()) {
-      console.log(formData); // Logs the entire formData including guests
-      // Add further submit logic (e.g., API call, etc.)
-    }
+  // Convert UTC to Colorado Springs Local Time using Moment.js
+  const formatDateTime = (date) => {
+    return moment(date).tz("America/Denver").format("MM/DD/YYYY hh:mm A");
   };
 
-  const today = new Date();
-
-  // Calculate the minimum check-out date dynamically based on check-in
-  const minCheckOutDate = formData.checkIn
-    ? new Date(formData.checkIn).setDate(formData.checkIn.getDate() + 2)
-    : today;
+  // Get formatted times
+  const checkInTime = formatDateTime(formData.checkIn);
+  const checkOutTime = formatDateTime(formData.checkOut);
 
   return (
     <div
@@ -199,14 +182,14 @@ const BookingForm = () => {
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
                 <DatePicker
-                  selected={formData.checkIn}
-                  onChange={handleCheckInChange}
+                  selected={new Date(formData.checkIn)}
+                  onChange={(date) => setFormData({ ...formData, checkIn: date })}
                   placeholderText="Check-in"
                   dateFormat="MM/dd/yyyy"
                   className="date-input"
                   popperPlacement="bottom"
                   withPortal
-                  minDate={today}
+                  minDate={new Date()}
                 />
                 {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
               </div>
@@ -215,18 +198,23 @@ const BookingForm = () => {
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
                 <DatePicker
-                  selected={formData.checkOut}
-                  onChange={handleCheckOutChange}
+                  selected={new Date(formData.checkOut)}
+                  onChange={(date) => setFormData({ ...formData, checkOut: date })}
                   placeholderText="Check-out"
                   dateFormat="MM/dd/yyyy"
                   className="date-input"
                   popperPlacement="bottom"
                   withPortal
-                  minDate={minCheckOutDate}
-                  disabled={!formData.checkIn}
+                  minDate={new Date(formData.checkIn)}
                 />
                 {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
               </div>
+            </div>
+
+            {/* Display Colorado Springs Time for Check-in/Check-out */}
+            <div className="time-display">
+              <p>Check-in (Colorado Springs Local Time): {checkInTime}</p>
+              <p>Check-out (Colorado Springs Local Time): {checkOutTime}</p>
             </div>
 
             {/* Guests: Adults, Children, Infants, Pets */}
