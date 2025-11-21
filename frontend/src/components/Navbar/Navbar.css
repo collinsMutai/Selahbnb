@@ -176,6 +176,7 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  cursor: pointer; /* Change cursor to pointer to indicate clickable overlay */
 }
 
 .modal-content {
@@ -184,8 +185,11 @@
   border-radius: 8px;
   text-align: center;
   width: 300px;
+  z-index: 10000; /* Ensure modal content is above the overlay */
+  pointer-events: all; /* Allow interaction with modal content */
 }
 
+/* Close Modal Button */
 .close-modal-btn {
   margin-top: 10px;
   padding: 8px 16px;
@@ -200,28 +204,27 @@
   background-color: #e60000; /* Darker red on hover */
 }
 
-/* Logout Modal (Top-right position) */
-.logout-modal {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background-color: rgba(0, 0, 0, 0.5); /* Transparent overlay */
+/* Logged-In Modal (Top-Right) */
+.google-login-modal.logged-in {
   display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 10px;
+  justify-content: flex-end; /* Align to the right */
+  align-items: flex-start; /* Align to the top */
+  padding: 20px;
 }
 
-.logout-modal .modal-content {
+.modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  width: 250px; /* Slightly smaller modal width */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Light shadow for modal */
+  position: relative;
+  z-index: 10000;
+  pointer-events: all;
 }
 
+/* Logout Button in Logged-In Modal */
 .logout-btn {
   background-color: #ff5555;
   color: white;
@@ -273,5 +276,18 @@
 
   .user-icon {
     margin-right: 3rem;
+  }
+
+  /* Close Modal on Outside Click (mobile) */
+  .google-login-modal {
+    z-index: 1000;
+  }
+
+  .google-login-modal:hover {
+    cursor: pointer;
+  }
+
+  .google-login-modal .modal-content {
+    pointer-events: all; /* Prevent modal content from closing the modal on click */
   }
 }

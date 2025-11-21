@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { GoogleLogin } from "@react-oauth/google"; // Import GoogleLogin from @react-oauth/google
-import jwt_decode from "jwt-decode"; // Decode JWT tokens (if you need to extract user info from token)
+import { GoogleLogin } from "@react-oauth/google";
+import jwt_decode from "jwt-decode"; // Decode JWT tokens
 import "./Navbar.css";
 
 const Navbar = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State to toggle mobile menu
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Check if user is logged in
-  const [user, setUser] = useState(null); // Store the user data
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   // Check if the user is logged in when the component mounts
   useEffect(() => {
@@ -25,30 +25,27 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen); // Toggle the state to show/hide the mobile menu
   };
 
-  // Close menu after navigating to a link
   const handleLinkClick = () => {
     setIsMenuOpen(false); // Close the menu when a link is clicked
   };
 
   // Handle Google login success
   const handleGoogleLoginSuccess = async (response) => {
-    const { credential } = response; // Extract the credential token from the response
+    const { credential } = response; // Extract the credential token
 
-    // Send the token to the backend for verification and user authentication
     try {
       const res = await fetch("http://localhost:5000/api/users/google-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ token: credential }), // Send the token to backend
+        body: JSON.stringify({ token: credential }),
       });
 
       const data = await res.json();
       if (res.ok) {
-        // Store tokens and user info in localStorage
-        localStorage.setItem("token", data.token); // Store the access token
-        localStorage.setItem("user", JSON.stringify(data.user)); // Store user data
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
         setIsLoggedIn(true); // User is logged in
         setUser(data.user); // Set user data
@@ -75,10 +72,14 @@ const Navbar = () => {
     setIsModalOpen(false); // Close the modal
   };
 
+  // Toggle modal visibility
+  const toggleModal = () => {
+    setIsModalOpen((prevState) => !prevState);
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        {/* Logo */}
         <div className="logo">
           <span className="navbar-logo">Selah</span>
         </div>
@@ -101,7 +102,6 @@ const Navbar = () => {
               className="navbar-link"
               end
               onClick={handleLinkClick}
-              activeClassName="active"
             >
               Home
             </NavLink>
@@ -116,7 +116,6 @@ const Navbar = () => {
               to="/places"
               className="navbar-link"
               onClick={handleLinkClick}
-              activeClassName="active"
             >
               Places
             </NavLink>
@@ -126,7 +125,6 @@ const Navbar = () => {
               to="/contact"
               className="navbar-link"
               onClick={handleLinkClick}
-              activeClassName="active"
             >
               Contact
             </NavLink>
@@ -137,7 +135,7 @@ const Navbar = () => {
         <div className="navbar-right">
           <div
             className="user-icon"
-            onClick={() => setIsModalOpen(true)}
+            onClick={toggleModal}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -184,7 +182,14 @@ const Navbar = () => {
 
       {/* Modal based on login state */}
       {isModalOpen && (
-        <div className="google-login-modal">
+        <div
+          className={`google-login-modal ${isLoggedIn ? "logged-in" : ""}`}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsModalOpen(false);
+            }
+          }}
+        >
           <div className="modal-content">
             {!isLoggedIn ? (
               <>
@@ -196,7 +201,10 @@ const Navbar = () => {
                   buttonText="Continue with Google"
                   cookiePolicy="single_host_origin"
                 />
-                <button onClick={() => setIsModalOpen(false)} className="close-modal-btn">
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="close-modal-btn"
+                >
                   Close
                 </button>
               </>
