@@ -3,11 +3,10 @@ import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment-timezone";
-import { useSelector, useDispatch } from "react-redux"; // Import useSelector and useDispatch
-import { setModalOpen } from "../../redux/modalSlice"; // Correct import for opening modal
+import { useSelector, useDispatch } from "react-redux";
+import { setModalOpen } from "../../redux/modalSlice"; // For opening login modal
+import { setBookingData } from "../../redux/bookingSlice"; // Import the action to set booking data
 import "./BookingForm.css";
-
-// Import the background image
 import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the path as needed
 
 const BookingForm = () => {
@@ -31,8 +30,8 @@ const BookingForm = () => {
     guests: "",
   });
 
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get the login status from the Redux store
-  const dispatch = useDispatch(); // Dispatch function to trigger actions
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status
+  const dispatch = useDispatch(); // Dispatch function
 
   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 
@@ -60,7 +59,6 @@ const BookingForm = () => {
     });
   };
 
-  // Convert the local date to UTC including time
   const handleCheckInChange = (date) => {
     const localDate = moment.tz(date, "America/Los_Angeles");
     const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
@@ -68,7 +66,6 @@ const BookingForm = () => {
     setFormData({ ...formData, checkIn: utcDate });
   };
 
-  // Handle check-out date similarly
   const handleCheckOutChange = (date) => {
     const localDate = moment.tz(date, "America/Los_Angeles");
     const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
@@ -136,14 +133,20 @@ const BookingForm = () => {
 
   // Check if the user is logged in before submitting the form
   if (!isLoggedIn) {
-    // If not logged in, open the login modal
     dispatch(setModalOpen(true)); // Open the login modal
     return; // Prevent form submission
   }
 
   // Perform validation before submitting the form
   if (validateForm()) {
-    // Log UTC and Colorado Springs date for check-in and check-out (with time)
+    // Convert Date objects to ISO strings
+    const formDataToDispatch = {
+      ...formData,
+      checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+      checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+    };
+
+    // Log the data (for debugging)
     if (formData.checkIn && formData.checkOut) {
       const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
       const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
@@ -157,8 +160,8 @@ const BookingForm = () => {
       console.log("Check-out (Colorado Springs Time):", checkOutCST);
     }
 
-    // Log the entire formData (for debugging purposes)
-    console.log("Form Data:", formData);
+    // Dispatch form data to Redux
+    dispatch(setBookingData(formDataToDispatch));
 
     // Reset form data after submission
     setFormData({
@@ -181,14 +184,12 @@ const BookingForm = () => {
       guests: "",
     });
 
-    // Add further submit logic (e.g., API call, etc.)
+    // Further submit logic (API call, etc.) can go here
   }
 };
 
 
   const today = new Date();
-
-  // Calculate the minimum check-out date dynamically based on check-in
   const minCheckOutDate = formData.checkIn
     ? new Date(formData.checkIn).setDate(formData.checkIn.getDate() + 2)
     : today;

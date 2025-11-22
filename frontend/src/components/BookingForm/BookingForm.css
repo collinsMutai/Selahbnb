@@ -13,7 +13,7 @@
 }
 
 /* Darker overlay on background image */
-.booking-overlay {
+.booking-section .booking-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -24,7 +24,7 @@
 }
 
 /* Main content section */
-.booking-content {
+.booking-section .booking-content {
   position: relative;
   display: flex;
   justify-content: space-between;
@@ -36,14 +36,14 @@
 }
 
 /* Text section on the left */
-.booking-text {
+.booking-section .booking-text {
   width: 45%;
   color: white;
   padding: 30px;
   margin-top: 10px; /* Adjust margin for better alignment */
 }
 
-.booking-text h2 {
+.booking-section .booking-text h2 {
   font-size: 36px;
   font-weight: bold;
   margin-bottom: 15px;
@@ -53,18 +53,15 @@
   color: #fff;
 }
 
-.booking-text p {
+.booking-section .booking-text p {
   font-size: 18px;
   line-height: 1.6;
   color: #f4f4f4;
   margin-bottom: 25px;
-  /* max-width: 80%;
-  margin-left: auto; */
-  margin-right: auto;
 }
 
 /* Form container */
-.booking-form-container {
+.booking-section .booking-form-container {
   width: 45%;
   padding: 20px;
   background-color: rgba(255, 255, 255, 0.9); /* White background with some opacity */
@@ -73,7 +70,7 @@
   font-family: Arial, sans-serif;
 }
 
-.booking-form-container h2 {
+.booking-section .booking-form-container h2 {
   text-align: center;
   color: #333;
   font-size: 24px;
@@ -81,7 +78,7 @@
 }
 
 /* Input container styling */
-.input-container {
+.booking-section .input-container {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
@@ -89,16 +86,16 @@
 }
 
 /* Input icon styling */
-.input-icon {
+.booking-section .input-icon {
   margin-right: 10px;
   color: #3c9d8e;
   font-size: 18px;
 }
 
 /* Input field styling */
-input[type="text"],
-input[type="tel"],
-input[type="date"] {
+.booking-section input[type="text"],
+.booking-section input[type="tel"],
+.booking-section input[type="date"] {
   width: 100%;
   padding: 12px 15px;
   font-size: 16px;
@@ -110,7 +107,7 @@ input[type="date"] {
 }
 
 /* Chevron Icon */
-.dropdown-icon {
+.booking-section .dropdown-icon {
   position: absolute;
   right: 10px;
   top: 50%;
@@ -122,7 +119,7 @@ input[type="date"] {
 }
 
 /* Submit Button */
-.submit-btn {
+.booking-section .submit-btn {
   width: 100%;
   padding: 12px;
   background-color: #3c9d8e;
@@ -134,12 +131,12 @@ input[type="date"] {
   transition: background-color 0.3s ease;
 }
 
-.submit-btn:hover {
+.booking-section .submit-btn:hover {
   background-color: #2b7a66;
 }
 
 /* Dropdown menu visibility */
-.dropdown-menu {
+.booking-section .dropdown-menu {
   position: absolute;
   top: 50px;
   left: 0;
@@ -153,25 +150,25 @@ input[type="date"] {
 }
 
 /* Each dropdown item */
-.dropdown-item {
+.booking-section .dropdown-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
 }
 
-.dropdown-item label {
+.booking-section .dropdown-item label {
   font-size: 16px;
 }
 
 /* Quantity control buttons */
-.quantity-controls {
+.booking-section .quantity-controls {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.quantity-controls button {
+.booking-section .quantity-controls button {
   padding: 5px 10px;
   background-color: #3c9d8e;
   color: white;
@@ -180,17 +177,17 @@ input[type="date"] {
   cursor: pointer;
 }
 
-.quantity-controls button:disabled {
+.booking-section .quantity-controls button:disabled {
   background-color: #ddd;
   cursor: not-allowed;
 }
 
-.quantity-controls span {
+.booking-section .quantity-controls span {
   font-size: 16px;
 }
 
 /* Inline Date Inputs */
-.input-container-inline {
+.booking-section .input-container-inline {
   display: flex;
   gap: 20px; /* Space between Check-in and Check-out */
   justify-content: space-between; /* Ensure they are spaced correctly */
@@ -206,49 +203,49 @@ input[type="date"] {
   }
 
   /* Text section */
-  .booking-text {
+  .booking-section .booking-text {
     width: 100%;
     text-align: center;
     padding: 15px;
     margin-bottom: 30px; /* Added space below text */
   }
 
-  .booking-text h2 {
+  .booking-section .booking-text h2 {
     font-size: 28px;
   }
 
-  .booking-text p {
+  .booking-section .booking-text p {
     font-size: 16px;
     margin-bottom: 20px;
   }
 
   /* Form section */
-  .booking-form-container {
+  .booking-section .booking-form-container {
     width: 100%;
     padding: 20px;
     margin-bottom: 30px; /* Ensure spacing between form and any content below */
   }
 
-  h2 {
+  .booking-section h2 {
     font-size: 22px;
   }
 
-  .input-container {
+  .booking-section .input-container {
     margin-bottom: 15px;
   }
 
-  .submit-btn {
+  .booking-section .submit-btn {
     padding: 10px;
   }
 
-  .input-container-inline {
+  .booking-section .input-container-inline {
     flex-direction: column;
     gap: 10px;
   }
 }
 
 /* Styling for Date Picker input */
-.date-input {
+.booking-section .date-input {
   width: 80%; /* Reduced width for date inputs */
   padding: 12px 15px;
   font-size: 16px;
@@ -259,12 +256,12 @@ input[type="date"] {
   padding-right: 35px; /* To accommodate the Chevron icon inside */
 }
 
-.date-input:focus {
+.booking-section .date-input:focus {
   border-color: #3c9d8e;
 }
 
 /* React Datepicker specific styles */
-.react-datepicker__input-container input {
+.booking-section .react-datepicker__input-container input {
   width: 80%; /* Same width for the date input in datepicker */
   padding: 12px 15px;
   font-size: 16px;
@@ -274,7 +271,7 @@ input[type="date"] {
 }
 
 /* Date Picker Popup */
-.date-picker-popup {
+.booking-section .date-picker-popup {
   position: absolute;
   top: 80px;
   left: 0;
@@ -285,13 +282,13 @@ input[type="date"] {
   z-index: 10;
 }
 
-.calendar {
+.booking-section .calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 10px;
 }
 
-.calendar-day {
+.booking-section .calendar-day {
   padding: 8px;
   text-align: center;
   border: 1px solid #ddd;
@@ -300,43 +297,43 @@ input[type="date"] {
   transition: background-color 0.3s;
 }
 
-.calendar-day:hover {
+.booking-section .calendar-day:hover {
   background-color: #3c9d8e;
   color: white;
 }
 
-.calendar-day:focus {
+.booking-section .calendar-day:focus {
   outline: none;
   background-color: #3c9d8e;
   color: white;
 }
 
-.react-datepicker__header {
+.booking-section .react-datepicker__header {
   background-color: #3c9d8e;
   color: white;
 }
 
-.react-datepicker__current-month {
+.booking-section .react-datepicker__current-month {
   font-size: 18px;
   font-weight: bold;
 }
 
-.react-datepicker__day:hover {
+.booking-section .react-datepicker__day:hover {
   background-color: #3c9d8e;
   color: white;
 }
 
-.react-datepicker__day:focus {
+.booking-section .react-datepicker__day:focus {
   background-color: #3c9d8e;
   color: white;
 }
 
-.react-datepicker__day--selected {
+.booking-section .react-datepicker__day--selected {
   background-color: #3c9d8e;
   color: white;
 }
 
-.react-datepicker__day--today {
+.booking-section .react-datepicker__day--today {
   background-color: #3c9d8e;
   color: white;
 }
