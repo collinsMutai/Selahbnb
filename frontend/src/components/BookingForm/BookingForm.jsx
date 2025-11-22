@@ -131,38 +131,60 @@ const BookingForm = () => {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+ const handleSubmit = (e) => {
+  e.preventDefault();
 
-    // Check if the user is logged in before submitting the form
-    if (!isLoggedIn) {
-      // If not logged in, open the login modal
-      dispatch(setModalOpen(true)); // Open the login modal
-      return; // Prevent form submission
+  // Check if the user is logged in before submitting the form
+  if (!isLoggedIn) {
+    // If not logged in, open the login modal
+    dispatch(setModalOpen(true)); // Open the login modal
+    return; // Prevent form submission
+  }
+
+  // Perform validation before submitting the form
+  if (validateForm()) {
+    // Log UTC and Colorado Springs date for check-in and check-out (with time)
+    if (formData.checkIn && formData.checkOut) {
+      const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
+      const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
+      const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+      const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+
+      console.log("Form submitted!");
+      console.log("Check-in (UTC):", checkInUtc);
+      console.log("Check-out (UTC):", checkOutUtc);
+      console.log("Check-in (Colorado Springs Time):", checkInCST);
+      console.log("Check-out (Colorado Springs Time):", checkOutCST);
     }
 
-    // Perform validation before submitting the form
-    if (validateForm()) {
-      // Log UTC and Colorado Springs date for check-in and check-out (with time)
-      if (formData.checkIn && formData.checkOut) {
-        const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
-        const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
-        const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-        const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+    // Log the entire formData (for debugging purposes)
+    console.log("Form Data:", formData);
 
-        console.log("Form submitted!");
-        console.log("Check-in (UTC):", checkInUtc);
-        console.log("Check-out (UTC):", checkOutUtc);
-        console.log("Check-in (Colorado Springs Time):", checkInCST);
-        console.log("Check-out (Colorado Springs Time):", checkOutCST);
-      }
+    // Reset form data after submission
+    setFormData({
+      name: "",
+      phone: "",
+      checkIn: null,
+      checkOut: null,
+      adults: 0,
+      children: 0,
+      infants: 0,
+      pets: 0,
+    });
 
-      // Log the entire formData (for debugging purposes)
-      console.log("Form Data:", formData);
+    // Reset errors after form submission
+    setErrors({
+      name: "",
+      phone: "",
+      checkIn: "",
+      checkOut: "",
+      guests: "",
+    });
 
-      // Add further submit logic (e.g., API call, etc.)
-    }
-  };
+    // Add further submit logic (e.g., API call, etc.)
+  }
+};
+
 
   const today = new Date();
 

@@ -1,18 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode"; 
 import axios from "axios"; 
 import { useDispatch, useSelector } from "react-redux"; 
 import { login, logout, setUser } from "../../redux/userSlice"; 
-import { setModalOpen } from "../../redux/modalSlice"; // Import setModalOpen from modalSlice
+import { setModalOpen } from "../../redux/modalSlice"; 
 import "./Navbar.css";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.user);
-  const { isModalOpen } = useSelector((state) => state.modal); // Access modal state from Redux
+  const { isModalOpen } = useSelector((state) => state.modal); 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const refreshToken = useCallback(async () => {
     try {
@@ -115,6 +117,33 @@ const Navbar = () => {
     dispatch(setModalOpen(!isModalOpen));  // Dispatch the action to toggle modal visibility
   };
 
+  // Function to handle "Overview" link (hash navigation)
+  const handleOverviewClick = (e) => {
+    e.preventDefault();  // Prevent default anchor behavior
+    
+    // If the current route is not "/"
+    if (location.pathname !== "/") {
+      // Navigate to the homepage and immediately scroll to #overview
+      navigate("/", { replace: true });
+    } else {
+      // If already on the homepage, directly scroll to the section
+      const overviewSection = document.getElementById("overview");
+      if (overviewSection) {
+        overviewSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  // useEffect to scroll to #overview if on homepage
+  useEffect(() => {
+    if (location.pathname === "/") {
+      const overviewSection = document.getElementById("overview");
+      if (overviewSection) {
+        overviewSection.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -130,7 +159,9 @@ const Navbar = () => {
 
         <ul className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
           <li><NavLink to="/" className="navbar-link" end onClick={handleLinkClick}>Home</NavLink></li>
-          <li><a href="#overview" className="navbar-link" onClick={handleLinkClick}>Overview</a></li>
+          <li>
+            <a href="#overview" className="navbar-link" onClick={handleOverviewClick}>Overview</a>
+          </li>
           <li><NavLink to="/places" className="navbar-link" onClick={handleLinkClick}>Places</NavLink></li>
           <li><NavLink to="/contact" className="navbar-link" onClick={handleLinkClick}>Contact</NavLink></li>
         </ul>
