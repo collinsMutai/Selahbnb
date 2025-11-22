@@ -56,30 +56,29 @@ const BookingForm = () => {
   };
 
   // Convert the local date to UTC including time
-// Set the check-in date to 12:00 PM local time (noon) for better clarity
-const handleCheckInChange = (date) => {
-  const localDate = moment.tz(date, "America/Los_Angeles"); // Get the local date in Pacific Time (PST)
-  const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for consistency
-  const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
-  setFormData({ ...formData, checkIn: utcDate });
-};
+  const handleCheckInChange = (date) => {
+    const localDate = moment.tz(date, "America/Los_Angeles"); // Get the local date in Pacific Time (PST)
+    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for consistency
+    const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
+    setFormData({ ...formData, checkIn: utcDate });
+  };
 
-// Handle check-out date similarly
-const handleCheckOutChange = (date) => {
-  const localDate = moment.tz(date, "America/Los_Angeles");
-  const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for check-out
-  const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
+  // Handle check-out date similarly
+  const handleCheckOutChange = (date) => {
+    const localDate = moment.tz(date, "America/Los_Angeles");
+    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for check-out
+    const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
 
-  const minCheckOutDate = new Date(formData.checkIn);
-  minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
+    const minCheckOutDate = new Date(formData.checkIn);
+    // Calculate minimum checkout date as 2 days after check-in (inclusive of check-in day)
+    minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
 
-  if (utcDate >= minCheckOutDate) {
-    setFormData({ ...formData, checkOut: utcDate });
-  } else {
-    alert("Check-out must be at least 2 nights after check-in.");
-  }
-};
-
+    if (utcDate >= minCheckOutDate) {
+      setFormData({ ...formData, checkOut: utcDate });
+    } else {
+      alert("Check-out must be at least 2 nights after check-in (including check-in day).");
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {
@@ -114,7 +113,7 @@ const handleCheckOutChange = (date) => {
       newErrors.checkOut = "Check-out date is required";
       isValid = false;
     } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      newErrors.checkOut = "Check-out date must be at least 2 days after check-in";
+      newErrors.checkOut = "Check-out date must be at least 2 days after check-in (including check-in day).";
       isValid = false;
     }
 

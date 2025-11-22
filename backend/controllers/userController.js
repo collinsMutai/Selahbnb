@@ -257,6 +257,7 @@ export const refreshAccessToken = async (req, res) => {
 
 // Logout the user
 export const logout = (req, res) => {
-  res.clearCookie('refreshToken'); // Clear the refresh token from cookies
-  res.json({ message: "Logged out successfully" });
+  // Clear the refresh token cookie on logout
+  res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
+  res.status(200).json({ message: 'Logged out successfully' });
 };
