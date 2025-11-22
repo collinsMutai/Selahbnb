@@ -63,7 +63,7 @@ export default function HeroSlider() {
   const { image, caption } = slides[current];
 
   return (
-    <div className="hero-slider">
+    <div className="hero-slider" id="hero">
       <div
         className="hero-slide"
         style={{ backgroundImage: `url(${image})` }}

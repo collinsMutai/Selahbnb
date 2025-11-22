@@ -110,42 +110,59 @@ const Navbar = () => {
   };
 
   const handleLinkClick = () => {
-    setIsMenuOpen(false);
+    setIsMenuOpen(false); // Close the mobile menu on link click
   };
 
   const toggleModal = () => {
     dispatch(setModalOpen(!isModalOpen));  // Dispatch the action to toggle modal visibility
   };
 
+  // Function to handle "Home" link (scroll to #hero if already on the homepage)
+  const handleHomeClick = (e) => {
+  e.preventDefault();  // Prevent default anchor behavior
+
+  // If already on the homepage, directly scroll to the #hero section
+  if (location.pathname === "/") {
+    const heroSection = document.getElementById("home");
+    if (heroSection) {
+      // Scroll to the hero section, but adjust for the navbar height
+      const navbarHeight = document.querySelector('.navbar').offsetHeight;
+      window.scrollTo({
+        top: heroSection.offsetTop - navbarHeight,  // Offset the scroll position by navbar height
+        behavior: 'smooth'
+      });
+    }
+  } else {
+    // Otherwise, navigate to the homepage and scroll to #hero
+    navigate("/", { replace: true });
+  }
+
+  setIsMenuOpen(false); // Close mobile menu after navigation
+};
+
+
   // Function to handle "Overview" link (hash navigation)
   const handleOverviewClick = (e) => {
     e.preventDefault();  // Prevent default anchor behavior
-    
-    // If the current route is not "/"
-    if (location.pathname !== "/") {
-      // Navigate to the homepage and immediately scroll to #overview
-      navigate("/", { replace: true });
-    } else {
-      // If already on the homepage, directly scroll to the section
-      const overviewSection = document.getElementById("overview");
-      if (overviewSection) {
-        overviewSection.scrollIntoView({ behavior: "smooth" });
-      }
-    }
-  };
 
-  // useEffect to scroll to #overview if on homepage
-  useEffect(() => {
+    // If already on the homepage, directly scroll to the #overview section
     if (location.pathname === "/") {
       const overviewSection = document.getElementById("overview");
       if (overviewSection) {
         overviewSection.scrollIntoView({ behavior: "smooth" });
       }
+    } else {
+      // If not on the homepage, navigate to the homepage and scroll to #overview
+      navigate("/", { replace: true });
     }
-  }, [location]);
+
+    setIsMenuOpen(false); // Close mobile menu after navigation
+  };
+
+
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" id="navbar">
       <div className="navbar-container">
         <div className="logo">
           <span className="navbar-logo">Selah</span>
@@ -158,10 +175,11 @@ const Navbar = () => {
         </div>
 
         <ul className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
-          <li><NavLink to="/" className="navbar-link" end onClick={handleLinkClick}>Home</NavLink></li>
+          <li><NavLink to="/" className="navbar-link" end onClick={handleHomeClick}>Home</NavLink></li>
           <li>
             <a href="#overview" className="navbar-link" onClick={handleOverviewClick}>Overview</a>
           </li>
+          
           <li><NavLink to="/places" className="navbar-link" onClick={handleLinkClick}>Places</NavLink></li>
           <li><NavLink to="/contact" className="navbar-link" onClick={handleLinkClick}>Contact</NavLink></li>
         </ul>

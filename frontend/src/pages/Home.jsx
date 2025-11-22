@@ -5,7 +5,7 @@ import BookingForm from "../components/BookingForm/BookingForm";
 
 export default function Home() {
   return (
-    <div>
+    <div id="home">
       <HeroSlider />
       <PropertyGallery/>
       <BookingForm />
