@@ -140,24 +140,44 @@ const Navbar = () => {
   setIsMenuOpen(false); // Close mobile menu after navigation
 };
 
+const handleOverviewClick = (e) => {
+  e.preventDefault();  // Prevent default anchor behavior
 
-  // Function to handle "Overview" link (hash navigation)
-  const handleOverviewClick = (e) => {
-    e.preventDefault();  // Prevent default anchor behavior
+  // If already on the homepage, scroll to the #overview section
+  if (location.pathname === "/") {
+    const overviewSection = document.getElementById("overview");
+    
+    if (overviewSection) {
+      const navbarHeight = document.querySelector('.navbar').offsetHeight;
 
-    // If already on the homepage, directly scroll to the #overview section
-    if (location.pathname === "/") {
-      const overviewSection = document.getElementById("overview");
-      if (overviewSection) {
-        overviewSection.scrollIntoView({ behavior: "smooth" });
-      }
-    } else {
-      // If not on the homepage, navigate to the homepage and scroll to #overview
-      navigate("/", { replace: true });
+      // Scroll to the section after a short delay to ensure page renders first
+      setTimeout(() => {
+        window.scrollTo({
+          top: overviewSection.offsetTop - navbarHeight,
+          behavior: 'smooth',
+        });
+      }, 100); // Delay to ensure the page has fully rendered
     }
+  } else {
+    // Navigate to the homepage first, then scroll to #overview
+    navigate("/", { replace: true });
 
-    setIsMenuOpen(false); // Close mobile menu after navigation
-  };
+    // Scroll to #overview after navigation to the homepage
+    setTimeout(() => {
+      const overviewSection = document.getElementById("overview");
+
+      if (overviewSection) {
+        const navbarHeight = document.querySelector('.navbar').offsetHeight;
+        window.scrollTo({
+          top: overviewSection.offsetTop - navbarHeight,
+          behavior: 'smooth',
+        });
+      }
+    }, 100); // A small delay to make sure the page has loaded before scrolling
+  }
+
+  setIsMenuOpen(false); // Close mobile menu after navigation
+};
 
 
 
