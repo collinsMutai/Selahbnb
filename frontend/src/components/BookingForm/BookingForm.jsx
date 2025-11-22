@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import moment from "moment-timezone"; // Import moment-timezone for time zone handling
+import moment from "moment-timezone";
+import { useSelector, useDispatch } from "react-redux"; // Import useSelector and useDispatch
+import { setModalOpen } from "../../redux/modalSlice"; // Correct import for opening modal
 import "./BookingForm.css";
 
 // Import the background image
@@ -28,6 +30,9 @@ const BookingForm = () => {
     checkOut: "",
     guests: "",
   });
+
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get the login status from the Redux store
+  const dispatch = useDispatch(); // Dispatch function to trigger actions
 
   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 
@@ -57,20 +62,19 @@ const BookingForm = () => {
 
   // Convert the local date to UTC including time
   const handleCheckInChange = (date) => {
-    const localDate = moment.tz(date, "America/Los_Angeles"); // Get the local date in Pacific Time (PST)
-    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for consistency
-    const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
+    const localDate = moment.tz(date, "America/Los_Angeles");
+    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
+    const utcDate = adjustedDate.utc().toDate();
     setFormData({ ...formData, checkIn: utcDate });
   };
 
   // Handle check-out date similarly
   const handleCheckOutChange = (date) => {
     const localDate = moment.tz(date, "America/Los_Angeles");
-    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 }); // Set time to noon for check-out
-    const utcDate = adjustedDate.utc().toDate(); // Convert to UTC
+    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
+    const utcDate = adjustedDate.utc().toDate();
 
     const minCheckOutDate = new Date(formData.checkIn);
-    // Calculate minimum checkout date as 2 days after check-in (inclusive of check-in day)
     minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
 
     if (utcDate >= minCheckOutDate) {
@@ -97,7 +101,7 @@ const BookingForm = () => {
     }
 
     // Validate Phone
-    const phoneRegex = /^[0-9]{10}$/; // Basic phone validation (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = "Please enter a valid phone number";
       isValid = false;
@@ -129,6 +133,13 @@ const BookingForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Check if the user is logged in before submitting the form
+    if (!isLoggedIn) {
+      // If not logged in, open the login modal
+      dispatch(setModalOpen(true)); // Open the login modal
+      return; // Prevent form submission
+    }
 
     // Perform validation before submitting the form
     if (validateForm()) {
@@ -170,24 +181,18 @@ const BookingForm = () => {
         backgroundAttachment: "fixed", // Keep background fixed
       }}
     >
-      {/* Dark overlay on background image */}
       <div className="booking-overlay"></div>
 
       <div className="booking-content">
-        {/* Content Text on the Left */}
         <div className="booking-text">
           <h2>Book Your Stay at Selah</h2>
           <p>
             Your Tranquil Retreat in Colorado Springs is Just a Few Clicks Away.
             Escape to Selah and experience the perfect blend of nature,
-            relaxation, and adventure! Whether you're planning a weekend
-            getaway, a romantic retreat, or an adventure-filled vacation, our
-            peaceful home offers everything you need to unwind and explore the
-            beauty of Colorado Springs.
+            relaxation, and adventure!
           </p>
         </div>
 
-        {/* Booking Form on the Right */}
         <div className="booking-form-container">
           <h2>Book Your Stay</h2>
           <form onSubmit={handleSubmit}>
@@ -217,9 +222,8 @@ const BookingForm = () => {
               {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
-            {/* Inline Date Inputs */}
+            {/* Check-in / Check-out */}
             <div className="input-container-inline">
-              {/* Check-in Date */}
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
                 <DatePicker
@@ -230,12 +234,11 @@ const BookingForm = () => {
                   className="date-input"
                   popperPlacement="bottom"
                   withPortal
-                  minDate={today} // Allow today as a valid check-in date
+                  minDate={today}
                 />
                 {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
               </div>
 
-              {/* Check-out Date */}
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
                 <DatePicker
@@ -247,13 +250,13 @@ const BookingForm = () => {
                   popperPlacement="bottom"
                   withPortal
                   minDate={minCheckOutDate}
-                  disabled={!formData.checkIn} // Disable check-out until check-in is selected
+                  disabled={!formData.checkIn}
                 />
                 {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
               </div>
             </div>
 
-            {/* Guests: Adults, Children, Infants, Pets */}
+            {/* Guests */}
             <div className="input-container" onClick={toggleDropdown}>
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
@@ -267,7 +270,6 @@ const BookingForm = () => {
               />
               {isDropdownVisible && (
                 <div className="dropdown-menu">
-                  {/* Adults */}
                   <div className="dropdown-item">
                     <label>Adults</label>
                     <div className="quantity-controls">
@@ -293,7 +295,6 @@ const BookingForm = () => {
                     </div>
                   </div>
 
-                  {/* Children */}
                   <div className="dropdown-item">
                     <label>Children</label>
                     <div className="quantity-controls">
@@ -319,7 +320,6 @@ const BookingForm = () => {
                     </div>
                   </div>
 
-                  {/* Infants */}
                   <div className="dropdown-item">
                     <label>Infants</label>
                     <div className="quantity-controls">
@@ -345,7 +345,6 @@ const BookingForm = () => {
                     </div>
                   </div>
 
-                  {/* Pets */}
                   <div className="dropdown-item">
                     <label>Pets</label>
                     <div className="quantity-controls">
@@ -374,7 +373,6 @@ const BookingForm = () => {
               )}
             </div>
 
-            {/* Guests Validation */}
             {errors.guests && <p className="error-text">{errors.guests}</p>}
 
             {/* Submit Button */}
