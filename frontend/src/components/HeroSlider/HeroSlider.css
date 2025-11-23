@@ -59,6 +59,7 @@
   z-index: 10;
   margin: 0 auto;
   box-sizing: border-box; /* Prevent form from overflowing */
+  transform: translateY(-40px); /* Move form slightly upwards */
 }
 
 .input-container {
@@ -216,6 +217,7 @@ input {
     width: 100%;
     padding: 2rem; /* Increased padding for more spacious form */
     order: 1; /* Make form appear above caption */
+    transform: none; /* Remove the translateY on mobile */
   }
 
   .input-container-inline {

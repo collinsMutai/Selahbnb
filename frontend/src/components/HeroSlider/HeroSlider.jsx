@@ -3,6 +3,9 @@ import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment-timezone";
+import { useSelector, useDispatch } from "react-redux";
+import { setModalOpen } from "../../redux/modalSlice"; // Action to open login modal
+import { setBookingData } from "../../redux/bookingSlice"; // Action to set booking data
 import "./HeroSlider.css";
 
 const slides = [
@@ -56,8 +59,11 @@ export default function HeroSlider() {
     checkOut: "",
     guests: "",
   });
-
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status from Redux
+  const dispatch = useDispatch(); // Dispatch function
+   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 
   const nextSlide = () => {
     setAnimateText(false);
@@ -138,11 +144,42 @@ export default function HeroSlider() {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+   const handleSubmit = (e) => {
     e.preventDefault();
+  
+    // Check if the user is logged in before submitting the form
+    if (!isLoggedIn) {
+      dispatch(setModalOpen(true)); // Open the login modal
+      return; // Prevent form submission
+    }
+  
+    // Perform validation before submitting the form
     if (validateForm()) {
-      console.log(formData);
-      alert("Form Submitted!");
+      // Convert Date objects to ISO strings
+      const formDataToDispatch = {
+        ...formData,
+        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+      };
+  
+      // Log the data (for debugging)
+      if (formData.checkIn && formData.checkOut) {
+        const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
+        const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
+        const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+        const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+  
+        console.log("Form submitted!");
+        console.log("Check-in (UTC):", checkInUtc);
+        console.log("Check-out (UTC):", checkOutUtc);
+        console.log("Check-in (Colorado Springs Time):", checkInCST);
+        console.log("Check-out (Colorado Springs Time):", checkOutCST);
+      }
+  
+      // Dispatch form data to Redux
+      dispatch(setBookingData(formDataToDispatch));
+  
+      // Reset form data after submission
       setFormData({
         name: "",
         phone: "",
@@ -153,7 +190,17 @@ export default function HeroSlider() {
         infants: 0,
         pets: 0,
       });
-      setErrors({ name: "", phone: "", checkIn: "", checkOut: "", guests: "" });
+  
+      // Reset errors after form submission
+      setErrors({
+        name: "",
+        phone: "",
+        checkIn: "",
+        checkOut: "",
+        guests: "",
+      });
+  
+      // Further submit logic (API call, etc.) can go here
     }
   };
 
