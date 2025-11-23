@@ -7,6 +7,7 @@ import {
   deleteListing,
 } from "../controllers/listingController.js";
 import { protect } from "../middleware/authMiddleware.js";
+import { isHostOrAdmin } from "../middleware/roleMiddleware.js"; // Import the isHostOrAdmin middleware
 
 const router = express.Router();
 
@@ -14,9 +15,9 @@ const router = express.Router();
 router.get("/", getListings);
 router.get("/:id", getListingById);
 
-// Protected routes
-router.post("/", protect, createListing);
-router.put("/:id", protect, updateListing); // ✅ Update listing
-router.delete("/:id", protect, deleteListing); // ✅ Delete listing
+// Protected routes with role-based access control
+router.post("/", protect, isHostOrAdmin, createListing);  // Only hosts or admins can create a listing
+router.put("/:id", protect, isHostOrAdmin, updateListing); // Only hosts or admins can update a listing
+router.delete("/:id", protect, isHostOrAdmin, deleteListing); // Only hosts or admins can delete a listing
 
 export default router;

@@ -6,8 +6,10 @@ import moment from "moment-timezone";
 import { useSelector, useDispatch } from "react-redux";
 import { setModalOpen } from "../../redux/modalSlice"; // Action to open login modal
 import { setBookingData } from "../../redux/bookingSlice"; // Action to set booking data
+import axios from "axios"; // Import axios
 import "./HeroSlider.css";
 
+// Your slide data with images and captions
 const slides = [
   { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200", caption: "Front View of the Property" },
   { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200", caption: "Spacious Living Room" },
@@ -24,10 +26,21 @@ const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [animateText, setAnimateText] = useState(false);
   const [formData, setFormData] = useState({
-    name: "", phone: "", checkIn: null, checkOut: null, adults: 0, children: 0, infants: 0, pets: 0,
+    name: "",
+    phone: "",
+    checkIn: null,
+    checkOut: null,
+    adults: 0,
+    children: 0,
+    infants: 0,
+    pets: 0,
   });
   const [errors, setErrors] = useState({
-    name: "", phone: "", checkIn: "", checkOut: "", guests: "",
+    name: "",
+    phone: "",
+    checkIn: "",
+    checkOut: "",
+    guests: "",
   });
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
@@ -113,9 +126,10 @@ const HeroSlider = () => {
     return isValid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-  console.log("Current form data:", formData);
+     const hardcodedListingId = "69230e30f841f3328e53ea37";
+     console.log("Current form data:", formData);
 
     if (!isLoggedIn) {
       dispatch(setModalOpen(true)); // Open the login modal
@@ -127,6 +141,7 @@ const HeroSlider = () => {
         ...formData,
         checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
         checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+        listingId: hardcodedListingId,
       };
 
       // Log the data (for debugging)
@@ -143,29 +158,45 @@ const HeroSlider = () => {
         console.log("Check-out (Colorado Springs Time):", checkOutCST);
       }
 
-      // Dispatch form data to Redux
-      dispatch(setBookingData(formDataToDispatch));
+      // API Call to create booking using Axios
+      try {
+        const response = await axios.post("http://localhost:5000/api/bookings", formDataToDispatch, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authorization if needed
+          },
+        });
 
-      // Reset form data after submission
-      setFormData({
-        name: "",
-        phone: "",
-        checkIn: null,
-        checkOut: null,
-        adults: 0,
-        children: 0,
-        infants: 0,
-        pets: 0,
-      });
+        if (response.status === 201) {
+          console.log("Booking created successfully:", response.data);
 
-      // Reset errors after form submission
-      setErrors({
-        name: "",
-        phone: "",
-        checkIn: "",
-        checkOut: "",
-        guests: "",
-      });
+          // Dispatch form data to Redux
+          dispatch(setBookingData(formDataToDispatch));
+
+          // Reset form data after submission
+          setFormData({
+            name: "",
+            phone: "",
+            checkIn: null,
+            checkOut: null,
+            adults: 0,
+            children: 0,
+            infants: 0,
+            pets: 0,
+          });
+
+          // Reset errors after form submission
+          setErrors({
+            name: "",
+            phone: "",
+            checkIn: "",
+            checkOut: "",
+            guests: "",
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+      }
     }
   };
 
@@ -176,10 +207,7 @@ const HeroSlider = () => {
 
   return (
     <div className="hero-slider" id="hero">
-      <div
-        className="hero-slide"
-        style={{ backgroundImage: `url(${image})` }}
-      >
+      <div className="hero-slide" style={{ backgroundImage: `url(${image})` }}>
         <div className={`hero-content`}>
           <div className={`hero-caption ${animateText ? "slide-up" : ""}`}>
             {caption}
@@ -263,7 +291,7 @@ const HeroSlider = () => {
                             e.stopPropagation();
                             setFormData({
                               ...formData,
-                              [type]: formData[type] - 1 < 0 ? 0 : formData[type] - 1
+                              [type]: formData[type] - 1 < 0 ? 0 : formData[type] - 1,
                             });
                           }}
                         >
@@ -276,7 +304,7 @@ const HeroSlider = () => {
                             e.stopPropagation();
                             setFormData({
                               ...formData,
-                              [type]: formData[type] + 1
+                              [type]: formData[type] + 1,
                             });
                           }}
                         >

@@ -1,26 +1,38 @@
-// controllers/bookingController.js
 import Booking from "../models/Booking.js";
 import Listing from "../models/Listing.js";
 
 // Create a booking
 export const createBooking = async (req, res) => {
   try {
-    const { listingId, startDate, endDate } = req.body;
+    const { listingId, name, phone, checkIn, checkOut, adults, children, infants, pets } = req.body;
     const listing = await Listing.findById(listingId);
     
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Calculate the total price based on price per night
-    const totalPrice = listing.price * Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+    // Calculate the number of days between checkIn and checkOut
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const numberOfDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)); // Calculate number of days
 
+    // Calculate the total price based on price per night and number of days
+    const totalPrice = listing.price * numberOfDays;
+
+    // Create a new booking with the provided form data
     const booking = new Booking({
       listing: listingId,
       user: req.user._id, // Attach user from the auth middleware
-      startDate,
-      endDate,
+      name,
+      phone,
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      infants,
+      pets,
       totalPrice,
+      numberOfDays,  // Store the number of days in the booking
     });
 
     const savedBooking = await booking.save();
