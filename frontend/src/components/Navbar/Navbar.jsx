@@ -1,24 +1,30 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode"; 
-import axios from "axios"; 
-import { useDispatch, useSelector } from "react-redux"; 
-import { login, logout, setUser } from "../../redux/userSlice"; 
-import { setModalOpen } from "../../redux/modalSlice"; 
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { login, logout, setUser } from "../../redux/userSlice";
+import { setModalOpen } from "../../redux/modalSlice";
 import "./Navbar.css";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.user);
-  const { isModalOpen } = useSelector((state) => state.modal); 
+  const { isModalOpen } = useSelector((state) => state.modal);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(true); // Add loading state
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Function to handle the refresh token
   const refreshToken = useCallback(async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/users/refresh-token", {}, { withCredentials: true });
+      const response = await axios.post(
+        "http://localhost:5000/api/users/refresh-token",
+        {},
+        { withCredentials: true }
+      );
       const newAccessToken = response.data.accessToken;
       localStorage.setItem("token", newAccessToken);
       const decoded = jwtDecode(newAccessToken);
@@ -31,8 +37,9 @@ const Navbar = () => {
 
   const getToken = useCallback(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
-      const tokenParts = token.split('.');
+      const tokenParts = token.split(".");
       if (tokenParts.length !== 3) {
         console.error("Invalid token format");
         handleLogout();
@@ -40,21 +47,23 @@ const Navbar = () => {
       }
       try {
         const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
+        const currentTime = Date.now() / 1000; // Current time in seconds
         if (decoded.exp < currentTime) {
-          refreshToken();
+          refreshToken(); // Refresh the token if expired
           return null;
         }
-        return token;
+        return token; // If token is valid, return it
       } catch (error) {
         console.error("Error decoding token:", error);
         handleLogout();
         return null;
       }
     }
-    return null;
+
+    return null; // If no token exists
   }, [refreshToken]);
 
+  // Google login success handler
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response;
     try {
@@ -68,12 +77,20 @@ const Navbar = () => {
 
       const data = await res.json();
       if (res.ok) {
+        // Save token and user data in localStorage
         localStorage.setItem("token", data.accessToken);
         localStorage.setItem("user", JSON.stringify(data.user));
+
+        // Dispatch login action to Redux store
         dispatch(login({ user: data.user, token: data.accessToken }));
-        dispatch(setModalOpen(false));  // Close modal on successful login
+
+        // Close modal on successful login
+        dispatch(setModalOpen(false));
       } else {
-        console.error("Authentication failed:", data.message);
+        console.error(
+          "Authentication failed:",
+          data.message || "Unknown error"
+        );
       }
     } catch (error) {
       console.error("Error sending Google login token to backend:", error);
@@ -84,24 +101,33 @@ const Navbar = () => {
     console.log("Google login failed:", error);
   };
 
+  // Handle logout
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     dispatch(logout());
-    dispatch(setModalOpen(false));  // Close modal on logout
+    dispatch(setModalOpen(false));
   };
+  useEffect(() => {
+    console.log("User data in Navbar:", user); // Log user to verify its state
+  }, [user]);
 
   useEffect(() => {
     const token = getToken();
     const storedUser = localStorage.getItem("user");
 
     if (token && storedUser) {
-      dispatch(setUser(JSON.parse(storedUser)));
+      const user = JSON.parse(storedUser);
+      dispatch(setUser(user)); // Update Redux state with user data
+      dispatch(login({ user, token })); // Ensure login action is dispatched with user and token
+      setLoading(false); // Set loading to false after the user data is fetched
     } else if (!token) {
       console.log("No token found, skipping refresh.");
+      setLoading(false); // Set loading to false if no token
     } else {
       console.log("Token is expired or invalid, refreshing...");
       refreshToken();
+      setLoading(false); // Set loading to false after token refresh attempt
     }
   }, [getToken, refreshToken, dispatch]);
 
@@ -110,76 +136,67 @@ const Navbar = () => {
   };
 
   const handleLinkClick = () => {
-    setIsMenuOpen(false); // Close the mobile menu on link click
+    setIsMenuOpen(false);
   };
 
   const toggleModal = () => {
-    dispatch(setModalOpen(!isModalOpen));  // Dispatch the action to toggle modal visibility
+    dispatch(setModalOpen(!isModalOpen)); // Dispatch the action to toggle modal visibility
   };
 
   // Function to handle "Home" link (scroll to #hero if already on the homepage)
   const handleHomeClick = (e) => {
-  e.preventDefault();  // Prevent default anchor behavior
+    e.preventDefault(); // Prevent default anchor behavior
 
-  // If already on the homepage, directly scroll to the #hero section
-  if (location.pathname === "/") {
-    const heroSection = document.getElementById("home");
-    if (heroSection) {
-      // Scroll to the hero section, but adjust for the navbar height
-      const navbarHeight = document.querySelector('.navbar').offsetHeight;
-      window.scrollTo({
-        top: heroSection.offsetTop - navbarHeight,  // Offset the scroll position by navbar height
-        behavior: 'smooth'
-      });
-    }
-  } else {
-    // Otherwise, navigate to the homepage and scroll to #hero
-    navigate("/", { replace: true });
-  }
-
-  setIsMenuOpen(false); // Close mobile menu after navigation
-};
-
-const handleOverviewClick = (e) => {
-  e.preventDefault();  // Prevent default anchor behavior
-
-  // If already on the homepage, scroll to the #overview section
-  if (location.pathname === "/") {
-    const overviewSection = document.getElementById("overview");
-    
-    if (overviewSection) {
-      const navbarHeight = document.querySelector('.navbar').offsetHeight;
-
-      // Scroll to the section after a short delay to ensure page renders first
-      setTimeout(() => {
+    if (location.pathname === "/") {
+      const heroSection = document.getElementById("home");
+      if (heroSection) {
+        const navbarHeight = document.querySelector(".navbar").offsetHeight;
         window.scrollTo({
-          top: overviewSection.offsetTop - navbarHeight,
-          behavior: 'smooth',
+          top: heroSection.offsetTop - navbarHeight,
+          behavior: "smooth",
         });
-      }, 100); // Delay to ensure the page has fully rendered
+      }
+    } else {
+      navigate("/", { replace: true });
     }
-  } else {
-    // Navigate to the homepage first, then scroll to #overview
-    navigate("/", { replace: true });
 
-    // Scroll to #overview after navigation to the homepage
-    setTimeout(() => {
+    setIsMenuOpen(false); // Close mobile menu after navigation
+  };
+
+  const handleOverviewClick = (e) => {
+    e.preventDefault();
+
+    if (location.pathname === "/") {
       const overviewSection = document.getElementById("overview");
 
       if (overviewSection) {
-        const navbarHeight = document.querySelector('.navbar').offsetHeight;
-        window.scrollTo({
-          top: overviewSection.offsetTop - navbarHeight,
-          behavior: 'smooth',
-        });
+        const navbarHeight = document.querySelector(".navbar").offsetHeight;
+
+        setTimeout(() => {
+          window.scrollTo({
+            top: overviewSection.offsetTop - navbarHeight,
+            behavior: "smooth",
+          });
+        }, 100);
       }
-    }, 100); // A small delay to make sure the page has loaded before scrolling
-  }
+    } else {
+      navigate("/", { replace: true });
 
-  setIsMenuOpen(false); // Close mobile menu after navigation
-};
+      setTimeout(() => {
+        const overviewSection = document.getElementById("overview");
 
+        if (overviewSection) {
+          const navbarHeight = document.querySelector(".navbar").offsetHeight;
+          window.scrollTo({
+            top: overviewSection.offsetTop - navbarHeight,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
 
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="navbar" id="navbar">
@@ -188,25 +205,69 @@ const handleOverviewClick = (e) => {
           <span className="navbar-logo">Selah</span>
         </div>
 
-        <div className={`hamburger ${isMenuOpen ? "active" : ""}`} onClick={toggleMenu}>
+        <div
+          className={`hamburger ${isMenuOpen ? "active" : ""}`}
+          onClick={toggleMenu}
+        >
           <span className="hamburger-line"></span>
           <span className="hamburger-line"></span>
           <span className="hamburger-line"></span>
         </div>
 
         <ul className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
-          <li><NavLink to="/" className="navbar-link" end onClick={handleHomeClick}>Home</NavLink></li>
           <li>
-            <a href="#overview" className="navbar-link" onClick={handleOverviewClick}>Overview</a>
+            <NavLink
+              to="/"
+              className="navbar-link"
+              end
+              onClick={handleHomeClick}
+            >
+              Home
+            </NavLink>
           </li>
-          
-          <li><NavLink to="/places" className="navbar-link" onClick={handleLinkClick}>Places</NavLink></li>
-          <li><NavLink to="/contact" className="navbar-link" onClick={handleLinkClick}>Contact</NavLink></li>
+          <li>
+            <a
+              href="#overview"
+              className="navbar-link"
+              onClick={handleOverviewClick}
+            >
+              Overview
+            </a>
+          </li>
+          <li>
+            <NavLink
+              to="/places"
+              className="navbar-link"
+              onClick={handleLinkClick}
+            >
+              Places
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/contact"
+              className="navbar-link"
+              onClick={handleLinkClick}
+            >
+              Contact
+            </NavLink>
+          </li>
         </ul>
 
         <div className="navbar-right">
           <div className="user-icon" onClick={toggleModal}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-user-circle">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
+            >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
               <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
@@ -214,7 +275,18 @@ const handleOverviewClick = (e) => {
             </svg>
           </div>
           <div className="phone-number">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="phone-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="phone-icon"
+            >
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
             </svg>
@@ -238,7 +310,9 @@ const handleOverviewClick = (e) => {
           }}
         >
           <div className="modal-content">
-            {!isLoggedIn ? (
+            {loading ? ( // Show loading state while user data is being fetched
+              <div>Loading...</div>
+            ) : !isLoggedIn ? (
               <>
                 <h2>Continue with Google</h2>
                 <GoogleLogin

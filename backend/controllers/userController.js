@@ -1,5 +1,5 @@
 // controllers/userController.js
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
@@ -10,7 +10,8 @@ export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
   try {
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: "User already exists" });
+    if (userExists)
+      return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashedPassword });
@@ -31,20 +32,29 @@ export const loginUser = async (req, res) => {
 
     // Compare password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     // Generate JWT Access Token (expires in 1 hour)
-    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const accessToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     // Generate JWT Refresh Token (expires in 7 days)
-    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const refreshToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     // Set the refresh token in an HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production', // Set to true in production to use https
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Set to true in production to use https
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
-      sameSite: 'Strict',
+      sameSite: "Strict",
     });
 
     // Return the access token in response
@@ -62,7 +72,6 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 // Google Login function
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
@@ -76,38 +85,54 @@ export const googleLogin = async (req, res) => {
 
     const payload = ticket.getPayload(); // Get user info from payload
     const { email, name, picture } = payload;
+    console.log("payload", payload);
 
     // Try to find and update the user
     let user = await User.findOneAndUpdate(
       { email },
+      { name: name },
       { profilePicture: picture }, // Update the profile picture
       { new: true, upsert: true } // Create user if they don't exist
     );
 
+    
     if (!user) {
       user = new User({
         email,
         name,
         password: null, // No password needed for Google login
-        role: 'user',
+        role: "user",
         profilePicture: picture,
       });
+     
+
       await user.save(); // Save the new user
     }
+    console.log("user", user);
 
     // Generate JWT Access Token (expires in 1 hour)
-    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const accessToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     // Generate JWT Refresh Token (expires in 7 days)
-    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const refreshToken = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
     // Set the refresh token in an HTTP-only cookie
-    res.cookie('refreshToken', refreshToken, {
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days expiration
-      sameSite: 'Strict',
+      sameSite: "Strict",
     });
+    console.log('res user', user);
+    
 
     // Return the access token and user data in response
     res.json({
@@ -121,11 +146,11 @@ export const googleLogin = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error during Google login", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error during Google login", error: error.message });
   }
 };
-
-
 
 // Get User Profile and Check if Host
 export const getUserProfile = async (req, res) => {
@@ -134,7 +159,7 @@ export const getUserProfile = async (req, res) => {
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // Check if the user is a host based on the role
-    const isHost = user.role === 'host';
+    const isHost = user.role === "host";
 
     res.json({
       id: user._id,
@@ -195,8 +220,10 @@ export const updateUserProfile = async (req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     // Check if the user is an admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: "Access denied. You are not an admin." });
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You are not an admin." });
     }
 
     // Fetch all users from the database
@@ -212,8 +239,10 @@ export const deleteUser = async (req, res) => {
   const { id } = req.params; // Get the user ID from the request params
   try {
     // Ensure that the user is an admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: "Access denied. You are not an admin." });
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You are not an admin." });
     }
 
     // Find the user by ID
@@ -231,7 +260,6 @@ export const deleteUser = async (req, res) => {
   }
 };
 
-
 // Refresh the Access Token
 export const refreshAccessToken = async (req, res) => {
   try {
@@ -246,7 +274,11 @@ export const refreshAccessToken = async (req, res) => {
     const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
 
     // Generate a new access token
-    const newAccessToken = jwt.sign({ id: decoded.id, role: decoded.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     // Return the new access token
     res.json({ accessToken: newAccessToken });
@@ -258,6 +290,10 @@ export const refreshAccessToken = async (req, res) => {
 // Logout the user
 export const logout = (req, res) => {
   // Clear the refresh token cookie on logout
-  res.clearCookie('refreshToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'Strict' });
-  res.status(200).json({ message: 'Logged out successfully' });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+  });
+  res.status(200).json({ message: "Logged out successfully" });
 };
