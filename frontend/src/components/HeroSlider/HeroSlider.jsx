@@ -9,61 +9,30 @@ import { setBookingData } from "../../redux/bookingSlice"; // Action to set book
 import "./HeroSlider.css";
 
 const slides = [
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200",
-    caption: "Front View of the Property"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200",
-    caption: "Spacious Living Room"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/ca24cc0e-34c7-4b18-b80f-e9ed639ea963.jpeg?im_w=1200",
-    caption: "Full Open Kitchen with Modern Amenities"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f88455c8-3f02-4b1d-a107-0fbaee382798.jpeg?im_w=1200",
-    caption: "Elegant Dining Room for Family Meals"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f4179e2e-7d5f-4c7f-8cbe-423a683d2d77.jpeg?im_w=1200",
-    caption: "Six Bedrooms for Comfort and Relaxation"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/951caa35-ee85-475f-b8cf-69dffc91d5d9.jpeg?im_w=1200",
-    caption: "Full Bathroom with Luxury Features"
-  },
-  {
-    image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/1722b722-bf9f-4508-a01a-402679439b21.jpeg?im_w=1440",
-    caption: "Exciting Gaming Room for Entertainment"
-  }
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200", caption: "Front View of the Property" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200", caption: "Spacious Living Room" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/ca24cc0e-34c7-4b18-b80f-e9ed639ea963.jpeg?im_w=1200", caption: "Full Open Kitchen with Modern Amenities" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f88455c8-3f02-4b1d-a107-0fbaee382798.jpeg?im_w=1200", caption: "Elegant Dining Room for Family Meals" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f4179e2e-7d5f-4c7f-8cbe-423a683d2d77.jpeg?im_w=1200", caption: "Six Bedrooms for Comfort and Relaxation" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/951caa35-ee85-475f-b8cf-69dffc91d5d9.jpeg?im_w=1200", caption: "Full Bathroom with Luxury Features" },
+  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/1722b722-bf9f-4508-a01a-402679439b21.jpeg?im_w=1440", caption: "Exciting Gaming Room for Entertainment" }
 ];
 
-export default function HeroSlider() {
+const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
+
+const HeroSlider = () => {
   const [current, setCurrent] = useState(0);
   const [animateText, setAnimateText] = useState(false);
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    checkIn: null,
-    checkOut: null,
-    adults: 0,
-    children: 0,
-    infants: 0,
-    pets: 0,
+    name: "", phone: "", checkIn: null, checkOut: null, adults: 0, children: 0, infants: 0, pets: 0,
   });
   const [errors, setErrors] = useState({
-    name: "",
-    phone: "",
-    checkIn: "",
-    checkOut: "",
-    guests: "",
+    name: "", phone: "", checkIn: "", checkOut: "", guests: "",
   });
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status from Redux
   const dispatch = useDispatch(); // Dispatch function
-   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 
   const nextSlide = () => {
     setAnimateText(false);
@@ -144,41 +113,39 @@ export default function HeroSlider() {
     return isValid;
   };
 
-   const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-  
-    // Check if the user is logged in before submitting the form
+  console.log("Current form data:", formData);
+
     if (!isLoggedIn) {
       dispatch(setModalOpen(true)); // Open the login modal
       return; // Prevent form submission
     }
-  
-    // Perform validation before submitting the form
+
     if (validateForm()) {
-      // Convert Date objects to ISO strings
       const formDataToDispatch = {
         ...formData,
         checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
         checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
       };
-  
+
       // Log the data (for debugging)
       if (formData.checkIn && formData.checkOut) {
         const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
         const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
         const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
         const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-  
+
         console.log("Form submitted!");
         console.log("Check-in (UTC):", checkInUtc);
         console.log("Check-out (UTC):", checkOutUtc);
         console.log("Check-in (Colorado Springs Time):", checkInCST);
         console.log("Check-out (Colorado Springs Time):", checkOutCST);
       }
-  
+
       // Dispatch form data to Redux
       dispatch(setBookingData(formDataToDispatch));
-  
+
       // Reset form data after submission
       setFormData({
         name: "",
@@ -190,7 +157,7 @@ export default function HeroSlider() {
         infants: 0,
         pets: 0,
       });
-  
+
       // Reset errors after form submission
       setErrors({
         name: "",
@@ -199,8 +166,6 @@ export default function HeroSlider() {
         checkOut: "",
         guests: "",
       });
-  
-      // Further submit logic (API call, etc.) can go here
     }
   };
 
@@ -208,22 +173,6 @@ export default function HeroSlider() {
   const minCheckOutDate = formData.checkIn
     ? new Date(formData.checkIn).setDate(formData.checkIn.getDate() + 2)
     : today;
-
-  const changeQuantity = (type, action, e) => {
-    e.stopPropagation(); // Prevent the click from closing the dropdown
-    setFormData((prevData) => {
-      const newValue =
-        action === "increase" ? prevData[type] + 1 : Math.max(prevData[type] - 1, 0);
-      return {
-        ...prevData,
-        [type]: newValue,
-      };
-    });
-  };
-
-  const toggleDropdown = () => {
-    setIsDropdownVisible((prevState) => !prevState);
-  };
 
   return (
     <div className="hero-slider" id="hero">
@@ -293,7 +242,7 @@ export default function HeroSlider() {
             </div>
 
             {/* Guests Dropdown */}
-            <div className="input-container" onClick={toggleDropdown}>
+            <div className="input-container" onClick={() => setIsDropdownVisible(!isDropdownVisible)}>
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
                 type="text"
@@ -310,14 +259,26 @@ export default function HeroSlider() {
                       <div className="quantity-controls">
                         <button
                           type="button"
-                          onClick={(e) => changeQuantity(type, "decrease", e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({
+                              ...formData,
+                              [type]: formData[type] - 1 < 0 ? 0 : formData[type] - 1
+                            });
+                          }}
                         >
                           −
                         </button>
                         <span>{formData[type]}</span>
                         <button
                           type="button"
-                          onClick={(e) => changeQuantity(type, "increase", e)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({
+                              ...formData,
+                              [type]: formData[type] + 1
+                            });
+                          }}
                         >
                           +
                         </button>
@@ -345,4 +306,6 @@ export default function HeroSlider() {
       </div>
     </div>
   );
-}
+};
+
+export default HeroSlider;
