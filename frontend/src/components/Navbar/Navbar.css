@@ -83,7 +83,7 @@
 }
 
 .user-icon svg:hover {
-  color: #148992; /* Change color on hover */
+  color: #116f71; /* Change color on hover */
 }
 
 /* Phone Number with SVG Icon */
@@ -104,11 +104,11 @@
 }
 
 .phone-number:hover {
-  color: #148992;
+  color: #116f71;
 }
 
 .phone-number:hover svg {
-  fill: #148992; /* Change icon color on hover */
+  fill: #116f71; /* Change icon color on hover */
 }
 
 /* Book Now Button */

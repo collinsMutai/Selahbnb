@@ -1,10 +1,9 @@
-/* General Styles for Hero Slider */
+/* General Slider Styles */
 .hero-slider {
-  margin-top: 85px;
   position: relative;
   width: 100%;
-  height: 90vh;
-  overflow: hidden;
+  height: 100vh; /* Default height for larger screens */
+  overflow: hidden; /* Prevent horizontal overflow */
 }
 
 .hero-slide {
@@ -15,99 +14,225 @@
   transition: background-image 0.8s ease-in-out;
 }
 
-.hero-caption {
+.hero-content {
+  display: grid;
+  grid-template-columns: 50% 50%; /* Two equal columns */
+  gap: 20px;
   position: absolute;
-  bottom: 20%;
-  left: 50%;
-  width: 60%;
-  transform: translateX(-50%) translateY(30px);
-  opacity: 0;
-  color: white;
-  font-size: 3rem;
-  font-family: "Jost";
-  font-weight: normal;
-  font-style: normal;
-  text-align: center;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 1rem 1.4rem;
-  border-radius: 5px;
-  transition: all 0.6s ease;
+  bottom: 40px; /* Adjusted for more space between content and bottom of screen */
+  left: 5%;
+  right: 5%;
+  width: 90%;
+  z-index: 5;
+  align-items: center;
+  padding-right: 5%;
+  box-sizing: border-box; /* Prevent content from overflowing */
 }
 
-/* Text animation */
+.hero-caption {
+  font-size: 2rem;
+  font-family: "Jost", sans-serif;
+  color: white;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1rem;
+  border-radius: 10px;
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  margin-bottom: 40px; /* Increased margin for more space between caption and form */
+}
+
 .hero-caption.slide-up {
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0);
   opacity: 1;
 }
 
-/* Arrows Styling */
-.arrow {
-  position: absolute;
-  bottom: 20%;
-  transform: translateY(-50%);
-  font-size: 2.5rem; /* Reduced size */
-  color: white;
-  background: rgba(0, 0, 0, 0.5);
-  border: none;
-  cursor: pointer;
+.hero-form {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%; /* Ensure form takes up full width */
+  max-width: 600px; /* Limit form width */
   z-index: 10;
-  transition: background-color 0.3s ease;
+  margin: 0 auto;
+  box-sizing: border-box; /* Prevent form from overflowing */
 }
 
-/* Left arrow and right arrow positioning */
+.input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  width: 100%; /* Ensure input containers are 100% width */
+}
+
+.input-icon {
+  margin-right: 10px;
+  font-size: 1.5rem;
+}
+
+input {
+  width: 100%; /* Make inputs 100% width */
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* Ensure padding is included in width */
+}
+
+.submit-btn {
+  background-color:#148992;
+  color: white;
+  padding: 15px;
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+  width: 100%; /* Ensure button fills container */
+  box-sizing: border-box; /* Prevent overflow */
+}
+
+.submit-btn:hover {
+  background-color: #116f71;
+}
+
+.error-text {
+  color: red;
+  font-size: 0.9rem;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  cursor: pointer;
+}
+
 .left-arrow {
-  left: 20px;
+  left: 10px;
 }
 
 .right-arrow {
-  right: 20px;
+  right: 10px;
 }
 
-/* Square background for arrows */
-.arrow {
-  width: 40px; /* Reduced square width */
-  height: 40px; /* Reduced square height */
-  text-align: center; /* Centers the arrow symbol horizontally */
-  line-height: 40px; /* Centers the arrow symbol vertically */
-  border-radius: 0; /* Square background (no rounding) */
-}
-
-/* Hover effect for arrows */
 .arrow:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
 }
 
-/* Mobile and Tablet-specific styles (up to 768px) */
+/* Styles for Inline Date Fields */
+.input-container-inline {
+  display: flex;
+  gap: 20px;
+  width: 100%; /* Ensure inline inputs fit within container */
+}
+
+/* Dropdown for Guests */
+.input-container {
+  position: relative;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; /* Position it below input */
+  left: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  width: 100%; /* Ensure dropdown doesn't overflow */
+  padding: 10px;
+  display: block;
+  z-index: 20;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+}
+
+.quantity-controls button {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+}
+
+.quantity-controls button:hover {
+  background-color: #218838;
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+}
+
+.dropdown-icon.rotate {
+  transform: rotate(180deg);
+}
+
+/* Media Query for Mobile */
 @media (max-width: 768px) {
+  /* Increase hero height for mobile */
+  .hero-slider {
+    height: 130vh; /* Increased height for more space on mobile */
+  }
+
+  .hero-content {
+    grid-template-columns: 1fr;
+    width: 90%;
+    left: 5%;
+    right: 5%;
+    padding-right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .hero-caption {
-    font-size: 1.4rem; /* Adjusted smaller font size for mobile */
-    padding: 0.75rem 0.5rem;
-    width: 45%;
-    left: 50%;
-    transform: translateX(-50%) translateY(0);
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    margin-top: 80px; /* Move caption to the bottom */
+    order: 2; /* Move caption below the form */
+  }
+
+  .hero-form {
+    width: 100%;
+    padding: 2rem; /* Increased padding for more spacious form */
+    order: 1; /* Make form appear above caption */
+  }
+
+  .input-container-inline {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .input-container {
+    margin-bottom: 10px;
+  }
+
+  .submit-btn {
+    padding: 16px; /* Increase button padding on mobile */
+    font-size: 1.1rem; /* Slightly larger font size for button */
   }
 
   .arrow {
-    width: 35px; /* Slightly smaller arrows on mobile */
-    height: 35px;
-    font-size: 1.8rem; /* Reduced font size of the arrows */
-  }
-
-  /* Position arrows inline with caption */
-  .left-arrow,
-  .right-arrow {
-    top: 50%; /* Align vertically at the center of the caption */
-    transform: translateY(-50%);
-  }
-
-  /* Hide arrows on mobile */
-  .arrow {
-    display: none; /* If you want to hide arrows on mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-caption {
-    width: 85%;
+    display: none; /* Hide the arrows on mobile */
   }
 }
