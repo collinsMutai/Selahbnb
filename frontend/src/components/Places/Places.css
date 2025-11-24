@@ -1,16 +1,19 @@
 /* Main container */
 .places-container {
-  padding: 150px 80px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 20px 40px;
+  margin: 150px 50px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 h2 {
   text-align: center;
   margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 50px;
 }
 
-/* Carousel container */
+/* Carousel */
 .carousel-container {
   position: relative;
   overflow: hidden;
@@ -18,72 +21,67 @@ h2 {
 }
 
 .carousel-wrapper {
-  display: flex;
-  flex-wrap: nowrap;  /* Prevent wrapping */
+  overflow: hidden;
 }
 
 .carousel-track {
   display: flex;
+  gap: 15px; /* spacing between cards */
   transition: transform 0.5s ease;
 }
 
-/* Ensure each card takes 1/3 of the space but reduce card width */
+/* Cards */
 .place-card {
+  flex: 0 0 350px; /* bigger width for desktop */
   cursor: pointer;
   border: 1px solid #ddd;
   border-radius: 8px;
-  padding: 20px;
+  padding: 15px;
   text-align: center;
-  background-color: white;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: white;
+  height: 300px; /* increased height */
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 0 15px; /* Increased margin between cards */
-  width: calc(33.33% - 30px); /* Show 3 cards by default */
-  flex-shrink: 0;
-  height: 500px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
 }
 
 .place-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Image Styling to make them of same height */
 .place-card img {
-  width: 100%;         /* Ensure image takes up full width */
-  height: 100%;  
-  max-height: 300px;     /* Set fixed height for uniformity */
-  object-fit: cover;   /* Maintain aspect ratio without stretching */
+  width: 330px; /* slightly smaller than card */
+  height: 180px;
+  object-fit: cover;
   border-radius: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .place-card h3 {
-  margin: 15px 0;
-  font-size: 1.5rem;
+  margin: 0;
+  font-size: 1.3rem;
   color: #333;
 }
 
 .place-card p {
-  color: #777;
-  font-size: 1rem;
-  line-height: 1.4;
-  padding: 0 10px;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  color: #333;
 }
 
-/* Carousel Navigation Buttons */
+/* Carousel Buttons */
 .carousel-button {
   position: absolute;
   top: 50%;
+  transform: translateY(-50%);
   background-color: #148992;
   color: white;
-  padding: 10px;
   border: none;
   cursor: pointer;
-  font-size: 20px;
-  transform: translateY(-50%);
+  font-size: 18px;
+  padding: 8px;
   z-index: 2;
 }
 
@@ -99,32 +97,26 @@ h2 {
   background-color: #116f71;
 }
 
-/* Modal Styling */
+/* Modal */
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7); /* Dark background */
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .modal-content {
-  position: relative;
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   width: 100%;
   max-width: 90%;
-  height: 100%;
   max-height: 90%;
   overflow: auto;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
@@ -148,21 +140,44 @@ button:hover {
   background-color: #116f71;
 }
 
-/* Responsive Styles */
+/* Responsive */
+
+/* Tablets – 2 cards per row */
 @media (max-width: 1024px) {
   .place-card {
-    width: calc(50% - 30px); /* Show 2 items on medium screens */
+    flex: 0 0 45%; /* 2 cards */
+    height: 260px;
+  }
+
+  .place-card img {
+    width: 90%;
+    height: 150px;
   }
 }
 
+/* Mobile – 1 card per row and heading adjustments */
 @media (max-width: 768px) {
-  .place-card {
-    width: calc(50% - 30px); /* Show 2 items on smaller screens */
+  .places-container {
+    margin: 50px 20px; /* reduce margins on mobile */
+    padding: 20px 20px;
   }
-}
 
-@media (max-width: 480px) {
+  h2 {
+    font-size: 32px; /* smaller heading for mobile */
+    margin-bottom: 15px;
+  }
+
   .place-card {
-    width: 100%; /* Show 1 item on very small screens */
+    flex: 0 0 100%;
+    height: 250px;
+  }
+
+  .place-card img {
+    width: 95%;
+    height: 140px;
+  }
+
+  .carousel-track {
+    gap: 0;
   }
 }
