@@ -192,7 +192,7 @@ input {
 @media (max-width: 768px) {
   /* Increase hero height for mobile */
   .hero-slider {
-    height: 130vh; /* Increased height for more space on mobile */
+    height: 110vh; /* Increased height for more space on mobile */
   }
 
   .hero-content {
@@ -209,7 +209,7 @@ input {
   .hero-caption {
     font-size: 1.5rem;
     padding: 0.5rem;
-    margin-top: 80px; /* Move caption to the bottom */
+    margin-top: 40px; 
     order: 2; /* Move caption below the form */
   }
 
