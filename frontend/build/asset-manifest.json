@@ -1,10 +1,19 @@
 {
   "files": {
-    "main.css": "/static/css/main.5889df76.css",
-    "main.js": "/static/js/main.92e413e1.js",
+    "main.css": "/static/css/main.1fa1224e.css",
+    "main.js": "/static/js/main.9e6de13c.js",
     "static/js/453.8701dc61.chunk.js": "/static/js/453.8701dc61.chunk.js",
+    "static/media/mount-cutler-trail.jpg": "/static/media/mount-cutler-trail.811eae2c2f6070ee1e9f.jpg",
+    "static/media/red-rock-canyon-open-space.jpg": "/static/media/red-rock-canyon-open-space.e38e99a051ec24ce33f1.jpg",
+    "static/media/colorado-springs-pioneers-museum.jpg": "/static/media/colorado-springs-pioneers-museum.48468949b2d783263718.jpg",
+    "static/media/old-colorado-city.webp": "/static/media/old-colorado-city.e01b7ae7ccd0633e86b8.webp",
+    "static/media/pikespeak-highway.webp": "/static/media/pikespeak-highway.88cdb2490e25570517ae.webp",
+    "static/media/garden-of-gods.jpg": "/static/media/garden-of-gods.2d2456b15932fb7a7a33.jpg",
+    "static/media/manitou-springs-penny-arcade.jpg": "/static/media/manitou-springs-penny-arcade.4167f2fc7faa9b7ba76c.jpg",
     "static/media/bedroom6_img1.jpeg": "/static/media/bedroom6_img1.38b86b90341df0cbef50.jpeg",
+    "static/media/seven-falls.jpeg": "/static/media/seven-falls.c983ddc1bc58b864ef37.jpeg",
     "static/media/gamingarea_img1.jpeg": "/static/media/gamingarea_img1.3ced8aa7d1bac48e100d.jpeg",
+    "static/media/cheyenne-mountain.webp": "/static/media/cheyenne-mountain.1fbc7eb9c4b14de54d32.webp",
     "static/media/bedroom3_img1.jpeg": "/static/media/bedroom3_img1.1ae9c51ec36a2be27b97.jpeg",
     "static/media/fullkitchen_img4.avif": "/static/media/fullkitchen_img4.474c9d7fb22fd3c8b2ef.avif",
     "static/media/fullkitchen_img1.avif": "/static/media/fullkitchen_img1.f8908d5be6bac0bd15af.avif",
@@ -14,6 +23,7 @@
     "static/media/exterior_img1.avif": "/static/media/exterior_img1.a0250575f267f5fa0927.avif",
     "static/media/laundryarea_img1.avif": "/static/media/laundryarea_img1.37bb1f3cea883328d2cb.avif",
     "static/media/bedroom5_img1.avif": "/static/media/bedroom5_img1.da7b0534c9ee1d8e7266.avif",
+    "static/media/airforceacademy.avif": "/static/media/airforceacademy.0408138df25e2b765676.avif",
     "static/media/diningarea_img1.avif": "/static/media/diningarea_img1.3aec25c08d4c75534a37.avif",
     "static/media/fullbathroom2_img1.avif": "/static/media/fullbathroom2_img1.6fe6281f691779cbae65.avif",
     "static/media/bedroom4_img1.avif": "/static/media/bedroom4_img1.ab257e5053f38c905116.avif",
@@ -46,12 +56,12 @@
     "static/media/gamingarea_img5.avif": "/static/media/gamingarea_img5.37b364d4b775a3790ff9.avif",
     "static/media/bedroom2_img3.avif": "/static/media/bedroom2_img3.c0d77464b586b1a3cc61.avif",
     "index.html": "/index.html",
-    "main.5889df76.css.map": "/static/css/main.5889df76.css.map",
-    "main.92e413e1.js.map": "/static/js/main.92e413e1.js.map",
+    "main.1fa1224e.css.map": "/static/css/main.1fa1224e.css.map",
+    "main.9e6de13c.js.map": "/static/js/main.9e6de13c.js.map",
     "453.8701dc61.chunk.js.map": "/static/js/453.8701dc61.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.5889df76.css",
-    "static/js/main.92e413e1.js"
+    "static/css/main.1fa1224e.css",
+    "static/js/main.9e6de13c.js"
   ]
 }
