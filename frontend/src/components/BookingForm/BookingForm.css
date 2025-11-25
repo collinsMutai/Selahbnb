@@ -88,7 +88,7 @@
 /* Input icon styling */
 .booking-section .input-icon {
   margin-right: 10px;
-  color: #3c9d8e;
+  color: #148992;
   font-size: 18px;
 }
 
@@ -113,7 +113,7 @@
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
-  color: #3c9d8e;
+  color: #148992;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
@@ -122,7 +122,7 @@
 .booking-section .submit-btn {
   width: 100%;
   padding: 12px;
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
   border: none;
   border-radius: 4px;
@@ -132,7 +132,7 @@
 }
 
 .booking-section .submit-btn:hover {
-  background-color: #2b7a66;
+  background-color: #116f71;
 }
 
 /* Dropdown menu visibility */
@@ -170,7 +170,7 @@
 
 .booking-section .quantity-controls button {
   padding: 5px 10px;
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
   border: none;
   border-radius: 4px;
@@ -257,7 +257,7 @@
 }
 
 .booking-section .date-input:focus {
-  border-color: #3c9d8e;
+  border-color: #148992;
 }
 
 /* React Datepicker specific styles */
@@ -298,18 +298,18 @@
 }
 
 .booking-section .calendar-day:hover {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
 .booking-section .calendar-day:focus {
   outline: none;
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
 .booking-section .react-datepicker__header {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
@@ -319,21 +319,21 @@
 }
 
 .booking-section .react-datepicker__day:hover {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
 .booking-section .react-datepicker__day:focus {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
 .booking-section .react-datepicker__day--selected {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }
 
 .booking-section .react-datepicker__day--today {
-  background-color: #3c9d8e;
+  background-color: #148992;
   color: white;
 }

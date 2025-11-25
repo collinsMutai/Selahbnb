@@ -1,10 +1,10 @@
 import React from "react";
+import Contact from "../components/Contact/Contact";
 
-export default function Contact() {
+export default function ContactPage() {
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Contact Us</h1>
-      <p>Email us at info@example.com</p>
+    <div>
+    <Contact />
     </div>
   );
 }
