@@ -185,6 +185,9 @@
 
 /* Contact section — small phones */
 @media (max-width: 480px) {
+    .contact-section {
+    padding: 100px 15px !important;
+}
   .contact-section .contact-title {
     font-size: 1.75rem;
   }

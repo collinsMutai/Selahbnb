@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './Footer.css';
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa'; // Correct import after installation
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'; // Import useNavigate
 const Footer = () => {
   const navigate = useNavigate(); // Initialize navigate function
 
-  // Handler function for link clicks (other than overview)
+  // Function to handle link clicks (other than overview)
   const handleLinkClick = (e, path) => {
     e.preventDefault(); // Prevent default anchor link behavior
     navigate(path); // Navigate to the desired path
@@ -14,38 +14,51 @@ const Footer = () => {
   };
 
   // Function to handle overview scroll with navbar offset
-const handleOverviewClick = (e) => {
-  e.preventDefault(); // Prevent default behavior
+  const handleOverviewClick = (e) => {
+    e.preventDefault(); // Prevent default behavior
 
-  // Check if you're on the homepage or not
-  const isHomePage = window.location.pathname === '/';
-  const overviewSection = document.getElementById("overview");
+    // Check if we're already on the homepage or not
+    const isHomePage = window.location.pathname === '/';
+    const overviewSection = document.getElementById("overview");
 
-  if (isHomePage && overviewSection) {
-    // If you're already on the homepage, just scroll to the overview section
-    const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0; // Get navbar height
-    window.scrollTo({
-      top: overviewSection.offsetTop - navbarHeight, // Adjust for navbar
-      behavior: "smooth", // Smooth scroll
-    });
-  } else if (!isHomePage) {
-    // If you're not on the homepage, navigate to homepage and scroll to overview section
-    navigate("/", { replace: true });
+    if (isHomePage && overviewSection) {
+      // If you're already on the homepage, just scroll to the overview section
+      const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0; // Get navbar height
+      window.scrollTo({
+        top: overviewSection.offsetTop - navbarHeight, // Adjust for navbar
+        behavior: "smooth", // Smooth scroll
+      });
+    } else {
+      // If we're not on the homepage, navigate to homepage first
+      navigate("/", { replace: true });
 
-    setTimeout(() => {
-      const overviewSection = document.getElementById("overview");
+      // Scroll after the page load, once navigation has happened
+      setTimeout(() => {
+        const overviewSection = document.getElementById("overview");
+        if (overviewSection) {
+          const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0; // Get navbar height
+          window.scrollTo({
+            top: overviewSection.offsetTop - navbarHeight, // Adjust for navbar height
+            behavior: "smooth", // Smooth scroll
+          });
+        }
+      }, 300); // Small delay to ensure the page has loaded before scrolling
+    }
+  };
 
+  // Ensure scrolling to overview section on initial load if hash is present
+  useEffect(() => {
+    if (window.location.hash === '#overview') {
+      const overviewSection = document.getElementById('overview');
       if (overviewSection) {
         const navbarHeight = document.querySelector(".navbar")?.offsetHeight || 0; // Get navbar height
         window.scrollTo({
-          top: overviewSection.offsetTop - navbarHeight, // Adjust for navbar height
-          behavior: "smooth", // Smooth scroll
+          top: overviewSection.offsetTop - navbarHeight,
+          behavior: 'smooth',
         });
       }
-    }, 100); // Delay navigation to ensure the page has time to load before scrolling
-  }
-};
-
+    }
+  }, []); // This ensures the first time the page loads and we need to scroll
 
   return (
     <footer className="footer">
