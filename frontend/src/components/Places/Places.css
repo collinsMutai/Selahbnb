@@ -1,4 +1,4 @@
-/* Main container */
+/* Main container for the Places page */
 .places-container {
   padding: 20px 40px;
   margin: 150px 50px;
@@ -6,32 +6,32 @@
   border-radius: 8px;
 }
 
-h2 {
+.places-container h2 {
   text-align: center;
   margin-bottom: 20px;
   font-weight: 700;
   font-size: 50px;
 }
 
-/* Carousel */
-.carousel-container {
+/* Carousel section */
+.places-container .carousel-container {
   position: relative;
   overflow: hidden;
   margin-bottom: 50px;
 }
 
-.carousel-wrapper {
+.places-container .carousel-wrapper {
   overflow: hidden;
 }
 
-.carousel-track {
+.places-container .carousel-track {
   display: flex;
   gap: 15px; /* spacing between cards */
   transition: transform 0.5s ease;
 }
 
-/* Cards */
-.place-card {
+/* Cards for each place */
+.places-container .place-card {
   flex: 0 0 350px; /* bigger width for desktop */
   cursor: pointer;
   border: 1px solid #ddd;
@@ -47,11 +47,11 @@ h2 {
   transition: transform 0.3s ease;
 }
 
-.place-card:hover {
+.places-container .place-card:hover {
   transform: scale(1.05);
 }
 
-.place-card img {
+.places-container .place-card img {
   width: 330px; /* slightly smaller than card */
   height: 180px;
   object-fit: cover;
@@ -59,20 +59,20 @@ h2 {
   margin-bottom: 10px;
 }
 
-.place-card h3 {
+.places-container .place-card h3 {
   margin: 0;
   font-size: 1.3rem;
   color: #333;
 }
 
-.place-card p {
+.places-container .place-card p {
   font-size: 0.9rem;
   line-height: 1.3;
   color: #333;
 }
 
-/* Carousel Buttons */
-.carousel-button {
+/* Carousel Buttons (Prev / Next) */
+.places-container .carousel-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -85,20 +85,20 @@ h2 {
   z-index: 2;
 }
 
-.carousel-button.prev {
+.places-container .carousel-button.prev {
   left: 10px;
 }
 
-.carousel-button.next {
+.places-container .carousel-button.next {
   right: 10px;
 }
 
-.carousel-button:hover {
+.places-container .carousel-button:hover {
   background-color: #116f71;
 }
 
 /* Modal */
-.modal-overlay {
+.places-container .modal-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.7);
@@ -107,7 +107,7 @@ h2 {
   align-items: center;
 }
 
-.modal-content {
+.places-container .modal-content {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -120,14 +120,14 @@ h2 {
   align-items: center;
 }
 
-.modal-image {
+.places-container .modal-image {
   width: 100%;
   max-width: 80%;
   height: auto;
   margin-bottom: 20px;
 }
 
-button {
+.places-container button {
   padding: 10px 20px;
   background-color: #148992;
   color: white;
@@ -136,20 +136,20 @@ button {
   cursor: pointer;
 }
 
-button:hover {
+.places-container button:hover {
   background-color: #116f71;
 }
 
-/* Responsive */
+/* Responsive Design */
 
 /* Tablets – 2 cards per row */
 @media (max-width: 1024px) {
-  .place-card {
+  .places-container .place-card {
     flex: 0 0 45%; /* 2 cards */
     height: 260px;
   }
 
-  .place-card img {
+  .places-container .place-card img {
     width: 90%;
     height: 150px;
   }
@@ -162,22 +162,22 @@ button:hover {
     padding: 60px 20px;
   }
 
-  h2 {
+  .places-container h2 {
     font-size: 32px; /* smaller heading for mobile */
     margin-bottom: 15px;
   }
 
-  .place-card {
+  .places-container .place-card {
     flex: 0 0 100%;
     height: 250px;
   }
 
-  .place-card img {
+  .places-container .place-card img {
     width: 95%;
     height: 140px;
   }
 
-  .carousel-track {
+  .places-container .carousel-track {
     gap: 0;
   }
 }
