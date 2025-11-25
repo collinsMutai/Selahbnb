@@ -108,6 +108,7 @@ const Navbar = () => {
     dispatch(logout());
     dispatch(setModalOpen(false));
   };
+
   useEffect(() => {
     console.log("User data in Navbar:", user); // Log user to verify its state
   }, [user]);
@@ -198,6 +199,22 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
+  // Updated function for Places link
+  const handlePlacesClick = (e) => {
+    e.preventDefault();
+    navigate("/places");
+    setIsMenuOpen(false); // Close menu after clicking
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top after navigating
+  };
+
+  // Updated function for Contact link
+  const handleContactClick = (e) => {
+    e.preventDefault();
+    navigate("/contact");
+    setIsMenuOpen(false); // Close menu after clicking
+    window.scrollTo({ top: 0, behavior: "smooth" }); // Scroll to top after navigating
+  };
+
   return (
     <nav className="navbar" id="navbar">
       <div className="navbar-container">
@@ -235,44 +252,28 @@ const Navbar = () => {
             </a>
           </li>
           <li>
-            <NavLink
-              to="/places"
+            <a
+              href="/places"
               className="navbar-link"
-              onClick={handleLinkClick}
+              onClick={handlePlacesClick}
             >
               Places
-            </NavLink>
+            </a>
           </li>
           <li>
-            <NavLink
-              to="/contact"
+            <a
+              href="/contact"
               className="navbar-link"
-              onClick={handleLinkClick}
+              onClick={handleContactClick}
             >
               Contact
-            </NavLink>
+            </a>
           </li>
         </ul>
 
         <div className="navbar-right">
           <div className="user-icon" onClick={toggleModal}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="icon icon-tabler icons-tabler-outline icon-tabler-user-circle"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
-              <path d="M12 10m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-              <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
-            </svg>
+            {/* User Icon */}
           </div>
           <div className="phone-number">
             <svg

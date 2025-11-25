@@ -47,7 +47,7 @@
 
 .footer-links a:hover {
   text-decoration: underline;
-  color: #3c9d8e;
+  color: #116f71;
 }
 
 /* Right section (Email and Phone aligned horizontally with Left) */
@@ -69,7 +69,7 @@
 
 .footer-right a:hover {
   text-decoration: underline;
-  color: #3c9d8e;
+  color: #116f71;
 }
 
 /* Bottom section (Copyright and social icons) */
@@ -89,7 +89,7 @@
 }
 
 .footer-social a {
-  color: #3c9d8e;
+  color: #116f71;
   margin: 0 15px;
   text-decoration: none;
 }

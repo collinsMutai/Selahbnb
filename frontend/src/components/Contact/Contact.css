@@ -1,3 +1,6 @@
+/* ================================================== */
+/* CONTACT SECTION (existing) */
+/* ================================================== */
 .contact-section {
   text-align: center;
   padding: 120px 20px 80px 20px;
@@ -49,6 +52,9 @@
   color: #000;
 }
 
+/* ================================================== */
+/* CONTACT TWO-COLUMN SECTION (IMAGE + FORM) FULL WIDTH */
+/* ================================================== */
 .contact-two-column {
   display: flex;
   align-items: stretch;
@@ -101,9 +107,15 @@
 }
 
 .form-input,
+.form-textarea,
+.form-btn {
+  border-radius: 0;    /* Remove rounded corners */
+}
+
+/* Form input, textarea, and button styling */
+.form-input,
 .form-textarea {
   padding: 12px;
-  border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 1rem;
 }
@@ -113,7 +125,6 @@
   background: #148992;
   color: white;
   border: none;
-  border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
   transition: 0.3s;
@@ -122,6 +133,10 @@
 .form-btn:hover {
   background: #0f5f66;
 }
+
+/* ================================================== */
+/* 📱 MOBILE RESPONSIVE STYLES */
+/* ================================================== */
 
 /* Contact section — tablets */
 @media (max-width: 992px) {
