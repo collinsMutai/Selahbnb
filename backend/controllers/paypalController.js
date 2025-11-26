@@ -49,7 +49,7 @@ const getPaypalAccessToken = async () => {
 
 // Create a PayPal payment (this generates the PayPal payment link)
 export const createPaypalPayment = async (req) => {
-  const { bookingId, totalPrice } = req.body;
+  const { bookingId, totalPrice, returnUrl } = req.body;
 
   try {
     const accessToken = await getPaypalAccessToken();

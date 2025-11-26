@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+
 import {
   FaUser,
   FaPhoneAlt,
@@ -60,7 +60,7 @@ const apiUrl = process.env.REACT_APP_API_URL || "https://8b0e6b8aec8b.ngrok-free
 
 
 const HeroSlider = () => {
-  const navigate = useNavigate();
+  
   const [current, setCurrent] = useState(0);
   const [animateText, setAnimateText] = useState(false);
   const [formData, setFormData] = useState({
@@ -221,7 +221,7 @@ const HeroSlider = () => {
         const approvalLink = response.data.approvalLink;
 
         if (approvalLink) {
-           navigate(approvalLink);  // Redirect user to PayPal for payment
+          window.location.href = approvalLink; // Redirect user to PayPal for payment
         }
 
         // Reset form data after successful submission
