@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Places from "./components/Places/Places";
 import ContactPage from "./pages/Contact";
+import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/places" element={<Places />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/paypalpayment/success" element={<PaypalPaymentSuccess />} /> {/* New route for PayPal success */}
       </Routes>
 
       <Footer />

@@ -47,7 +47,7 @@ export const createBooking = async (req, res) => {
 
     // Now trigger the PayPal payment flow after saving the booking
     // Call the createPaypalPayment function with the booking ID
-    const paymentResponse = await createPaypalPayment({ body: { bookingId: savedBooking._id } });
+    const paymentResponse = await createPaypalPayment({ body: { bookingId: savedBooking._id, totalPrice } });
 
     // If payment creation was successful, return the booking and approval link
     if (paymentResponse.status === 200) {

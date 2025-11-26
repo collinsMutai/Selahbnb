@@ -1,23 +1,34 @@
+// server.js
 import express from "express";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+dotenv.config();
+
+
 import cors from "cors";
+import path from "path";
+
+
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import listingRoutes from "./routes/listingRoutes.js";
 import tourPlaceRoutes from "./routes/tourPlaceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
-import paypalRoutes from './routes/paypalRoutes.js';
+import paypalRoutes from "./routes/paypalRoutes.js";
 
 
-dotenv.config();
+
+
+// Connect to MongoDB
 connectDB();
 
 const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost:3000", // Update this with the actual origin of your frontend
-  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+  origin: "http://localhost:3000", // Update to your frontend URL
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 // Enable CORS
@@ -30,6 +41,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Middleware to parse JSON bodies
 app.use(express.json());
 
 // Routes
@@ -37,8 +49,10 @@ app.use("/api/users", userRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/tourplaces", tourPlaceRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use('/api/paypal', paypalRoutes);
+app.use("/api/paypal", paypalRoutes);
 
 
+
+// Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

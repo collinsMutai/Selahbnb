@@ -1,4 +1,6 @@
 // controllers/userController.js
+import dotenv from 'dotenv';
+dotenv.config();
 import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";

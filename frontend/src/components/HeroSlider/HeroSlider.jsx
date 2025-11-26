@@ -126,86 +126,88 @@ const HeroSlider = () => {
     return isValid;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const hardcodedListingId = "69230e30f841f3328e53ea37";
-    console.log("Current form data:", formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  const hardcodedListingId = "69230e30f841f3328e53ea37";
+  console.log("Current form data:", formData);
 
-    if (!isLoggedIn) {
-      dispatch(setModalOpen(true)); // Open the login modal
-      return; // Prevent form submission
+  if (!isLoggedIn) {
+    dispatch(setModalOpen(true)); // Open the login modal
+    return; // Prevent form submission
+  }
+
+  if (validateForm()) {
+    const formDataToDispatch = {
+      ...formData,
+      checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+      checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+      listingId: hardcodedListingId,
+    };
+
+    // Log the data (for debugging)
+    if (formData.checkIn && formData.checkOut) {
+      const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
+      const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
+      const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+      const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+
+      console.log("Form submitted!");
+      console.log("Check-in (UTC):", checkInUtc);
+      console.log("Check-out (UTC):", checkOutUtc);
+      console.log("Check-in (Colorado Springs Time):", checkInCST);
+      console.log("Check-out (Colorado Springs Time):", checkOutCST);
     }
 
-    if (validateForm()) {
-      const formDataToDispatch = {
-        ...formData,
-        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
-        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-        listingId: hardcodedListingId,
-      };
+    // API Call to create booking using Axios
+    try {
+      const response = await axios.post("http://localhost:5000/api/bookings", formDataToDispatch, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authorization if needed
+        },
+      });
 
-      // Log the data (for debugging)
-      if (formData.checkIn && formData.checkOut) {
-        const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
-        const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
-        const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-        const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
+      if (response.status === 201) {
+        console.log("Booking created successfully:", response.data);
 
-        console.log("Form submitted!");
-        console.log("Check-in (UTC):", checkInUtc);
-        console.log("Check-out (UTC):", checkOutUtc);
-        console.log("Check-in (Colorado Springs Time):", checkInCST);
-        console.log("Check-out (Colorado Springs Time):", checkOutCST);
-      }
+        // Dispatch form data to Redux
+        dispatch(setBookingData(formDataToDispatch));
 
-      // API Call to create booking using Axios
-      try {
-        const response = await axios.post("http://localhost:5000/api/bookings", formDataToDispatch, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authorization if needed
-          },
+        // If the booking is created successfully, the backend will also create PayPal payment
+        const approvalLink = response.data.approvalLink;
+
+        if (approvalLink) {
+          window.location.href = approvalLink; // Redirect user to PayPal for payment
+        }
+
+        // Reset form data after submission
+        setFormData({
+          name: "",
+          phone: "",
+          checkIn: null,
+          checkOut: null,
+          adults: 0,
+          children: 0,
+          infants: 0,
+          pets: 0,
         });
 
-        if (response.status === 201) {
-          console.log("Booking created successfully:", response.data);
-
-          // Dispatch form data to Redux
-          dispatch(setBookingData(formDataToDispatch));
-
-          // Call backend to create PayPal payment order
-          const paymentResponse = await axios.post("http://localhost:5000/api/paypal/create-payment", { bookingId: response.data.bookingId });
-
-          if (paymentResponse.data.approvalLink) {
-            window.location.href = paymentResponse.data.approvalLink; // Redirect user to PayPal
-          }
-
-          // Reset form data after submission
-          setFormData({
-            name: "",
-            phone: "",
-            checkIn: null,
-            checkOut: null,
-            adults: 0,
-            children: 0,
-            infants: 0,
-            pets: 0,
-          });
-
-          // Reset errors after form submission
-          setErrors({
-            name: "",
-            phone: "",
-            checkIn: "",
-            checkOut: "",
-            guests: "",
-          });
-        }
-      } catch (error) {
-        console.error("Error submitting booking:", error);
+        // Reset errors after form submission
+        setErrors({
+          name: "",
+          phone: "",
+          checkIn: "",
+          checkOut: "",
+          guests: "",
+        });
       }
+    } catch (error) {
+      console.error("Error submitting booking:", error);
     }
-  };
+  }
+};
+
+
 
   const today = new Date();
   const minCheckOutDate = formData.checkIn
