@@ -128,8 +128,8 @@ const HeroSlider = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     const hardcodedListingId = "69230e30f841f3328e53ea37";
-     console.log("Current form data:", formData);
+    const hardcodedListingId = "69230e30f841f3328e53ea37";
+    console.log("Current form data:", formData);
 
     if (!isLoggedIn) {
       dispatch(setModalOpen(true)); // Open the login modal
@@ -172,6 +172,13 @@ const HeroSlider = () => {
 
           // Dispatch form data to Redux
           dispatch(setBookingData(formDataToDispatch));
+
+          // Call backend to create PayPal payment order
+          const paymentResponse = await axios.post("http://localhost:5000/api/paypal/create-payment", { bookingId: response.data.bookingId });
+
+          if (paymentResponse.data.approvalLink) {
+            window.location.href = paymentResponse.data.approvalLink; // Redirect user to PayPal
+          }
 
           // Reset form data after submission
           setFormData({

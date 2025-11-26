@@ -1,28 +1,34 @@
 import Booking from "../models/Booking.js";
-import Listing from "../models/Listing.js";
+import { v4 as uuidv4 } from "uuid"; // Import uuidv4 to generate unique IDs
+import Listing from "../models/Listing.js"; // To fetch listing details
+import { createPaypalPayment } from './paypalController.js'; // Import PayPal payment method
 
-// Create a booking
+// Create a new booking and initiate PayPal payment
 export const createBooking = async (req, res) => {
   try {
     const { listingId, name, phone, checkIn, checkOut, adults, children, infants, pets } = req.body;
     const listing = await Listing.findById(listingId);
-    
+
+    // If listing not found, return an error
     if (!listing) {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Calculate the number of days between checkIn and checkOut
+    // Calculate the number of days between check-in and check-out
     const checkInDate = new Date(checkIn);
     const checkOutDate = new Date(checkOut);
-    const numberOfDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)); // Calculate number of days
+    const numberOfDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
 
     // Calculate the total price based on price per night and number of days
     const totalPrice = listing.price * numberOfDays;
 
-    // Create a new booking with the provided form data
+    // Generate a unique transaction ID using uuidv4
+    const paymentTransactionId = uuidv4();
+
+    // Create a new booking
     const booking = new Booking({
       listing: listingId,
-      user: req.user._id, // Attach user from the auth middleware
+      user: req.user._id,  // Assuming user is attached to req by an auth middleware
       name,
       phone,
       checkIn,
@@ -32,15 +38,33 @@ export const createBooking = async (req, res) => {
       infants,
       pets,
       totalPrice,
-      numberOfDays,  // Store the number of days in the booking
+      numberOfDays,
+      paymentTransactionId,  // Save the unique payment transaction ID
     });
 
+    // Save the booking to the database
     const savedBooking = await booking.save();
-    res.status(201).json(savedBooking);
+
+    // Now trigger the PayPal payment flow after saving the booking
+    // Call the createPaypalPayment function with the booking ID
+    const paymentResponse = await createPaypalPayment({ body: { bookingId: savedBooking._id } });
+
+    // If payment creation was successful, return the booking and approval link
+    if (paymentResponse.status === 200) {
+      res.status(201).json({
+        booking: savedBooking,
+        approvalLink: paymentResponse.data.approvalLink,
+      });
+    } else {
+      res.status(paymentResponse.status).json({ message: paymentResponse.message });
+    }
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating booking and initiating PayPal payment:', error);
+    res.status(500).json({ message: 'Error creating booking and initiating PayPal payment' });
   }
 };
+
 
 // Get all bookings for a user
 export const getUserBookings = async (req, res) => {
