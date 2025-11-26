@@ -1,46 +1,51 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // useNavigate instead of useHistory
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+const apiUrl = process.env.REACT_APP_API_URL || "https://8b0e6b8aec8b.ngrok-free.app/api";
 
 const PaypalPaymentSuccess = () => {
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
+  
+  // Using useRef to keep track of the captured state across renders
+  const capturedRef = useRef(false); // This will not trigger re-renders
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const payerID = params.get("PayerID");
 
-    if (token && payerID) {
-      // Call the backend to capture the payment
+    if (token && payerID && !capturedRef.current) {
+      // Prevent multiple captures by checking the ref value
       const capturePayment = async () => {
         try {
-          const response = await axios.post("http://localhost:5000/api/paypal/capture", {
+          const response = await axios.post(`${apiUrl}/paypal/capture`, {
             orderId: token,
             payerId: payerID,
           });
+          console.log('capturepayment response', response);
 
           if (response.status === 200) {
-            // Redirect to order confirmation or success page
-            navigate("/order-success");  // Use navigate for redirection
+            capturedRef.current = true;  // Set captured to true in the ref after successful capture
+            navigate("/order-success");  // Redirect on success
           } else {
-            // Handle failure case
             alert("There was an error completing your payment. Please try again.");
-            navigate("/payment/cancel");  // Redirect to a cancel page if necessary
+            navigate("/payment/cancel");
           }
         } catch (error) {
           console.error("Error capturing payment:", error);
           alert("There was an error completing your payment. Please try again.");
-          navigate("/payment/cancel");  // Redirect to a cancel page if necessary
+          navigate("/payment/cancel");
         }
       };
 
       capturePayment();
     } else {
       alert("Invalid payment details.");
-      navigate("/payment/cancel");  // Redirect to a cancel page if necessary
+      navigate("/payment/cancel");
     }
-  }, [navigate]);  // Add navigate to the dependencies
+  }, [navigate]);  // No need to depend on `captured` anymore since we use `useRef`
 
   return (
     <div>

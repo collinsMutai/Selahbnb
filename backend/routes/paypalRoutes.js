@@ -61,20 +61,33 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Handle payment completion
+// Handle payment completion
 const handlePaymentCompleted = async (paymentData) => {
   const { transaction_id, amount, payer } = paymentData;
 
+  // Check if the payment transaction already exists in the booking database
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
+    // If the booking is already confirmed or processed, skip it
+    if (booking.paymentStatus === 'Completed') {
+      console.log(`Payment already processed for transaction: ${transaction_id}`);
+      return;  // Prevent duplicate processing
+    }
+
+    // Otherwise, update the booking status to 'Confirmed' and mark payment as completed
     booking.status = 'Confirmed';
     booking.paymentStatus = 'Completed';
     booking.paymentAmount = amount.total;
     booking.payerEmail = payer.payer_info.email;
 
     await booking.save();
+    console.log(`Payment confirmed for transaction: ${transaction_id}`);
+  } else {
+    console.log(`Booking not found for transaction: ${transaction_id}`);
   }
 };
+
 
 // Handle pending payment
 const handlePaymentPending = async (paymentData) => {
@@ -83,8 +96,15 @@ const handlePaymentPending = async (paymentData) => {
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
+    // Check if status is already 'Pending' to prevent updating the status again
+    if (booking.status === 'Pending') {
+      console.log(`Payment already marked as Pending for transaction: ${transaction_id}`);
+      return;
+    }
+
     booking.status = 'Pending';
     await booking.save();
+    console.log(`Payment pending for transaction: ${transaction_id}`);
   }
 };
 
@@ -95,8 +115,15 @@ const handlePaymentRefunded = async (paymentData) => {
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
+    // Prevent updating the status if it's already 'Refunded'
+    if (booking.status === 'Refunded') {
+      console.log(`Payment already refunded for transaction: ${transaction_id}`);
+      return;
+    }
+
     booking.status = 'Refunded';
     await booking.save();
+    console.log(`Payment refunded for transaction: ${transaction_id}`);
   }
 };
 
@@ -107,9 +134,17 @@ const handlePaymentDenied = async (paymentData) => {
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
+    // Prevent updating the status if it's already 'Denied'
+    if (booking.status === 'Denied') {
+      console.log(`Payment already denied for transaction: ${transaction_id}`);
+      return;
+    }
+
     booking.status = 'Denied';
     await booking.save();
+    console.log(`Payment denied for transaction: ${transaction_id}`);
   }
 };
+
 
 export default router;

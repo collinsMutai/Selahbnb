@@ -1,13 +1,9 @@
-// server.js
 import express from "express";
-import dotenv from 'dotenv';
-dotenv.config();
-
-
+import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
 
-
+// Routes
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/userRoutes.js";
 import listingRoutes from "./routes/listingRoutes.js";
@@ -15,8 +11,8 @@ import tourPlaceRoutes from "./routes/tourPlaceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paypalRoutes from "./routes/paypalRoutes.js";
 
-
-
+// Load environment variables
+dotenv.config();
 
 // Connect to MongoDB
 connectDB();
@@ -25,7 +21,10 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost:3000", // Update to your frontend URL
+  origin: [
+    "http://localhost:3000", // Local frontend
+    "https://8b0e6b8aec8b.ngrok-free.app", // Ngrok URL for backend
+  ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -51,8 +50,8 @@ app.use("/api/tourplaces", tourPlaceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/paypal", paypalRoutes);
 
-
-
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});

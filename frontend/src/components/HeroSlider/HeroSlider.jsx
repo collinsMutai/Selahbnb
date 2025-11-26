@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaUser,
   FaPhoneAlt,
@@ -55,9 +56,11 @@ const slides = [
 ];
 
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
-const apiUrl = process.env.REACT_APP_API_URL || "https://b3381c50ccec.ngrok-free.app/api"; 
+const apiUrl = process.env.REACT_APP_API_URL || "https://8b0e6b8aec8b.ngrok-free.app/api"; 
+
 
 const HeroSlider = () => {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [animateText, setAnimateText] = useState(false);
   const [formData, setFormData] = useState({
@@ -196,7 +199,7 @@ const HeroSlider = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/bookings",
+        `${apiUrl}/bookings`,
         formDataToDispatch,
         {
           headers: {
@@ -218,7 +221,7 @@ const HeroSlider = () => {
         const approvalLink = response.data.approvalLink;
 
         if (approvalLink) {
-          window.location.href = approvalLink; // Redirect user to PayPal for payment
+           navigate(approvalLink);  // Redirect user to PayPal for payment
         }
 
         // Reset form data after successful submission
