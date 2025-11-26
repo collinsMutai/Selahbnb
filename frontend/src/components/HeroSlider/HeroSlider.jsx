@@ -1,23 +1,57 @@
 import React, { useState, useEffect } from "react";
-import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUser,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import moment from "moment-timezone";
+import moment from "moment-timezone"; // Correct import
 import { useSelector, useDispatch } from "react-redux";
 import { setModalOpen } from "../../redux/modalSlice"; // Action to open login modal
 import { setBookingData } from "../../redux/bookingSlice"; // Action to set booking data
 import axios from "axios"; // Import axios
+import { ToastContainer, toast } from "react-toastify"; // Import Toastify
+import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import "./HeroSlider.css";
 
-// Your slide data with images and captions
 const slides = [
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200", caption: "Front View of the Property" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200", caption: "Spacious Living Room" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/ca24cc0e-34c7-4b18-b80f-e9ed639ea963.jpeg?im_w=1200", caption: "Full Open Kitchen with Modern Amenities" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f88455c8-3f02-4b1d-a107-0fbaee382798.jpeg?im_w=1200", caption: "Elegant Dining Room for Family Meals" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f4179e2e-7d5f-4c7f-8cbe-423a683d2d77.jpeg?im_w=1200", caption: "Six Bedrooms for Comfort and Relaxation" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/951caa35-ee85-475f-b8cf-69dffc91d5d9.jpeg?im_w=1200", caption: "Full Bathroom with Luxury Features" },
-  { image: "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/1722b722-bf9f-4508-a01a-402679439b21.jpeg?im_w=1440", caption: "Exciting Gaming Room for Entertainment" }
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200",
+    caption: "Front View of the Property",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200",
+    caption: "Spacious Living Room",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/ca24cc0e-34c7-4b18-b80f-e9ed639ea963.jpeg?im_w=1200",
+    caption: "Full Open Kitchen with Modern Amenities",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f88455c8-3f02-4b1d-a107-0fbaee382798.jpeg?im_w=1200",
+    caption: "Elegant Dining Room for Family Meals",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f4179e2e-7d5f-4c7f-8cbe-423a683d2d77.jpeg?im_w=1200",
+    caption: "Six Bedrooms for Comfort and Relaxation",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/951caa35-ee85-475f-b8cf-69dffc91d5d9.jpeg?im_w=1200",
+    caption: "Full Bathroom with Luxury Features",
+  },
+  {
+    image:
+      "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/1722b722-bf9f-4508-a01a-402679439b21.jpeg?im_w=1440",
+    caption: "Exciting Gaming Room for Entertainment",
+  },
 ];
 
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
@@ -35,14 +69,8 @@ const HeroSlider = () => {
     infants: 0,
     pets: 0,
   });
-  const [errors, setErrors] = useState({
-    name: "",
-    phone: "",
-    checkIn: "",
-    checkOut: "",
-    guests: "",
-  });
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // New state for submitting status
 
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status from Redux
   const dispatch = useDispatch(); // Dispatch function
@@ -79,135 +107,142 @@ const HeroSlider = () => {
     });
   };
 
+  // Handle check-in date change
   const handleCheckInChange = (date) => {
-    const adjustedDate = moment(date).set({ hour: 12, minute: 0, second: 0 });
+    const adjustedDate = moment(date)
+      .tz(coloradoSpringsTimeZone)
+      .set({ hour: 15, minute: 0, second: 0 });
     setFormData({ ...formData, checkIn: adjustedDate.toDate() });
   };
 
+  // Handle check-out date change
   const handleCheckOutChange = (date) => {
-    const adjustedDate = moment(date).set({ hour: 12, minute: 0, second: 0 });
+    const adjustedDate = moment(date)
+      .tz(coloradoSpringsTimeZone)
+      .set({ hour: 11, minute: 0, second: 0 });
     setFormData({ ...formData, checkOut: adjustedDate.toDate() });
   };
 
   const validateForm = () => {
-    const newErrors = { name: "", phone: "", checkIn: "", checkOut: "", guests: "" };
     let isValid = true;
+    let errorMessages = [];
 
     if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
+      errorMessages.push("Name is required");
       isValid = false;
     }
 
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      errorMessages.push("Please enter a valid phone number");
       isValid = false;
     }
 
     if (!formData.checkIn) {
-      newErrors.checkIn = "Check-in date is required";
+      errorMessages.push("Check-in date is required");
       isValid = false;
     }
 
     if (!formData.checkOut) {
-      newErrors.checkOut = "Check-out date is required";
+      errorMessages.push("Check-out date is required");
       isValid = false;
     } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      newErrors.checkOut = "Check-out date must be at least 2 days after check-in.";
+      errorMessages.push("Check-out date must be at least 2 days after check-in.");
       isValid = false;
     }
 
     if (formData.adults <= 0) {
-      newErrors.guests = "At least one adult is required";
+      errorMessages.push("At least one adult is required");
       isValid = false;
     }
 
-    setErrors(newErrors);
+    // If any errors exist, display them in Toast notifications
+    if (!isValid) {
+      errorMessages.forEach((message) => {
+        toast.error(message);
+      });
+    }
+
     return isValid;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  const hardcodedListingId = "69230e30f841f3328e53ea37";
-  console.log("Current form data:", formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent form default submit action
 
-  if (!isLoggedIn) {
-    dispatch(setModalOpen(true)); // Open the login modal
-    return; // Prevent form submission
-  }
+    // Prevent multiple submissions if one is already in progress
+    if (isSubmitting) return;
 
-  if (validateForm()) {
-    const formDataToDispatch = {
-      ...formData,
-      checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
-      checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-      listingId: hardcodedListingId,
-    };
+    const hardcodedListingId = "69230e30f841f3328e53ea37";
+    console.log("Current form data:", formData);
 
-    // Log the data (for debugging)
-    if (formData.checkIn && formData.checkOut) {
-      const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
-      const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
-      const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-      const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-
-      console.log("Form submitted!");
-      console.log("Check-in (UTC):", checkInUtc);
-      console.log("Check-out (UTC):", checkOutUtc);
-      console.log("Check-in (Colorado Springs Time):", checkInCST);
-      console.log("Check-out (Colorado Springs Time):", checkOutCST);
+    if (!isLoggedIn) {
+      dispatch(setModalOpen(true)); // Open the login modal
+      return; // Prevent form submission
     }
 
-    // API Call to create booking using Axios
-    try {
-      const response = await axios.post("http://localhost:5000/api/bookings", formDataToDispatch, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Add token for authorization if needed
-        },
-      });
+    // Validate the form before proceeding
+    if (validateForm()) {
+      const formDataToDispatch = {
+        ...formData,
+        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+        listingId: hardcodedListingId,
+      };
 
-      if (response.status === 201) {
-        console.log("Booking created successfully:", response.data);
+      // Set submitting state to true to disable the submit button and prevent multiple submissions
+      setIsSubmitting(true);
 
-        // Dispatch form data to Redux
-        dispatch(setBookingData(formDataToDispatch));
+      try {
+        const response = await axios.post(
+          "http://localhost:5000/api/bookings",
+          formDataToDispatch,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-        // If the booking is created successfully, the backend will also create PayPal payment
-        const approvalLink = response.data.approvalLink;
+        if (response.status === 201) {
+          console.log("Booking created successfully:", response.data);
 
-        if (approvalLink) {
-          window.location.href = approvalLink; // Redirect user to PayPal for payment
+          // Dispatch form data to Redux
+          dispatch(setBookingData(formDataToDispatch));
+
+          // Display success toast
+          toast.success("Booking successful! Redirecting to PayPal...");
+
+          const approvalLink = response.data.approvalLink;
+
+          if (approvalLink) {
+            window.location.href = approvalLink; // Redirect user to PayPal for payment
+          }
+
+          // Reset form data after successful submission
+          setFormData({
+            name: "",
+            phone: "",
+            checkIn: null,
+            checkOut: null,
+            adults: 0,
+            children: 0,
+            infants: 0,
+            pets: 0,
+          });
         }
-
-        // Reset form data after submission
-        setFormData({
-          name: "",
-          phone: "",
-          checkIn: null,
-          checkOut: null,
-          adults: 0,
-          children: 0,
-          infants: 0,
-          pets: 0,
-        });
-
-        // Reset errors after form submission
-        setErrors({
-          name: "",
-          phone: "",
-          checkIn: "",
-          checkOut: "",
-          guests: "",
-        });
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+        const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred";
+        
+        // Display error message in toast
+        toast.error(errorMessage);
+      } finally {
+        // Set submitting state back to false to re-enable the submit button
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      console.error("Error submitting booking:", error);
     }
-  }
-};
-
-
+  };
 
   const today = new Date();
   const minCheckOutDate = formData.checkIn
@@ -223,7 +258,7 @@ const handleSubmit = async (e) => {
           </div>
 
           <form onSubmit={handleSubmit} className="hero-form">
-            {/* Name and Phone Fields */}
+            {/* Form fields */}
             <div className="input-container">
               <FaUser className="input-icon" />
               <input
@@ -233,7 +268,6 @@ const handleSubmit = async (e) => {
                 onChange={handleInputChange}
                 placeholder="Full Name"
               />
-              {errors.name && <p className="error-text">{errors.name}</p>}
             </div>
 
             <div className="input-container">
@@ -245,10 +279,8 @@ const handleSubmit = async (e) => {
                 onChange={handleInputChange}
                 placeholder="Phone Number"
               />
-              {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
-            {/* Date pickers inline */}
             <div className="input-container-inline">
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
@@ -260,7 +292,6 @@ const handleSubmit = async (e) => {
                   className="date-input"
                   minDate={today}
                 />
-                {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
               </div>
 
               <div className="input-container">
@@ -274,12 +305,13 @@ const handleSubmit = async (e) => {
                   minDate={minCheckOutDate}
                   disabled={!formData.checkIn}
                 />
-                {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
               </div>
             </div>
 
-            {/* Guests Dropdown */}
-            <div className="input-container" onClick={() => setIsDropdownVisible(!isDropdownVisible)}>
+            <div
+              className="input-container"
+              onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+            >
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
                 type="text"
@@ -287,12 +319,16 @@ const handleSubmit = async (e) => {
                 readOnly
                 placeholder="Select Guests"
               />
-              <FaChevronDown className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`} />
+              <FaChevronDown
+                className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
+              />
               {isDropdownVisible && (
                 <div className="dropdown-menu">
                   {["adults", "children", "infants", "pets"].map((type) => (
                     <div className="dropdown-item" key={type}>
-                      <label>{type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                      <label>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </label>
                       <div className="quantity-controls">
                         <button
                           type="button"
@@ -300,7 +336,8 @@ const handleSubmit = async (e) => {
                             e.stopPropagation();
                             setFormData({
                               ...formData,
-                              [type]: formData[type] - 1 < 0 ? 0 : formData[type] - 1,
+                              [type]:
+                                formData[type] - 1 < 0 ? 0 : formData[type] - 1,
                             });
                           }}
                         >
@@ -326,10 +363,8 @@ const handleSubmit = async (e) => {
               )}
             </div>
 
-            {errors.guests && <p className="error-text">{errors.guests}</p>}
-
             <button type="submit" className="submit-btn">
-              Book Now
+              {isSubmitting ? <div className="spinner"></div> : "Book Now"}
             </button>
           </form>
         </div>
@@ -341,6 +376,9 @@ const handleSubmit = async (e) => {
           &#10095;
         </button>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 };

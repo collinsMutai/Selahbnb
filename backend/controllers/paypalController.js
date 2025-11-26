@@ -49,24 +49,19 @@ const getPaypalAccessToken = async () => {
 
 // Create a PayPal payment (this generates the PayPal payment link)
 export const createPaypalPayment = async (req) => {
+  const { bookingId, totalPrice } = req.body;
+
   try {
-    const { bookingId, totalPrice } = req.body;
-
-    if (!totalPrice) {
-      throw new Error("Invalid totalPrice");
-    }
-
-    // Get PayPal access token (if required)
     const accessToken = await getPaypalAccessToken();
 
     // Set up the PayPal payment request
     const requestBody = {
-      intent: "CAPTURE",
+      intent: 'CAPTURE',
       purchase_units: [
         {
           amount: {
-            currency_code: "USD", // Adjust to your currency
-            value: totalPrice.toString(), // Convert totalPrice to string
+            currency_code: 'USD',
+            value: totalPrice.toString(),  // Convert totalPrice to string
           },
         },
       ],
@@ -78,87 +73,78 @@ export const createPaypalPayment = async (req) => {
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.requestBody(requestBody);
+    request.headers['Authorization'] = `Bearer ${accessToken}`;
 
-    // Add access token to authorization header
-    request.headers["Authorization"] = `Bearer ${accessToken}`;
-
-    // Execute the PayPal API call
     const paypalResponse = await client.execute(request);
 
-    // Log the full PayPal response to inspect the links
-    console.log("PayPal Response:", paypalResponse);
-
     // Check if response contains the expected properties
-    if (paypalResponse.result && paypalResponse.result.status === "CREATED") {
-      // Log the links array to understand its structure
-      console.log("PayPal Response Links:", paypalResponse.result.links);
-
-      // Find the link with rel === 'approve' (or 'approval_url')
+    if (paypalResponse.result && paypalResponse.result.status === 'CREATED') {
+      // Extract the approval link
       const approvalLinkObj = paypalResponse.result.links.find(
-        (link) => link.rel === "approve" || link.rel === "approval_url"
+        (link) => link.rel === 'approve' || link.rel === 'approval_url'
       );
 
       if (approvalLinkObj) {
         return {
           status: 200,
           data: {
-            approvalLink: approvalLinkObj.href, // Extract the approval link from the response
-            orderId: paypalResponse.result.id,
+            approvalLink: approvalLinkObj.href,
+            orderId: paypalResponse.result.id, // Save PayPal Order ID for later use
           },
         };
       } else {
-        console.error("No approval link found in PayPal response");
-        return {
-          status: 500,
-          message: "No approval link found in PayPal response",
-        };
+        return { status: 500, message: 'No approval link found in PayPal response' };
       }
     } else {
-      console.error("Unexpected PayPal response:", paypalResponse);
-      return { status: 500, message: "Error processing PayPal payment" };
+      return { status: 500, message: 'Error processing PayPal payment' };
     }
   } catch (error) {
-    console.error("Error creating PayPal payment:", error);
-    return { status: 500, message: "Error creating PayPal payment" };
+    console.error('Error creating PayPal payment:', error);
+    return { status: 500, message: 'Error creating PayPal payment' };
   }
 };
 
+
 // Capture the PayPal payment (after the user completes the payment)
 export const capturePaypalPayment = async (req, res) => {
-  const { orderId } = req.body; // Order ID returned from PayPal
+  const { orderId, payerId } = req.body; // Order ID and Payer ID returned from PayPal
 
   try {
     const accessToken = await getPaypalAccessToken();
 
     const request = new paypal.orders.OrdersCaptureRequest(orderId);
-    request.headers["Authorization"] = `Bearer ${accessToken}`;
+    request.headers['Authorization'] = `Bearer ${accessToken}`;
 
     const captureResponse = await client.execute(request);
 
-    // Find the booking based on the PayPal order reference (assuming you store it)
+    // Ensure the booking exists and is valid
     const booking = await Booking.findOne({
-      paypalOrderId: orderId,
+      paypalOrderId: orderId, // Find the booking based on the PayPal Order ID
     });
 
     if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Ensure the booking has not already been processed
+    if (booking.paymentStatus === 'Completed') {
+      return res.status(400).json({ message: 'Payment has already been processed' });
     }
 
     // Update booking status to 'Confirmed' and save the payment details
-    booking.status = "Confirmed";
-    booking.paymentStatus = "Completed";
-    booking.paymentTransactionId =
-      captureResponse.result.purchase_units[0].payments.captures[0].id;
+    booking.status = 'Confirmed';
+    booking.paymentStatus = 'Completed';
     booking.paymentAmount =
       captureResponse.result.purchase_units[0].payments.captures[0].amount.value;
     booking.payerEmail = captureResponse.result.payer.email_address;
+    booking.paymentTransactionId = captureResponse.result.id; // Save PayPal transaction ID
 
     await booking.save();
 
-    res.status(200).json({ message: "Payment successfully captured", booking });
+    res.status(200).json({ message: 'Payment successfully captured', booking });
   } catch (error) {
-    console.error("Error capturing PayPal payment:", error);
-    res.status(500).json({ message: "Error capturing PayPal payment" });
+    console.error('Error capturing PayPal payment:', error);
+    res.status(500).json({ message: 'Error capturing PayPal payment' });
   }
 };
 
