@@ -1,13 +1,25 @@
 import React, { useState } from "react";
-import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUser,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment-timezone";
 import { useSelector, useDispatch } from "react-redux";
 import { setModalOpen } from "../../redux/modalSlice"; // For opening login modal
-import { setBookingData } from "../../redux/bookingSlice"; // Import the action to set booking data
+import { setBookingData, setPaymentProcessed } from "../../redux/bookingSlice"; // Import the new actions
+import axios from "axios"; // Import Axios
+import { ToastContainer, toast } from "react-toastify"; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css';
+
 import "./BookingForm.css";
 import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the path as needed
+
+const apiUrl =
+  process.env.REACT_APP_API_URL || "https://63919269e920.ngrok-free.app/api"; // Replace with your actual API URL
 
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -30,7 +42,10 @@ const BookingForm = () => {
     guests: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state for submission
+
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status
+  const paymentProcessed = useSelector((state) => state.booking.paymentProcessed); // Get payment status from Redux
   const dispatch = useDispatch(); // Dispatch function
 
   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
@@ -51,7 +66,9 @@ const BookingForm = () => {
   const changeQuantity = (type, action) => {
     setFormData((prevData) => {
       const newValue =
-        action === "increase" ? prevData[type] + 1 : Math.max(prevData[type] - 1, 0);
+        action === "increase"
+          ? prevData[type] + 1
+          : Math.max(prevData[type] - 1, 0);
       return {
         ...prevData,
         [type]: newValue,
@@ -60,25 +77,17 @@ const BookingForm = () => {
   };
 
   const handleCheckInChange = (date) => {
-    const localDate = moment.tz(date, "America/Los_Angeles");
-    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
-    const utcDate = adjustedDate.utc().toDate();
-    setFormData({ ...formData, checkIn: utcDate });
+    const adjustedDate = moment(date)
+      .tz("America/Denver") // Use Colorado Springs' local time zone
+      .set({ hour: 15, minute: 0, second: 0 }); // Set time to 3:00 PM
+    setFormData({ ...formData, checkIn: adjustedDate.toDate() });
   };
 
   const handleCheckOutChange = (date) => {
-    const localDate = moment.tz(date, "America/Los_Angeles");
-    const adjustedDate = localDate.set({ hour: 12, minute: 0, second: 0 });
-    const utcDate = adjustedDate.utc().toDate();
-
-    const minCheckOutDate = new Date(formData.checkIn);
-    minCheckOutDate.setDate(minCheckOutDate.getDate() + 2);
-
-    if (utcDate >= minCheckOutDate) {
-      setFormData({ ...formData, checkOut: utcDate });
-    } else {
-      alert("Check-out must be at least 2 nights after check-in (including check-in day).");
-    }
+    const adjustedDate = moment(date)
+      .tz(coloradoSpringsTimeZone)
+      .set({ hour: 11, minute: 0, second: 0 });
+    setFormData({ ...formData, checkOut: adjustedDate.toDate() });
   };
 
   const validateForm = () => {
@@ -114,7 +123,8 @@ const BookingForm = () => {
       newErrors.checkOut = "Check-out date is required";
       isValid = false;
     } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      newErrors.checkOut = "Check-out date must be at least 2 days after check-in (including check-in day).";
+      newErrors.checkOut =
+        "Check-out date must be at least 2 days after check-in (including check-in day).";
       isValid = false;
     }
 
@@ -128,66 +138,87 @@ const BookingForm = () => {
     return isValid;
   };
 
- const handleSubmit = (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Check if the user is logged in before submitting the form
-  if (!isLoggedIn) {
-    dispatch(setModalOpen(true)); // Open the login modal
-    return; // Prevent form submission
-  }
-
-  // Perform validation before submitting the form
-  if (validateForm()) {
-    // Convert Date objects to ISO strings
-    const formDataToDispatch = {
-      ...formData,
-      checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
-      checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-    };
-
-    // Log the data (for debugging)
-    if (formData.checkIn && formData.checkOut) {
-      const checkInUtc = moment(formData.checkIn).format("YYYY-MM-DD HH:mm:ss [UTC]");
-      const checkOutUtc = moment(formData.checkOut).format("YYYY-MM-DD HH:mm:ss [UTC]");
-      const checkInCST = moment(formData.checkIn).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-      const checkOutCST = moment(formData.checkOut).tz(coloradoSpringsTimeZone).format("YYYY-MM-DD HH:mm:ss [MST]");
-
-      console.log("Form submitted!");
-      console.log("Check-in (UTC):", checkInUtc);
-      console.log("Check-out (UTC):", checkOutUtc);
-      console.log("Check-in (Colorado Springs Time):", checkInCST);
-      console.log("Check-out (Colorado Springs Time):", checkOutCST);
+    // Check if the user is logged in before submitting the form
+    if (!isLoggedIn) {
+      dispatch(setModalOpen(true)); // Open the login modal
+      return; // Prevent form submission
     }
 
-    // Dispatch form data to Redux
-    dispatch(setBookingData(formDataToDispatch));
+    // Prevent double submission if payment has already been processed or form is in submitting state
+    if (paymentProcessed || isSubmitting) return;
 
-    // Reset form data after submission
-    setFormData({
-      name: "",
-      phone: "",
-      checkIn: null,
-      checkOut: null,
-      adults: 0,
-      children: 0,
-      infants: 0,
-      pets: 0,
-    });
+    // Perform validation before submitting the form
+    if (validateForm()) {
+      setIsSubmitting(true); // Set loading state to true during submission
+      const hardcodedListingId = "69230e30f841f3328e53ea37";
+      // Convert Date objects to ISO strings
+      const formDataToDispatch = {
+        ...formData,
+        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+        listingId: hardcodedListingId,
+        returnUrl: window.location.href,
+      };
 
-    // Reset errors after form submission
-    setErrors({
-      name: "",
-      phone: "",
-      checkIn: "",
-      checkOut: "",
-      guests: "",
-    });
+      try {
+        const response = await axios.post(
+          `${apiUrl}/bookings`, // API URL
+          formDataToDispatch,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
-    // Further submit logic (API call, etc.) can go here
-  }
-};
+        if (response.status === 201) {
+          console.log("Booking created successfully:", response.data);
 
+          // Dispatch form data to Redux
+          dispatch(setBookingData(formDataToDispatch));
+
+          // Set payment processed flag to prevent double submission
+          dispatch(setPaymentProcessed(true));
+
+          // Display success toast
+          toast.success("Booking successful! Redirecting to payment...");
+
+          // Optionally redirect to payment page if necessary
+          const approvalLink = response.data.approvalLink; // Assuming backend returns a link
+          if (approvalLink) {
+            window.location.href = approvalLink;
+          }
+
+          // Reset form data after successful submission
+          setFormData({
+            name: "",
+            phone: "",
+            checkIn: null,
+            checkOut: null,
+            adults: 0,
+            children: 0,
+            infants: 0,
+            pets: 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "An unknown error occurred";
+
+        // Display error message in toast
+        toast.error(errorMessage);
+      } finally {
+        setIsSubmitting(false); // Reset submitting state after API call
+      }
+    }
+  };
 
   const today = new Date();
   const minCheckOutDate = formData.checkIn
@@ -245,7 +276,7 @@ const BookingForm = () => {
               {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
-            {/* Check-in / Check-out */}
+            {/* Check-in and Check-out Dates */}
             <div className="input-container-inline">
               <div className="input-container">
                 <FaCalendarAlt className="input-icon" />
@@ -255,11 +286,11 @@ const BookingForm = () => {
                   placeholderText="Check-in"
                   dateFormat="MM/dd/yyyy"
                   className="date-input"
-                  popperPlacement="bottom"
-                  withPortal
                   minDate={today}
                 />
-                {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
+                {errors.checkIn && (
+                  <p className="error-text">{errors.checkIn}</p>
+                )}
               </div>
 
               <div className="input-container">
@@ -270,141 +301,84 @@ const BookingForm = () => {
                   placeholderText="Check-out"
                   dateFormat="MM/dd/yyyy"
                   className="date-input"
-                  popperPlacement="bottom"
-                  withPortal
                   minDate={minCheckOutDate}
                   disabled={!formData.checkIn}
                 />
-                {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
+                {errors.checkOut && (
+                  <p className="error-text">{errors.checkOut}</p>
+                )}
               </div>
             </div>
 
             {/* Guests */}
-            <div className="input-container" onClick={toggleDropdown}>
+            <div
+              className="input-container"
+              onClick={() => setIsDropdownVisible(!isDropdownVisible)}
+            >
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
                 type="text"
                 value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
                 readOnly
-                placeholder="Select People"
+                placeholder="Select Guests"
               />
               <FaChevronDown
                 className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
               />
               {isDropdownVisible && (
                 <div className="dropdown-menu">
-                  <div className="dropdown-item">
-                    <label>Adults</label>
-                    <div className="quantity-controls">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("adults", "decrease");
-                        }}
-                      >
-                        −
-                      </button>
-                      <span>{formData.adults}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("adults", "increase");
-                        }}
-                      >
-                        +
-                      </button>
+                  {["adults", "children", "infants", "pets"].map((type) => (
+                    <div className="dropdown-item" key={type}>
+                      <label>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </label>
+                      <div className="quantity-controls">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({
+                              ...formData,
+                              [type]:
+                                formData[type] - 1 < 0 ? 0 : formData[type] - 1,
+                            });
+                          }}
+                        >
+                          −
+                        </button>
+                        <span>{formData[type]}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setFormData({
+                              ...formData,
+                              [type]: formData[type] + 1,
+                            });
+                          }}
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="dropdown-item">
-                    <label>Children</label>
-                    <div className="quantity-controls">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("children", "decrease");
-                        }}
-                      >
-                        −
-                      </button>
-                      <span>{formData.children}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("children", "increase");
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="dropdown-item">
-                    <label>Infants</label>
-                    <div className="quantity-controls">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("infants", "decrease");
-                        }}
-                      >
-                        −
-                      </button>
-                      <span>{formData.infants}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("infants", "increase");
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="dropdown-item">
-                    <label>Pets</label>
-                    <div className="quantity-controls">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("pets", "decrease");
-                        }}
-                      >
-                        −
-                      </button>
-                      <span>{formData.pets}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          changeQuantity("pets", "increase");
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               )}
             </div>
 
-            {errors.guests && <p className="error-text">{errors.guests}</p>}
-
-            {/* Submit Button */}
-            <button type="submit" className="submit-btn">
-              Book Now
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={isSubmitting || paymentProcessed}
+            >
+              {isSubmitting ? <div className="spinner"></div> : "Book Now"}
             </button>
           </form>
         </div>
       </div>
+
+      {/* Toast Container */}
+      <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
 };

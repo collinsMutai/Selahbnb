@@ -10,6 +10,7 @@ const initialState = {
   children: 0,
   infants: 0,
   pets: 0,
+  paymentProcessed: false, // New property to track payment status
 };
 
 const bookingSlice = createSlice({
@@ -21,9 +22,13 @@ const bookingSlice = createSlice({
       state = { ...state, ...action.payload };
       return state;
     },
-    resetBookingData: () => initialState, // Reset form data
+    setPaymentProcessed: (state, action) => {
+      // This will update the paymentProcessed flag
+      state.paymentProcessed = action.payload;
+    },
+    resetBookingData: () => initialState, // Reset form data and paymentProcessed
   },
 });
 
-export const { setBookingData, resetBookingData } = bookingSlice.actions;
+export const { setBookingData, setPaymentProcessed, resetBookingData } = bookingSlice.actions;
 export default bookingSlice.reducer;

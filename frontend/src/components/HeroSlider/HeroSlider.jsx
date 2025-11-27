@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-
+import React, { useState, useEffect, forwardRef } from "react";
 import {
   FaUser,
   FaPhoneAlt,
@@ -56,11 +55,9 @@ const slides = [
 ];
 
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
-const apiUrl = process.env.REACT_APP_API_URL || "https://8b0e6b8aec8b.ngrok-free.app/api"; 
+const apiUrl = process.env.REACT_APP_API_URL || "https://63919269e920.ngrok-free.app/api"; 
 
-
-const HeroSlider = () => {
-  
+const HeroSlider = forwardRef((props, ref) => {
   const [current, setCurrent] = useState(0);
   const [animateText, setAnimateText] = useState(false);
   const [formData, setFormData] = useState({
@@ -170,84 +167,84 @@ const HeroSlider = () => {
     return isValid;
   };
 
- const handleSubmit = async (e) => {
-  e.preventDefault(); // Prevent form default submit action
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // Prevent form default submit action
 
-  // Prevent multiple submissions if one is already in progress
-  if (isSubmitting) return;
+    // Prevent multiple submissions if one is already in progress
+    if (isSubmitting) return;
 
-  const hardcodedListingId = "69230e30f841f3328e53ea37";
-  console.log("Current form data:", formData);
+    const hardcodedListingId = "69230e30f841f3328e53ea37";
+    console.log("Current form data:", formData);
 
-  if (!isLoggedIn) {
-    dispatch(setModalOpen(true)); // Open the login modal
-    return; // Prevent form submission
-  }
-
-  // Validate the form before proceeding
-  if (validateForm()) {
-    const formDataToDispatch = {
-      ...formData,
-      checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
-      checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-      listingId: hardcodedListingId,
-      returnUrl: window.location.href,  // Send current URL as return_url (for both return and cancel)
-    };
-
-    // Set submitting state to true to disable the submit button and prevent multiple submissions
-    setIsSubmitting(true);
-
-    try {
-      const response = await axios.post(
-        `${apiUrl}/bookings`,
-        formDataToDispatch,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.status === 201) {
-        console.log("Booking created successfully:", response.data);
-
-        // Dispatch form data to Redux
-        dispatch(setBookingData(formDataToDispatch));
-
-        // Display success toast
-        toast.success("Booking successful! Redirecting to PayPal...");
-
-        const approvalLink = response.data.approvalLink;
-
-        if (approvalLink) {
-          window.location.href = approvalLink; // Redirect user to PayPal for payment
-        }
-
-        // Reset form data after successful submission
-        setFormData({
-          name: "",
-          phone: "",
-          checkIn: null,
-          checkOut: null,
-          adults: 0,
-          children: 0,
-          infants: 0,
-          pets: 0,
-        });
-      }
-    } catch (error) {
-      console.error("Error submitting booking:", error);
-      const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred";
-      
-      // Display error message in toast
-      toast.error(errorMessage);
-    } finally {
-      // Set submitting state back to false to re-enable the submit button
-      setIsSubmitting(false);
+    if (!isLoggedIn) {
+      dispatch(setModalOpen(true)); // Open the login modal
+      return; // Prevent form submission
     }
-  }
-};
+
+    // Validate the form before proceeding
+    if (validateForm()) {
+      const formDataToDispatch = {
+        ...formData,
+        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
+        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+        listingId: hardcodedListingId,
+        returnUrl: window.location.href,  // Send current URL as return_url (for both return and cancel)
+      };
+
+      // Set submitting state to true to disable the submit button and prevent multiple submissions
+      setIsSubmitting(true);
+
+      try {
+        const response = await axios.post(
+          `${apiUrl}/bookings`,
+          formDataToDispatch,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        if (response.status === 201) {
+          console.log("Booking created successfully:", response.data);
+
+          // Dispatch form data to Redux
+          dispatch(setBookingData(formDataToDispatch));
+
+          // Display success toast
+          toast.success("Booking successful! Redirecting to PayPal...");
+
+          const approvalLink = response.data.approvalLink;
+
+          if (approvalLink) {
+            window.location.href = approvalLink; // Redirect user to PayPal for payment
+          }
+
+          // Reset form data after successful submission
+          setFormData({
+            name: "",
+            phone: "",
+            checkIn: null,
+            checkOut: null,
+            adults: 0,
+            children: 0,
+            infants: 0,
+            pets: 0,
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting booking:", error);
+        const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred";
+
+        // Display error message in toast
+        toast.error(errorMessage);
+      } finally {
+        // Set submitting state back to false to re-enable the submit button
+        setIsSubmitting(false);
+      }
+    }
+  };
 
   const today = new Date();
   const minCheckOutDate = formData.checkIn
@@ -255,7 +252,7 @@ const HeroSlider = () => {
     : today;
 
   return (
-    <div className="hero-slider" id="hero">
+    <div className="hero-slider" id="hero" ref={ref}>
       <div className="hero-slide" style={{ backgroundImage: `url(${image})` }}>
         <div className={`hero-content`}>
           <div className={`hero-caption ${animateText ? "slide-up" : ""}`}>
@@ -386,6 +383,6 @@ const HeroSlider = () => {
       <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );
-};
+});
 
 export default HeroSlider;

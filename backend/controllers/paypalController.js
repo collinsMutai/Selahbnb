@@ -106,16 +106,23 @@ export const createPaypalPayment = async (req) => {
 
 
 // Capture the PayPal payment (after the user completes the payment)
+// Capture the PayPal payment (after the user completes the payment)
 export const capturePaypalPayment = async (req, res) => {
   const { orderId, payerId } = req.body; // Order ID and Payer ID returned from PayPal
 
   try {
     const accessToken = await getPaypalAccessToken();
 
-    const request = new paypal.orders.OrdersCaptureRequest(orderId);
-    request.headers['Authorization'] = `Bearer ${accessToken}`;
+    // First, check the order status to make sure it's approved
+    const statusRequest = new paypal.orders.OrdersGetRequest(orderId);
+    statusRequest.headers['Authorization'] = `Bearer ${accessToken}`;
 
-    const captureResponse = await client.execute(request);
+    const statusResponse = await client.execute(statusRequest);
+
+    // Check if the order status is APPROVED
+    if (statusResponse.result.status !== 'APPROVED') {
+      return res.status(400).json({ message: 'Payment is not approved. Please complete the payment first.' });
+    }
 
     // Ensure the booking exists and is valid
     const booking = await Booking.findOne({
@@ -126,10 +133,16 @@ export const capturePaypalPayment = async (req, res) => {
       return res.status(404).json({ message: 'Booking not found' });
     }
 
-    // Ensure the booking has not already been processed
+    // Check if the payment has already been processed
     if (booking.paymentStatus === 'Completed') {
       return res.status(400).json({ message: 'Payment has already been processed' });
     }
+
+    // Proceed with capturing the payment if the status is APPROVED
+    const captureRequest = new paypal.orders.OrdersCaptureRequest(orderId);
+    captureRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+
+    const captureResponse = await client.execute(captureRequest);
 
     // Update booking status to 'Confirmed' and save the payment details
     booking.status = 'Confirmed';
@@ -138,7 +151,6 @@ export const capturePaypalPayment = async (req, res) => {
       captureResponse.result.purchase_units[0].payments.captures[0].amount.value;
     booking.payerEmail = captureResponse.result.payer.email_address;
     booking.paymentTransactionId = captureResponse.result.id; // Save PayPal transaction ID
-
     await booking.save();
 
     res.status(200).json({ message: 'Payment successfully captured', booking });
@@ -147,6 +159,7 @@ export const capturePaypalPayment = async (req, res) => {
     res.status(500).json({ message: 'Error capturing PayPal payment' });
   }
 };
+
 
 // Cancel the PayPal payment (if the user decides to cancel)
 export const cancelPaypalPayment = async (req, res) => {
