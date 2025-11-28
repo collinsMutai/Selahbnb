@@ -13,7 +13,7 @@ import { setModalOpen } from "../../redux/modalSlice"; // For opening login moda
 import { setBookingData, setPaymentProcessed } from "../../redux/bookingSlice"; // Import the new actions
 import axios from "axios"; // Import Axios
 import { ToastContainer, toast } from "react-toastify"; // Import Toastify
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
 import "./BookingForm.css";
 import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the path as needed
@@ -45,7 +45,9 @@ const BookingForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state for submission
 
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status
-  const paymentProcessed = useSelector((state) => state.booking.paymentProcessed); // Get payment status from Redux
+  const paymentProcessed = useSelector(
+    (state) => state.booking.paymentProcessed
+  ); // Get payment status from Redux
   const dispatch = useDispatch(); // Dispatch function
 
   const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
@@ -191,6 +193,8 @@ const BookingForm = () => {
           const approvalLink = response.data.approvalLink; // Assuming backend returns a link
           if (approvalLink) {
             window.location.href = approvalLink;
+            // Set toastShown to true after the booking is complete
+            localStorage.setItem("toastShown", "false");
           }
 
           // Reset form data after successful submission

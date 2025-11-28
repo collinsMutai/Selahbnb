@@ -55,7 +55,8 @@ const slides = [
 ];
 
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
-const apiUrl = process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api"; 
+const apiUrl =
+  process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api";
 
 const HeroSlider = forwardRef((props, ref) => {
   const [current, setCurrent] = useState(0);
@@ -148,7 +149,9 @@ const HeroSlider = forwardRef((props, ref) => {
       errorMessages.push("Check-out date is required");
       isValid = false;
     } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      errorMessages.push("Check-out date must be at least 2 days after check-in.");
+      errorMessages.push(
+        "Check-out date must be at least 2 days after check-in."
+      );
       isValid = false;
     }
 
@@ -188,7 +191,7 @@ const HeroSlider = forwardRef((props, ref) => {
         checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
         checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
         listingId: hardcodedListingId,
-        returnUrl: window.location.href,  // Send current URL as return_url (for both return and cancel)
+        returnUrl: window.location.href, // Send current URL as return_url (for both return and cancel)
       };
 
       // Set submitting state to true to disable the submit button and prevent multiple submissions
@@ -219,6 +222,7 @@ const HeroSlider = forwardRef((props, ref) => {
 
           if (approvalLink) {
             window.location.href = approvalLink; // Redirect user to PayPal for payment
+            localStorage.setItem("toastShown", "false");
           }
 
           // Reset form data after successful submission
@@ -235,7 +239,10 @@ const HeroSlider = forwardRef((props, ref) => {
         }
       } catch (error) {
         console.error("Error submitting booking:", error);
-        const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred";
+        const errorMessage =
+          error.response?.data?.message ||
+          error.message ||
+          "An unknown error occurred";
 
         // Display error message in toast
         toast.error(errorMessage);
