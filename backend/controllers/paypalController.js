@@ -1,6 +1,7 @@
 import paypal from "@paypal/checkout-server-sdk";
-import Booking from "../models/Booking.js";
 import axios from "axios";
+import Listing from "../models/Listing.js";
+import Booking from "../models/Booking.js";
 import { sendBookingConfirmationEmail } from './emailController.js';
 import dotenv from "dotenv";
 dotenv.config();
@@ -148,8 +149,8 @@ export const capturePaypalPayment = async (req, res) => {
     await booking.save();
 
     // Send confirmation email
-    const listing = await Listing.findById(booking.listing);
-    await sendBookingConfirmationEmail(booking.payerEmail, booking, listing);
+    // const listing = await Listing.findById(booking.listing);
+    // await sendBookingConfirmationEmail(booking.payerEmail, booking, listing);
 
     res.status(200).json({ message: "Payment successfully captured", booking });
   } catch (error) {

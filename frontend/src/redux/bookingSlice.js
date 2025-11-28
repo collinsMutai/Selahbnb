@@ -1,5 +1,5 @@
 // src/redux/bookingSlice.js
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   name: "",
@@ -14,10 +14,11 @@ const initialState = {
   status: "",
   paymentStatus: "",
   paymentProcessed: false, // New property to track payment status
+  listingId: "69230e30f841f3328e53ea37",
 };
 
 const bookingSlice = createSlice({
-  name: 'booking',
+  name: "booking",
   initialState,
   reducers: {
     setBookingData: (state, action) => {
@@ -33,5 +34,6 @@ const bookingSlice = createSlice({
   },
 });
 
-export const { setBookingData, setPaymentProcessed, resetBookingData } = bookingSlice.actions;
+export const { setBookingData, setPaymentProcessed, resetBookingData } =
+  bookingSlice.actions;
 export default bookingSlice.reducer;

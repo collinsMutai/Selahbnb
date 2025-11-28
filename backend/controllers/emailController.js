@@ -2,6 +2,9 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 
 dotenv.config();
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+
 
 // Create a reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({

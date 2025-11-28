@@ -72,6 +72,7 @@ const PaypalPaymentSuccess = () => {
               status: bookingData.status,
               paymentStatus: bookingData.paymentStatus,
               paymentProcessed: true, // Set paymentProcessed flag to true
+              listingId: "69230e30f841f3328e53ea37",
             }));
 
             // Set payment as processed in Redux and store it in localStorage to prevent re-triggering
