@@ -155,13 +155,12 @@ const BookingForm = () => {
     // Perform validation before submitting the form
     if (validateForm()) {
       setIsSubmitting(true); // Set loading state to true during submission
-      const hardcodedListingId = "69230e30f841f3328e53ea37";
       // Convert Date objects to ISO strings
       const formDataToDispatch = {
         ...formData,
         checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
         checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-        listingId: hardcodedListingId,
+        listingId: "6929ea1334872125aba99042",
         returnUrl: window.location.href,
       };
 

@@ -7,6 +7,7 @@ import Footer from "./components/Footer/Footer";
 import Places from "./components/Places/Places";
 import ContactPage from "./pages/Contact";
 import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
+import AdminDashboard from "./pages/Admin";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/places" element={<Places />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/paypalpayment/success" element={<PaypalPaymentSuccess />} /> {/* New route for PayPal success */}
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
 
       <Footer />

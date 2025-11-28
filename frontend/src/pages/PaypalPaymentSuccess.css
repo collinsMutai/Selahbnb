@@ -7,7 +7,7 @@
   margin: 40px auto;
   margin-top: 130px;
   height: 300px; /* Set a fixed height for the card */
- overflow-y: hidden; /* Make the card scrollable if content overflows */
+  overflow-y: hidden; /* Make the card scrollable if content overflows */
 }
 
 .title {
@@ -48,12 +48,26 @@
   background-color: #fff;
 }
 
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;  /* Full height of the viewport */
+  flex-direction: column;
+  text-align: center;
+}
+
+.spinner-container h1,
+.spinner-container p {
+  margin: 10px 0;
+}
+
+
 @media (max-width: 768px) {
   .card {
     margin-top: 100px;
- 
   }
-  
+
   .table {
     font-size: 14px;
   }

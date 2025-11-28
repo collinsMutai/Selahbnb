@@ -1,0 +1,69 @@
+/* AdminDashboard.css */
+.admin-dashboard {
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.booking-table th,
+.booking-table td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.booking-table th {
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+.booking-table td {
+  background-color: #fff;
+}
+
+.booking-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.booking-table .btn {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.booking-table .btn-view {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.booking-table .btn-delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.booking-table .btn:hover {
+  opacity: 0.8;
+}
+
+/* Loading and error messages */
+.loading,
+.error {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 1.2em;
+}

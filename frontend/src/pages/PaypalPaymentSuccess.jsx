@@ -4,6 +4,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setBookingData, setPaymentProcessed } from "../redux/bookingSlice"; 
 import { toast, ToastContainer } from "react-toastify"; 
 import "react-toastify/dist/ReactToastify.css"; 
+import { TailSpin } from "react-loader-spinner"; // Import TailSpin spinner
+
 import "./PaypalPaymentSuccess.css"; 
 
 const apiUrl = process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api";
@@ -72,7 +74,7 @@ const PaypalPaymentSuccess = () => {
               status: bookingData.status,
               paymentStatus: bookingData.paymentStatus,
               paymentProcessed: true, // Set paymentProcessed flag to true
-              listingId: "69230e30f841f3328e53ea37",
+              listingId: "6929ea1334872125aba99042",
             }));
 
             // Set payment as processed in Redux and store it in localStorage to prevent re-triggering
@@ -100,9 +102,12 @@ const PaypalPaymentSuccess = () => {
 
   if (loading) {
     return (
-      <div>
+      <div className="spinner-container">
         <h1>Processing your payment...</h1>
         <p>Please wait while we confirm your payment.</p>
+
+        {/* Using TailSpin Spinner */}
+        <TailSpin height="80" width="80" color="#148992" margin-top="130" ariaLabel="tail-spin-loading" />
       </div>
     );
   }
@@ -119,7 +124,6 @@ const PaypalPaymentSuccess = () => {
   if (bookingDetails) {
     return (
       <div className="card">
-        {/* <h1 className="title">Payment Successful!</h1> */}
         <h2 className="subtitle">Your Booking Details</h2>
 
         <table className="table">

@@ -105,6 +105,9 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("toastShown");
+    localStorage.removeItem("paymentProcessed");
+    localStorage.removeItem("bookingDetails");
     dispatch(logout());
     dispatch(setModalOpen(false));
     navigate('/')

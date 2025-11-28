@@ -10,7 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import moment from "moment-timezone"; // Correct import
 import { useSelector, useDispatch } from "react-redux";
 import { setModalOpen } from "../../redux/modalSlice"; // Action to open login modal
-import { setBookingData } from "../../redux/bookingSlice"; // Action to set booking data
+import { setBookingData, setPaymentProcessed } from "../../redux/bookingSlice"; // Action to set booking data
 import axios from "axios"; // Import axios
 import { ToastContainer, toast } from "react-toastify"; // Import Toastify
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
@@ -176,9 +176,6 @@ const HeroSlider = forwardRef((props, ref) => {
     // Prevent multiple submissions if one is already in progress
     if (isSubmitting) return;
 
-    const hardcodedListingId = "69230e30f841f3328e53ea37";
-    console.log("Current form data:", formData);
-
     if (!isLoggedIn) {
       dispatch(setModalOpen(true)); // Open the login modal
       return; // Prevent form submission
@@ -190,7 +187,7 @@ const HeroSlider = forwardRef((props, ref) => {
         ...formData,
         checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
         checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
-        listingId: hardcodedListingId,
+        listingId: "6929ea1334872125aba99042",
         returnUrl: window.location.href, // Send current URL as return_url (for both return and cancel)
       };
 
@@ -215,8 +212,11 @@ const HeroSlider = forwardRef((props, ref) => {
           // Dispatch form data to Redux
           dispatch(setBookingData(formDataToDispatch));
 
+          // Set payment processed flag to prevent double submission
+          dispatch(setPaymentProcessed(true));
+
           // Display success toast
-          toast.success("Booking successful! Redirecting to PayPal...");
+          toast.success("Booking successful! Redirecting to payment...");
 
           const approvalLink = response.data.approvalLink;
 

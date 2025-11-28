@@ -4,8 +4,6 @@ import moment from 'moment'; // For better date formatting
 
 dotenv.config();
 
-
-
 // Create a reusable transporter object using SMTP transport
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Use Gmail as the service
@@ -27,6 +25,10 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
   const formattedCheckIn = moment(checkIn).format('MMMM Do YYYY, h:mm A');
   const formattedCheckOut = moment(checkOut).format('MMMM Do YYYY, h:mm A');
 
+  // Selah Springs contact details
+  const contactEmail = 'selahsprings48@gmail.com';
+  const contactPhone = '+17194920042';
+
   const mailOptions = {
     from: process.env.EMAIL_USER, // Sender address
     to: payerEmail, // Primary recipient's email address (payer)
@@ -36,6 +38,7 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
       <h1>Booking Confirmation</h1>
       <p>Dear ${name},</p>
       <p>Your booking for <strong>${title}</strong> at <strong>${location}</strong> has been confirmed.</p>
+
       <h3>Booking Details:</h3>
       <ul>
         <li><strong>Check-in:</strong> ${formattedCheckIn}</li>
@@ -43,7 +46,13 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
         <li><strong>Total Price:</strong> $${totalPrice}</li>
         <li><strong>Payment Transaction ID:</strong> ${paymentTransactionId}</li>
       </ul>
-      <p>We look forward to hosting you! If you have any questions, feel free to contact us.</p>
+
+      <p>We look forward to hosting you! If you have any questions, feel free to contact us:</p>
+
+      <p><strong>Selah Springs Contact Information:</strong></p>
+      <p>Email: <a href="mailto:${contactEmail}">${contactEmail}</a></p>
+      <p>Phone: <a href="tel:${contactPhone}">${contactPhone}</a></p>
+
       <p>Best regards,<br>The Booking Team</p>
     `, // HTML body
   };
