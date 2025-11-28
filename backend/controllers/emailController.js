@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import moment from 'moment'; // For better date formatting
 
 dotenv.config();
-console.log("EMAIL_USER:", process.env.EMAIL_USER);
-console.log("EMAIL_PASS:", process.env.EMAIL_PASS);
+
 
 
 // Create a reusable transporter object using SMTP transport
@@ -18,43 +18,62 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Send email function
-const sendBookingConfirmationEmail = async (userEmail, bookingDetails, listingDetails) => {
+// Send email function with retry logic
+const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetails, listingDetails) => {
   const { name, checkIn, checkOut, totalPrice, paymentTransactionId } = bookingDetails;
   const { title, location } = listingDetails;
 
+  // Format the check-in and check-out dates
+  const formattedCheckIn = moment(checkIn).format('MMMM Do YYYY, h:mm A');
+  const formattedCheckOut = moment(checkOut).format('MMMM Do YYYY, h:mm A');
+
   const mailOptions = {
     from: process.env.EMAIL_USER, // Sender address
-    to: userEmail, // Recipient's email address
+    to: payerEmail, // Primary recipient's email address (payer)
+    cc: userEmail, // CC the user's email address
     subject: `Booking Confirmation - ${title} at ${location}`, // Subject line
-    text: `
-    Dear ${name},
-
-    Your booking for ${title} at ${location} has been confirmed.
-
-    Booking Details:
-    - Check-in: ${checkIn}
-    - Check-out: ${checkOut}
-    - Total Price: $${totalPrice}
-    - Payment Transaction ID: ${paymentTransactionId}
-
-    We look forward to hosting you! If you have any questions, feel free to contact us.
-
-    Best regards,
-    The Booking Team
-    `,
+    html: `
+      <h1>Booking Confirmation</h1>
+      <p>Dear ${name},</p>
+      <p>Your booking for <strong>${title}</strong> at <strong>${location}</strong> has been confirmed.</p>
+      <h3>Booking Details:</h3>
+      <ul>
+        <li><strong>Check-in:</strong> ${formattedCheckIn}</li>
+        <li><strong>Check-out:</strong> ${formattedCheckOut}</li>
+        <li><strong>Total Price:</strong> $${totalPrice}</li>
+        <li><strong>Payment Transaction ID:</strong> ${paymentTransactionId}</li>
+      </ul>
+      <p>We look forward to hosting you! If you have any questions, feel free to contact us.</p>
+      <p>Best regards,<br>The Booking Team</p>
+    `, // HTML body
   };
 
-  try {
-    // Attempt to send the email
-    await transporter.sendMail(mailOptions);
-    console.log('Booking confirmation email sent successfully!');
-  } catch (error) {
-    console.error('Error sending email:', error);
-    if (error.response) {
-      console.error('SMTP Response Error:', error.response);
+  // Retry logic for sending the email (max 3 attempts)
+  const maxRetries = 3;
+  let attempt = 0;
+
+  const sendEmailWithRetry = async () => {
+    while (attempt < maxRetries) {
+      try {
+        // Attempt to send the email
+        await transporter.sendMail(mailOptions);
+        console.log('Booking confirmation email sent successfully!');
+        break; // Exit loop after successful email send
+      } catch (error) {
+        attempt++;
+        console.error(`Attempt ${attempt} failed:`, error);
+        
+        if (attempt >= maxRetries) {
+          console.error('Max retries reached. Failed to send email.');
+        } else {
+          console.log('Retrying...');
+        }
+      }
     }
-  }
+  };
+
+  // Execute the retry logic
+  await sendEmailWithRetry();
 };
 
 export { sendBookingConfirmationEmail };

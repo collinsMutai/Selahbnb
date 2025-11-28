@@ -56,7 +56,7 @@ const slides = [
 
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 const apiUrl =
-  process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api";
+  process.env.REACT_APP_API_URL || "https://5654e32705e7.ngrok-free.app/api";
 
 const HeroSlider = forwardRef((props, ref) => {
   const [current, setCurrent] = useState(0);
