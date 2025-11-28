@@ -107,6 +107,7 @@ const Navbar = () => {
     localStorage.removeItem("user");
     dispatch(logout());
     dispatch(setModalOpen(false));
+    navigate('/')
   };
 
   useEffect(() => {

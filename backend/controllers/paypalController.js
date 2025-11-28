@@ -1,8 +1,8 @@
 import paypal from "@paypal/checkout-server-sdk";
 import Booking from "../models/Booking.js";
-import dotenv from "dotenv";
 import axios from "axios";
-
+import { sendBookingConfirmationEmail } from './emailController.js';
+import dotenv from "dotenv";
 dotenv.config();
 
 // Initialize PayPal environment
@@ -56,12 +56,12 @@ export const createPaypalPayment = async (req) => {
 
     // Set up the PayPal payment request
     const requestBody = {
-      intent: 'CAPTURE',
+      intent: "CAPTURE",
       purchase_units: [
         {
           amount: {
-            currency_code: 'USD',
-            value: totalPrice.toString(),  // Convert totalPrice to string
+            currency_code: "USD",
+            value: totalPrice.toString(), // Convert totalPrice to string
           },
         },
       ],
@@ -73,15 +73,15 @@ export const createPaypalPayment = async (req) => {
 
     const request = new paypal.orders.OrdersCreateRequest();
     request.requestBody(requestBody);
-    request.headers['Authorization'] = `Bearer ${accessToken}`;
+    request.headers["Authorization"] = `Bearer ${accessToken}`;
 
     const paypalResponse = await client.execute(request);
 
     // Check if response contains the expected properties
-    if (paypalResponse.result && paypalResponse.result.status === 'CREATED') {
+    if (paypalResponse.result && paypalResponse.result.status === "CREATED") {
       // Extract the approval link
       const approvalLinkObj = paypalResponse.result.links.find(
-        (link) => link.rel === 'approve' || link.rel === 'approval_url'
+        (link) => link.rel === "approve" || link.rel === "approval_url"
       );
 
       if (approvalLinkObj) {
@@ -93,73 +93,70 @@ export const createPaypalPayment = async (req) => {
           },
         };
       } else {
-        return { status: 500, message: 'No approval link found in PayPal response' };
+        return {
+          status: 500,
+          message: "No approval link found in PayPal response",
+        };
       }
     } else {
-      return { status: 500, message: 'Error processing PayPal payment' };
+      return { status: 500, message: "Error processing PayPal payment" };
     }
   } catch (error) {
-    console.error('Error creating PayPal payment:', error);
-    return { status: 500, message: 'Error creating PayPal payment' };
+    console.error("Error creating PayPal payment:", error);
+    return { status: 500, message: "Error creating PayPal payment" };
   }
 };
 
-
-// Capture the PayPal payment (after the user completes the payment)
 // Capture the PayPal payment (after the user completes the payment)
 export const capturePaypalPayment = async (req, res) => {
-  const { orderId, payerId } = req.body; // Order ID and Payer ID returned from PayPal
+  const { orderId, payerId } = req.body;
 
   try {
     const accessToken = await getPaypalAccessToken();
 
-    // First, check the order status to make sure it's approved
     const statusRequest = new paypal.orders.OrdersGetRequest(orderId);
-    statusRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+    statusRequest.headers["Authorization"] = `Bearer ${accessToken}`;
 
     const statusResponse = await client.execute(statusRequest);
 
-    // Check if the order status is APPROVED
-    if (statusResponse.result.status !== 'APPROVED') {
-      return res.status(400).json({ message: 'Payment is not approved. Please complete the payment first.' });
+    if (statusResponse.result.status !== "APPROVED") {
+      return res.status(400).json({ message: "Payment not approved" });
     }
 
-    // Ensure the booking exists and is valid
-    const booking = await Booking.findOne({
-      paypalOrderId: orderId, // Find the booking based on the PayPal Order ID
-    });
+    const booking = await Booking.findOne({ paypalOrderId: orderId });
 
     if (!booking) {
-      return res.status(404).json({ message: 'Booking not found' });
+      return res.status(404).json({ message: "Booking not found" });
     }
 
-    // Check if the payment has already been processed
-    if (booking.paymentStatus === 'Completed') {
-      return res.status(400).json({ message: 'Payment has already been processed' });
+    if (booking.paymentStatus === "Completed") {
+      return res.status(400).json({ message: "Payment already processed" });
     }
 
-    // Proceed with capturing the payment if the status is APPROVED
     const captureRequest = new paypal.orders.OrdersCaptureRequest(orderId);
-    captureRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+    captureRequest.headers["Authorization"] = `Bearer ${accessToken}`;
 
     const captureResponse = await client.execute(captureRequest);
 
-    // Update booking status to 'Confirmed' and save the payment details
-    booking.status = 'Confirmed';
-    booking.paymentStatus = 'Completed';
-    booking.paymentAmount =
-      captureResponse.result.purchase_units[0].payments.captures[0].amount.value;
+    // Update booking and payment status
+    booking.status = "Confirmed";
+    booking.paymentStatus = "Completed";
+    booking.paymentAmount = captureResponse.result.purchase_units[0].payments.captures[0].amount.value;
     booking.payerEmail = captureResponse.result.payer.email_address;
-    booking.paymentTransactionId = captureResponse.result.id; // Save PayPal transaction ID
+    booking.paymentTransactionId = captureResponse.result.id;
+
     await booking.save();
 
-    res.status(200).json({ message: 'Payment successfully captured', booking });
+    // Send confirmation email
+    const listing = await Listing.findById(booking.listing);
+    await sendBookingConfirmationEmail(booking.payerEmail, booking, listing);
+
+    res.status(200).json({ message: "Payment successfully captured", booking });
   } catch (error) {
-    console.error('Error capturing PayPal payment:', error);
-    res.status(500).json({ message: 'Error capturing PayPal payment' });
+    console.error("Error capturing PayPal payment:", error);
+    res.status(500).json({ message: "Error capturing PayPal payment" });
   }
 };
-
 
 // Cancel the PayPal payment (if the user decides to cancel)
 export const cancelPaypalPayment = async (req, res) => {
