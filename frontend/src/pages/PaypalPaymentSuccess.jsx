@@ -1,34 +1,44 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux"; // Import useSelector to read from Redux store
-import { setBookingData, setPaymentProcessed } from "../redux/bookingSlice"; // Import actions
-import "./PaypalPaymentSuccess.css"; // Import the CSS file
+import { useDispatch, useSelector } from "react-redux"; 
+import { setBookingData, setPaymentProcessed } from "../redux/bookingSlice"; 
+import { toast, ToastContainer } from "react-toastify"; 
+import "react-toastify/dist/ReactToastify.css"; 
+import "./PaypalPaymentSuccess.css"; 
 
 const apiUrl = process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api";
 
 const PaypalPaymentSuccess = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch(); // Initialize dispatch
+  const dispatch = useDispatch(); 
 
-  // Access payment status from Redux store (you can also use localStorage here)
   const { paymentProcessed } = useSelector(state => state.booking);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Check if payment has already been processed using localStorage (or Redux if you prefer)
+  // Check if payment has already been processed using localStorage or Redux
   const isPaymentProcessed = localStorage.getItem("paymentProcessed") === "true" || paymentProcessed;
 
-  // Check if booking data is already stored (from previous successful capture)
+  // Check if booking data is already stored in localStorage
   const storedBookingData = JSON.parse(localStorage.getItem("bookingDetails"));
-
   const [bookingDetails, setBookingDetails] = useState(storedBookingData || null);
 
   useEffect(() => {
+    // Check if the toast has already been shown using localStorage
+    const toastShown = localStorage.getItem("toastShown");
+
+    // If booking data is available and toast hasn't been shown before
+    if (bookingDetails && toastShown !== "true") {
+      // Show success toast
+      toast.success("Thank you for booking with us! You will receive a confirmation email shortly.");
+      
+      // Mark the toast as shown in localStorage
+      localStorage.setItem("toastShown", "true");
+    }
+
     // If payment has already been processed, skip the capture process
     if (isPaymentProcessed) {
-      setLoading(false); // No need to call capture API, just show the stored data
+      setLoading(false);
       return;
     }
 
@@ -85,7 +95,7 @@ const PaypalPaymentSuccess = () => {
     } else {
       setLoading(false); // No payment capture needed if data is already present in localStorage
     }
-  }, [dispatch, isPaymentProcessed]); // Depend on paymentProcessed to ensure it doesn't re-trigger unnecessarily
+  }, [dispatch, isPaymentProcessed, bookingDetails]); // Dependency on bookingDetails to show the toast only when the booking is confirmed
 
   if (loading) {
     return (
@@ -108,13 +118,12 @@ const PaypalPaymentSuccess = () => {
   if (bookingDetails) {
     return (
       <div className="card">
-        <h1 className="title">Payment Successful!</h1>
+        {/* <h1 className="title">Payment Successful!</h1> */}
         <h2 className="subtitle">Your Booking Details</h2>
 
         <table className="table">
           <thead>
             <tr>
-              {/* The "Field" headers */}
               <th>Name</th>
               <th>Phone</th>
               <th>Check-in Date</th>
@@ -126,7 +135,6 @@ const PaypalPaymentSuccess = () => {
             </tr>
           </thead>
           <tbody>
-            {/* The booking data in a single row */}
             <tr>
               <td>{bookingDetails.name}</td>
               <td>{bookingDetails.phone}</td>
@@ -143,7 +151,7 @@ const PaypalPaymentSuccess = () => {
           </tbody>
         </table>
 
-        <p>Thank you for booking with us! You will receive a confirmation email shortly.</p>
+        <ToastContainer />
       </div>
     );
   }
