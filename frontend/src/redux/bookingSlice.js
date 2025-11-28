@@ -10,6 +10,9 @@ const initialState = {
   children: 0,
   infants: 0,
   pets: 0,
+  totalPrice: 0,
+  status: "",
+  paymentStatus: "",
   paymentProcessed: false, // New property to track payment status
 };
 

@@ -8,22 +8,17 @@ import { Provider } from 'react-redux';
 import store from './redux/store'; 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-
 // Make sure to add your Google Client ID here (use .env variable or hard-code it)
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-     <Provider store={store}>
-
-
+  <Provider store={store}>
     {/* Wrap your app with GoogleOAuthProvider and pass clientId */}
     <GoogleOAuthProvider clientId={googleClientId}>
       <App />
     </GoogleOAuthProvider>
-     </Provider>
-  </React.StrictMode>
+  </Provider>
 );
 
 // If you want to start measuring performance in your app, pass a function
