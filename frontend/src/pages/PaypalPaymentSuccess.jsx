@@ -8,7 +8,7 @@ import { TailSpin } from "react-loader-spinner"; // Import TailSpin spinner
 
 import "./PaypalPaymentSuccess.css"; 
 
-const apiUrl = process.env.REACT_APP_API_URL || "https://875660ecaa99.ngrok-free.app/api";
+const apiUrl = process.env.REACT_APP_API_URL || "https://selahbnbbackend.onrender.com/api";
 
 const PaypalPaymentSuccess = () => {
   const dispatch = useDispatch(); 
