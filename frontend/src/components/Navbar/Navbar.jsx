@@ -21,7 +21,7 @@ const Navbar = () => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/refresh-token",
+        "https://selahbnbbackend.onrender.com/api/users/refresh-token",
         {},
         { withCredentials: true }
       );
@@ -67,7 +67,7 @@ const Navbar = () => {
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response;
     try {
-      const res = await fetch("http://localhost:5000/api/users/google-login", {
+      const res = await fetch("https://selahbnbbackend.onrender.com/api/users/google-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

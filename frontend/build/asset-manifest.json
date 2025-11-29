@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.246bde87.css",
-    "main.js": "/static/js/main.d96d4358.js",
+    "main.js": "/static/js/main.b973c67f.js",
     "static/js/453.8701dc61.chunk.js": "/static/js/453.8701dc61.chunk.js",
     "static/media/mount-cutler-trail.jpg": "/static/media/mount-cutler-trail.811eae2c2f6070ee1e9f.jpg",
     "static/media/red-rock-canyon-open-space.jpg": "/static/media/red-rock-canyon-open-space.e38e99a051ec24ce33f1.jpg",
@@ -57,11 +57,11 @@
     "static/media/bedroom2_img3.avif": "/static/media/bedroom2_img3.c0d77464b586b1a3cc61.avif",
     "index.html": "/index.html",
     "main.246bde87.css.map": "/static/css/main.246bde87.css.map",
-    "main.d96d4358.js.map": "/static/js/main.d96d4358.js.map",
+    "main.b973c67f.js.map": "/static/js/main.b973c67f.js.map",
     "453.8701dc61.chunk.js.map": "/static/js/453.8701dc61.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.246bde87.css",
-    "static/js/main.d96d4358.js"
+    "static/js/main.b973c67f.js"
   ]
 }

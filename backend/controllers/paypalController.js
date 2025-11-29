@@ -68,8 +68,8 @@ export const createPaypalPayment = async (req) => {
         },
       ],
       application_context: {
-        return_url: `http://localhost:3000/paypalpayment/success`,
-        cancel_url: `http://localhost:3000/paypalpayment/cancel`,
+        return_url: `https://selahbnb.onrender.com/paypalpayment/success`,
+        cancel_url: `https://selahbnb.onrender.com/paypalpayment/cancel`,
       },
     };
 
