@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.46867749.css",
-    "main.js": "/static/js/main.13abf5e9.js",
+    "main.css": "/static/css/main.246bde87.css",
+    "main.js": "/static/js/main.d96d4358.js",
     "static/js/453.8701dc61.chunk.js": "/static/js/453.8701dc61.chunk.js",
     "static/media/mount-cutler-trail.jpg": "/static/media/mount-cutler-trail.811eae2c2f6070ee1e9f.jpg",
     "static/media/red-rock-canyon-open-space.jpg": "/static/media/red-rock-canyon-open-space.e38e99a051ec24ce33f1.jpg",
@@ -56,12 +56,12 @@
     "static/media/gamingarea_img5.avif": "/static/media/gamingarea_img5.37b364d4b775a3790ff9.avif",
     "static/media/bedroom2_img3.avif": "/static/media/bedroom2_img3.c0d77464b586b1a3cc61.avif",
     "index.html": "/index.html",
-    "main.46867749.css.map": "/static/css/main.46867749.css.map",
-    "main.13abf5e9.js.map": "/static/js/main.13abf5e9.js.map",
+    "main.246bde87.css.map": "/static/css/main.246bde87.css.map",
+    "main.d96d4358.js.map": "/static/js/main.d96d4358.js.map",
     "453.8701dc61.chunk.js.map": "/static/js/453.8701dc61.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.46867749.css",
-    "static/js/main.13abf5e9.js"
+    "static/css/main.246bde87.css",
+    "static/js/main.d96d4358.js"
   ]
 }
