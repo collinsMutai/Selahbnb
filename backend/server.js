@@ -22,7 +22,7 @@ const app = express();
 // CORS configuration
 const corsOptions = {
   origin: [
-    "http://localhost:3000", // Local frontend
+    "https://selahbnb.onrender.com", // Local frontend
     "https://selahbnbbackend.onrender.com", // Ngrok URL for backend
   ],
   credentials: true,
