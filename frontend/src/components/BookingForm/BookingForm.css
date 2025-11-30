@@ -193,6 +193,26 @@
   justify-content: space-between; /* Ensure they are spaced correctly */
 }
 
+
+.date-range-wrapper .DateRangePicker {
+  width: 100%;
+}
+
+.DateInput_input {
+  font-size: 16px !important;
+  padding: 10px !important;
+  height: 45px;
+}
+
+.DateRangePickerInput {
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.DateInput {
+  width: 100%;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .booking-section {

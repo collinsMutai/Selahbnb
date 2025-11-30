@@ -1,33 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FaUser,
   FaPhoneAlt,
   FaCalendarAlt,
   FaChevronDown,
 } from "react-icons/fa";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import moment from "moment-timezone";
+
+import { DateRange } from "react-date-range";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+
 import { useSelector, useDispatch } from "react-redux";
-import { setModalOpen } from "../../redux/modalSlice"; // For opening login modal
-import { setBookingData, setPaymentProcessed } from "../../redux/bookingSlice"; // Import the new actions
-import axios from "axios"; // Import Axios
-import { ToastContainer, toast } from "react-toastify"; // Import Toastify
+import { setModalOpen } from "../../redux/modalSlice";
+import { setBookingData, setPaymentProcessed } from "../../redux/bookingSlice";
+
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { enUS } from "date-fns/locale";
+
 import "./BookingForm.css";
-import backgroundImage from "../../images/bedroom1_img1.avif"; // Adjust the path as needed
+import backgroundImage from "../../images/bedroom1_img1.avif";
 
 const apiUrl =
-  process.env.REACT_APP_API_URL || "https://ef08732044fb.ngrok-free.app/api"; // Replace with your actual API URL
+  process.env.REACT_APP_API_URL || "https://ef08732044fb.ngrok-free.app/api";
 
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  const today = new Date();
+
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    checkIn: null,
-    checkOut: null,
+    startDate: null,
+    endDate: null,
     adults: 0,
     children: 0,
     infants: 0,
@@ -42,16 +51,32 @@ const BookingForm = () => {
     guests: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false); // Add loading state for submission
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isLoggedIn = useSelector((state) => state.user.isLoggedIn); // Get login status
+  const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const paymentProcessed = useSelector(
     (state) => state.booking.paymentProcessed
-  ); // Get payment status from Redux
-  const dispatch = useDispatch(); // Dispatch function
+  );
+  const dispatch = useDispatch();
 
-  const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
+  // Responsive Calendar State
+  const [calendarDirection, setCalendarDirection] = useState("horizontal");
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setCalendarDirection("vertical");
+      } else {
+        setCalendarDirection("horizontal");
+      }
+    };
+
+    handleResize(); // set initial state
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Handle Text Inputs
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -60,36 +85,14 @@ const BookingForm = () => {
     });
   };
 
-  const toggleDropdown = (e) => {
-    e.stopPropagation();
-    setIsDropdownVisible(!isDropdownVisible);
-  };
-
-  const changeQuantity = (type, action) => {
-    setFormData((prevData) => {
-      const newValue =
-        action === "increase"
-          ? prevData[type] + 1
-          : Math.max(prevData[type] - 1, 0);
-      return {
-        ...prevData,
-        [type]: newValue,
-      };
+  // Handle Calendar Change
+  const handleRangeChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+    setFormData({
+      ...formData,
+      startDate,
+      endDate,
     });
-  };
-
-  const handleCheckInChange = (date) => {
-    const adjustedDate = moment(date)
-      .tz("America/Denver") // Use Colorado Springs' local time zone
-      .set({ hour: 15, minute: 0, second: 0 }); // Set time to 3:00 PM
-    setFormData({ ...formData, checkIn: adjustedDate.toDate() });
-  };
-
-  const handleCheckOutChange = (date) => {
-    const adjustedDate = moment(date)
-      .tz(coloradoSpringsTimeZone)
-      .set({ hour: 11, minute: 0, second: 0 });
-    setFormData({ ...formData, checkOut: adjustedDate.toDate() });
   };
 
   const validateForm = () => {
@@ -100,37 +103,37 @@ const BookingForm = () => {
       checkOut: "",
       guests: "",
     };
+
     let isValid = true;
 
-    // Validate Name
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
       isValid = false;
     }
 
-    // Validate Phone
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = "Please enter a valid phone number";
       isValid = false;
     }
 
-    // Validate Check-in and Check-out
-    if (!formData.checkIn) {
+    if (!formData.startDate) {
       newErrors.checkIn = "Check-in date is required";
       isValid = false;
     }
 
-    if (!formData.checkOut) {
+    if (!formData.endDate) {
       newErrors.checkOut = "Check-out date is required";
       isValid = false;
-    } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      newErrors.checkOut =
-        "Check-out date must be at least 2 days after check-in (including check-in day).";
-      isValid = false;
+    } else {
+      const diffDays =
+        (formData.endDate - formData.startDate) / (1000 * 60 * 60 * 24);
+      if (diffDays < 2) {
+        newErrors.checkOut = "Minimum stay is 2 nights.";
+        isValid = false;
+      }
     }
 
-    // Validate Guests
     if (formData.adults <= 0) {
       newErrors.guests = "At least one adult is required";
       isValid = false;
@@ -140,33 +143,33 @@ const BookingForm = () => {
     return isValid;
   };
 
+  // Handle Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Check if the user is logged in before submitting the form
     if (!isLoggedIn) {
-      dispatch(setModalOpen(true)); // Open the login modal
-      return; // Prevent form submission
+      dispatch(setModalOpen(true));
+      return;
     }
 
-    // Prevent double submission if payment has already been processed or form is in submitting state
     if (paymentProcessed || isSubmitting) return;
 
-    // Perform validation before submitting the form
     if (validateForm()) {
-      setIsSubmitting(true); // Set loading state to true during submission
-      // Convert Date objects to ISO strings
+      setIsSubmitting(true);
+
       const formDataToDispatch = {
         ...formData,
-        checkIn: formData.checkIn ? formData.checkIn.toISOString() : null,
-        checkOut: formData.checkOut ? formData.checkOut.toISOString() : null,
+        checkIn: formData.startDate
+          ? formData.startDate.toISOString()
+          : null,
+        checkOut: formData.endDate ? formData.endDate.toISOString() : null,
         listingId: "6929ea1334872125aba99042",
         returnUrl: window.location.href,
       };
 
       try {
         const response = await axios.post(
-          `${apiUrl}/bookings`, // API URL
+          `${apiUrl}/bookings`,
           formDataToDispatch,
           {
             headers: {
@@ -177,31 +180,19 @@ const BookingForm = () => {
         );
 
         if (response.status === 201) {
-          console.log("Booking created successfully:", response.data);
-
-          // Dispatch form data to Redux
           dispatch(setBookingData(formDataToDispatch));
-
-          // Set payment processed flag to prevent double submission
           dispatch(setPaymentProcessed(true));
 
-          // Display success toast
           toast.success("Booking successful! Redirecting to payment...");
 
-          // Optionally redirect to payment page if necessary
-          const approvalLink = response.data.approvalLink; // Assuming backend returns a link
-          if (approvalLink) {
-            window.location.href = approvalLink;
-            // Set toastShown to true after the booking is complete
-            localStorage.setItem("toastShown", "false");
-          }
+          const approvalLink = response.data.approvalLink;
+          if (approvalLink) window.location.href = approvalLink;
 
-          // Reset form data after successful submission
           setFormData({
             name: "",
             phone: "",
-            checkIn: null,
-            checkOut: null,
+            startDate: null,
+            endDate: null,
             adults: 0,
             children: 0,
             infants: 0,
@@ -209,24 +200,14 @@ const BookingForm = () => {
           });
         }
       } catch (error) {
-        console.error("Error submitting booking:", error);
         const errorMessage =
-          error.response?.data?.message ||
-          error.message ||
-          "An unknown error occurred";
-
-        // Display error message in toast
+          error.response?.data?.message || "An error occurred";
         toast.error(errorMessage);
       } finally {
-        setIsSubmitting(false); // Reset submitting state after API call
+        setIsSubmitting(false);
       }
     }
   };
-
-  const today = new Date();
-  const minCheckOutDate = formData.checkIn
-    ? new Date(formData.checkIn).setDate(formData.checkIn.getDate() + 2)
-    : today;
 
   return (
     <div
@@ -235,7 +216,7 @@ const BookingForm = () => {
         backgroundImage: `url(${backgroundImage})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundAttachment: "fixed", // Keep background fixed
+        backgroundAttachment: "fixed",
       }}
     >
       <div className="booking-overlay"></div>
@@ -243,15 +224,12 @@ const BookingForm = () => {
       <div className="booking-content">
         <div className="booking-text">
           <h2>Book Your Stay at Selah</h2>
-          <p>
-            Your Tranquil Retreat in Colorado Springs is Just a Few Clicks Away.
-            Escape to Selah and experience the perfect blend of nature,
-            relaxation, and adventure!
-          </p>
+          <p>Your Tranquil Retreat in Colorado Springs is Just a Few Clicks Away.</p>
         </div>
 
         <div className="booking-form-container">
           <h2>Book Your Stay</h2>
+
           <form onSubmit={handleSubmit}>
             {/* Name */}
             <div className="input-container">
@@ -279,39 +257,54 @@ const BookingForm = () => {
               {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
-            {/* Check-in and Check-out Dates */}
-            <div className="input-container-inline">
-              <div className="input-container">
-                <FaCalendarAlt className="input-icon" />
-                <DatePicker
-                  selected={formData.checkIn}
-                  onChange={handleCheckInChange}
-                  placeholderText="Check-in"
-                  dateFormat="MM/dd/yyyy"
-                  className="date-input"
-                  minDate={today}
-                />
-                {errors.checkIn && (
-                  <p className="error-text">{errors.checkIn}</p>
-                )}
-              </div>
-
-              <div className="input-container">
-                <FaCalendarAlt className="input-icon" />
-                <DatePicker
-                  selected={formData.checkOut}
-                  onChange={handleCheckOutChange}
-                  placeholderText="Check-out"
-                  dateFormat="MM/dd/yyyy"
-                  className="date-input"
-                  minDate={minCheckOutDate}
-                  disabled={!formData.checkIn}
-                />
-                {errors.checkOut && (
-                  <p className="error-text">{errors.checkOut}</p>
-                )}
-              </div>
+            {/* Date Range Picker */}
+            <div
+              className="input-container"
+              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+            >
+              <FaCalendarAlt className="input-icon" />
+              <input
+                type="text"
+                readOnly
+                placeholder="Select dates"
+                value={
+                  formData.startDate && formData.endDate
+                    ? `${formData.startDate.toLocaleDateString()} → ${formData.endDate.toLocaleDateString()}`
+                    : ""
+                }
+                className="date-input"
+              />
             </div>
+
+            {isCalendarOpen && (
+              <div
+                className="calendar-popup"
+                style={{
+                  maxHeight: window.innerWidth < 768 ? "400px" : "auto",
+                  overflowY: window.innerWidth < 768 ? "auto" : "visible",
+                }}
+              >
+                <DateRange
+                  ranges={[
+                    {
+                      startDate: formData.startDate || today,
+                      endDate: formData.endDate || today,
+                      key: "selection",
+                    },
+                  ]}
+                  onChange={handleRangeChange}
+                  moveRangeOnFirstSelection={false}
+                  rangeColors={["#148992"]}
+                  months={2} // ALWAYS 2 months
+                  direction={calendarDirection} // horizontal desktop, vertical mobile
+                  minDate={today}
+                  locale={enUS}
+                />
+              </div>
+            )}
+
+            {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
+            {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
 
             {/* Guests */}
             <div
@@ -319,22 +312,24 @@ const BookingForm = () => {
               onClick={() => setIsDropdownVisible(!isDropdownVisible)}
             >
               <span className="input-icon">👨‍👩‍👧‍👦</span>
+
               <input
                 type="text"
-                value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
                 readOnly
                 placeholder="Select Guests"
+                value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
               />
+
               <FaChevronDown
                 className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
               />
+
               {isDropdownVisible && (
                 <div className="dropdown-menu">
                   {["adults", "children", "infants", "pets"].map((type) => (
                     <div className="dropdown-item" key={type}>
-                      <label>
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </label>
+                      <label>{type.charAt(0).toUpperCase() + type.slice(1)}</label>
+
                       <div className="quantity-controls">
                         <button
                           type="button"
@@ -342,14 +337,15 @@ const BookingForm = () => {
                             e.stopPropagation();
                             setFormData({
                               ...formData,
-                              [type]:
-                                formData[type] - 1 < 0 ? 0 : formData[type] - 1,
+                              [type]: Math.max(formData[type] - 1, 0),
                             });
                           }}
                         >
                           −
                         </button>
+
                         <span>{formData[type]}</span>
+
                         <button
                           type="button"
                           onClick={(e) => {
@@ -369,6 +365,7 @@ const BookingForm = () => {
               )}
             </div>
 
+            {/* Submit Button */}
             <button
               type="submit"
               className="submit-btn"
@@ -380,7 +377,6 @@ const BookingForm = () => {
         </div>
       </div>
 
-      {/* Toast Container */}
       <ToastContainer position="top-right" autoClose={5000} />
     </div>
   );

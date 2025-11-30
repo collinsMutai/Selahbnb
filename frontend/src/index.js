@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import store from './redux/store'; 
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+
 // Make sure to add your Google Client ID here (use .env variable or hard-code it)
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
