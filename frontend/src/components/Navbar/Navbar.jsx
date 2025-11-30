@@ -21,7 +21,7 @@ const Navbar = () => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.post(
-        "https://selahbnbbackend.onrender.com/api/users/refresh-token",
+        "https://ef08732044fb.ngrok-free.app/api/users/refresh-token",
         {},
         { withCredentials: true }
       );
@@ -67,7 +67,7 @@ const Navbar = () => {
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response;
     try {
-      const res = await fetch("https://selahbnbbackend.onrender.com/api/users/google-login", {
+      const res = await fetch("https://ef08732044fb.ngrok-free.app/api/users/google-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

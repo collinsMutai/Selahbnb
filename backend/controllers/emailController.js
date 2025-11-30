@@ -43,7 +43,7 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
       <ul>
         <li><strong>Check-in:</strong> ${formattedCheckIn}</li>
         <li><strong>Check-out:</strong> ${formattedCheckOut}</li>
-        <li><strong>Total Price:</strong> $${totalPrice}</li>
+        <li><strong>Total Price:</strong> $${Number(totalPrice).toFixed(2)}</li>
         <li><strong>Payment Transaction ID:</strong> ${paymentTransactionId}</li>
       </ul>
 

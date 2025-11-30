@@ -2,14 +2,13 @@ import Booking from "../models/Booking.js";
 import { v4 as uuidv4 } from "uuid"; // Import uuidv4 to generate unique IDs
 import Listing from "../models/Listing.js"; // To fetch listing details
 import { createPaypalPayment } from "./paypalController.js"; // Import PayPal payment method
-import moment from 'moment-timezone';
+import moment from "moment-timezone";
 
 // Define the check-in and check-out restrictions in Colorado Springs time (America/Denver timezone)
 const HOUSE_RULES = {
-  checkIn: { hour: 15, minute: 0 },  // 3:00 PM
+  checkIn: { hour: 15, minute: 0 }, // 3:00 PM
   checkOut: { hour: 11, minute: 0 }, // 11:00 AM
 };
-
 
 // Create a new booking and initiate PayPal payment
 export const createBooking = async (req, res) => {
@@ -44,21 +43,31 @@ export const createBooking = async (req, res) => {
       return res.status(400).json({ message: "Dates are already booked." });
     }
 
-      // Convert the check-in and check-out times to Colorado Springs time (America/Denver timezone)
-  const checkInDate = moment.tz(checkIn, "America/Denver");
-  const checkOutDate = moment.tz(checkOut, "America/Denver");
+    // Convert the check-in and check-out times to Colorado Springs time (America/Denver timezone)
+    const checkInDate = moment.tz(checkIn, "America/Denver");
+    const checkOutDate = moment.tz(checkOut, "America/Denver");
 
-  // Ensure the check-in is after 3:00 PM Colorado Springs time
-  if (checkInDate.hour() < HOUSE_RULES.checkIn.hour || 
-      (checkInDate.hour() === HOUSE_RULES.checkIn.hour && checkInDate.minute() < HOUSE_RULES.checkIn.minute)) {
-    return res.status(400).json({ message: "Check-in must be after 3:00 PM in Colorado Springs." });
-  }
+    // Ensure the check-in is after 3:00 PM Colorado Springs time
+    if (
+      checkInDate.hour() < HOUSE_RULES.checkIn.hour ||
+      (checkInDate.hour() === HOUSE_RULES.checkIn.hour &&
+        checkInDate.minute() < HOUSE_RULES.checkIn.minute)
+    ) {
+      return res.status(400).json({
+        message: "Check-in must be after 3:00 PM in Colorado Springs.",
+      });
+    }
 
-  // Ensure the check-out is before 11:00 AM Colorado Springs time
-  if (checkOutDate.hour() > HOUSE_RULES.checkOut.hour || 
-      (checkOutDate.hour() === HOUSE_RULES.checkOut.hour && checkOutDate.minute() > HOUSE_RULES.checkOut.minute)) {
-    return res.status(400).json({ message: "Checkout must be before 11:00 AM in Colorado Springs." });
-  }
+    // Ensure the check-out is before 11:00 AM Colorado Springs time
+    if (
+      checkOutDate.hour() > HOUSE_RULES.checkOut.hour ||
+      (checkOutDate.hour() === HOUSE_RULES.checkOut.hour &&
+        checkOutDate.minute() > HOUSE_RULES.checkOut.minute)
+    ) {
+      return res.status(400).json({
+        message: "Checkout must be before 11:00 AM in Colorado Springs.",
+      });
+    }
 
     // Calculate the number of days between check-in and check-out
     const checkInDateJS = new Date(checkIn);
@@ -67,8 +76,12 @@ export const createBooking = async (req, res) => {
       (checkOutDateJS - checkInDateJS) / (1000 * 60 * 60 * 24)
     );
 
-    // Calculate the total price based on price per night and number of days
-    const totalPrice = listing.price * numberOfDays;
+    // Colorado Springs / El Paso County lodging tax
+    const TAX_RATE = 0.112; // 11.2%
+
+    const subtotal = listing.price * numberOfDays;
+    const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
+    const totalPrice = Number((subtotal + taxAmount).toFixed(2));
 
     // Generate a unique transaction ID (UUID) for local tracking
     const paymentTransactionId = uuidv4();
@@ -76,7 +89,7 @@ export const createBooking = async (req, res) => {
     // Create a new booking
     const booking = new Booking({
       listing: listingId,
-      user: req.user._id, // Assuming user is attached to req by an auth middleware
+      user: req.user._id,
       name,
       phone,
       checkIn,
@@ -85,9 +98,11 @@ export const createBooking = async (req, res) => {
       children,
       infants,
       pets,
+      subtotal,
+      tax: taxAmount,
       totalPrice,
       numberOfDays,
-      paymentTransactionId, // Save the unique payment transaction ID
+      paymentTransactionId,
     });
 
     // Save the booking to the database
@@ -107,7 +122,12 @@ export const createBooking = async (req, res) => {
       });
 
       res.status(201).json({
-        booking: savedBooking,
+        booking: {
+          ...savedBooking._doc,
+          subtotal: savedBooking.subtotal.toFixed(2),
+          tax: savedBooking.tax.toFixed(2),
+          totalPrice: savedBooking.totalPrice.toFixed(2),
+        },
         approvalLink: paymentResponse.data.approvalLink,
       });
     } else {
@@ -120,11 +140,9 @@ export const createBooking = async (req, res) => {
       "Error creating booking and initiating PayPal payment:",
       error
     );
-    res
-      .status(500)
-      .json({
-        message: "Error creating booking and initiating PayPal payment",
-      });
+    res.status(500).json({
+      message: "Error creating booking and initiating PayPal payment",
+    });
   }
 };
 
@@ -180,14 +198,3 @@ export const updateBookingStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-
-
-
-
-
-
-
-
-

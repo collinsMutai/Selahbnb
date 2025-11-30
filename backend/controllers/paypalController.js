@@ -3,7 +3,7 @@ import axios from "axios";
 import Listing from "../models/Listing.js";
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
-import { sendBookingConfirmationEmail } from './emailController.js';
+import { sendBookingConfirmationEmail } from "./emailController.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -68,8 +68,8 @@ export const createPaypalPayment = async (req) => {
         },
       ],
       application_context: {
-        return_url: `https://selahbnb.onrender.com/paypalpayment/success`,
-        cancel_url: `https://selahbnb.onrender.com/paypalpayment/cancel`,
+        return_url: `http://localhost:3000/paypalpayment/success`,
+        cancel_url: `http://localhost:3000/paypalpayment/cancel`,
       },
     };
 
@@ -113,18 +113,18 @@ export const createPaypalPayment = async (req) => {
 export const capturePaypalPayment = async (req, res) => {
   const { orderId, payerId } = req.body;
 
-  console.log("Received capturePaypalPayment request", orderId, payerId);  // Log when the function is called
+  console.log("Received capturePaypalPayment request", orderId, payerId); // Log when the function is called
 
   try {
     // Step 1: Get the access token to interact with PayPal API
     const accessToken = await getPaypalAccessToken();
-    console.log("Access token obtained:", accessToken);  // Log access token retrieval
+    console.log("Access token obtained:", accessToken); // Log access token retrieval
 
     // Step 2: Check if the PayPal payment was approved
     const statusRequest = new paypal.orders.OrdersGetRequest(orderId);
     statusRequest.headers["Authorization"] = `Bearer ${accessToken}`;
     const statusResponse = await client.execute(statusRequest);
-    console.log("PayPal payment status response:", statusResponse);  // Log PayPal status response
+    console.log("PayPal payment status response:", statusResponse); // Log PayPal status response
 
     if (statusResponse.result.status !== "APPROVED") {
       return res.status(400).json({ message: "Payment not approved" });
@@ -132,7 +132,7 @@ export const capturePaypalPayment = async (req, res) => {
 
     // Step 3: Find the booking associated with the PayPal order ID
     const booking = await Booking.findOne({ paypalOrderId: orderId });
-    console.log("Booking found:", booking);  // Log the booking
+    console.log("Booking found:", booking); // Log the booking
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -147,7 +147,7 @@ export const capturePaypalPayment = async (req, res) => {
     const captureRequest = new paypal.orders.OrdersCaptureRequest(orderId);
     captureRequest.headers["Authorization"] = `Bearer ${accessToken}`;
     const captureResponse = await client.execute(captureRequest);
-    console.log("Capture payment response:", captureResponse);  // Log payment capture response
+    console.log("Capture payment response:", captureResponse); // Log payment capture response
 
     // Step 6: Ensure the capture response is valid
     if (!captureResponse.result || !captureResponse.result.purchase_units) {
@@ -157,15 +157,16 @@ export const capturePaypalPayment = async (req, res) => {
     // Step 7: Update the booking with payment details
     booking.status = "Confirmed"; // Change booking status to 'Confirmed'
     booking.paymentStatus = "Completed"; // Set payment status to 'Completed'
-    booking.paymentAmount = captureResponse.result.purchase_units[0].payments.captures[0].amount.value; // Store the captured amount
+    booking.paymentAmount =
+      captureResponse.result.purchase_units[0].payments.captures[0].amount.value; // Store the captured amount
     booking.payerEmail = captureResponse.result.payer.email_address; // Store the payer's email
     booking.paymentTransactionId = captureResponse.result.id; // Store the transaction ID
 
-    console.log("Booking status updated:", booking);  // Log before saving the booking
+    console.log("Booking status updated:", booking); // Log before saving the booking
 
     // Step 8: Save the updated booking
     const updatedBooking = await booking.save();
-    console.log("Booking saved:", updatedBooking);  // Log after saving the booking
+    console.log("Booking saved:", updatedBooking); // Log after saving the booking
 
     // Step 9: Populate the listing information
     await updatedBooking.populate("listing"); // Populate the `listing` field with the full listing details
@@ -177,23 +178,37 @@ export const capturePaypalPayment = async (req, res) => {
     // Step 11: Send a confirmation email to the payer's email and user's email
     setImmediate(async () => {
       try {
-        console.log("Sending confirmation email to payer:", updatedBooking.payerEmail); // Log before sending the email
-        await sendBookingConfirmationEmail(updatedBooking.payerEmail, userEmail, updatedBooking, updatedBooking.listing);
+        console.log(
+          "Sending confirmation email to payer:",
+          updatedBooking.payerEmail
+        ); // Log before sending the email
+        await sendBookingConfirmationEmail(
+          updatedBooking.payerEmail,
+          userEmail,
+          updatedBooking,
+          updatedBooking.listing
+        );
         console.log("Email sent to payer successfully.");
       } catch (emailError) {
-        console.error("Error sending email to payer:", emailError);  // Log email sending failure
+        console.error("Error sending email to payer:", emailError); // Log email sending failure
       }
     });
 
     // Step 12: Respond with success and the updated booking data
-    res.status(200).json({ message: "Payment successfully captured", booking: updatedBooking });
-
+    res.status(200).json({
+      message: "Payment successfully captured",
+      booking: {
+        ...updatedBooking._doc,
+        subtotal: updatedBooking.subtotal.toFixed(2),
+        tax: updatedBooking.tax.toFixed(2),
+        totalPrice: updatedBooking.totalPrice.toFixed(2),
+      },
+    });
   } catch (error) {
-    console.error("Error in capturing PayPal payment:", error);  // Log error in try-catch block
+    console.error("Error in capturing PayPal payment:", error); // Log error in try-catch block
     res.status(500).json({ message: "Error capturing PayPal payment" });
   }
 };
-
 
 // Cancel the PayPal payment (if the user decides to cancel)
 export const cancelPaypalPayment = async (req, res) => {
