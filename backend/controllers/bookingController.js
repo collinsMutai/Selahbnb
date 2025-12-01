@@ -198,3 +198,19 @@ export const updateBookingStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getListingAvailability = async (req, res) => {
+  try {
+    const listingId = req.params.listingId;
+
+    const bookings = await Booking.find({
+      listing: listingId,
+      status: "Confirmed"   // Only confirmed bookings block dates
+    }).select("checkIn checkOut");
+
+    res.json({ bookedDates: bookings });
+  } catch (error) {
+    console.error("Error fetching availability:", error);
+    res.status(500).json({ message: "Error fetching availability" });
+  }
+};

@@ -21,7 +21,7 @@ const Navbar = () => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.post(
-        "https://ef08732044fb.ngrok-free.app/api/users/refresh-token",
+        "https://6aec2c544806.ngrok-free.app/api/users/refresh-token",
         {},
         { withCredentials: true }
       );
@@ -67,7 +67,7 @@ const Navbar = () => {
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response;
     try {
-      const res = await fetch("https://ef08732044fb.ngrok-free.app/api/users/google-login", {
+      const res = await fetch("https://6aec2c544806.ngrok-free.app/api/users/google-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

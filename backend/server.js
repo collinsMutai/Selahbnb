@@ -23,7 +23,7 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:3000", // Local frontend
-    "https://ef08732044fb.ngrok-free.app", // Ngrok URL for backend
+    "https://6aec2c544806.ngrok-free.app", // Ngrok URL for backend
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],

@@ -24,7 +24,7 @@ import "./BookingForm.css";
 import backgroundImage from "../../images/bedroom1_img1.avif";
 
 const apiUrl =
-  process.env.REACT_APP_API_URL || "https://ef08732044fb.ngrok-free.app/api";
+  process.env.REACT_APP_API_URL || "https://6aec2c544806.ngrok-free.app/api";
 
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -53,6 +53,9 @@ const BookingForm = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [bookedRanges, setBookedRanges] = useState([]); // ⭐ NEW
+  const listingId = "6929ea1334872125aba99042"; // your listing ID
+
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const paymentProcessed = useSelector(
     (state) => state.booking.paymentProcessed
@@ -71,10 +74,61 @@ const BookingForm = () => {
       }
     };
 
-    handleResize(); // set initial state
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  // ⭐ Fetch availability when calendar is opened
+  const fetchAvailability = async () => {
+    try {
+      const res = await axios.get(
+        `${apiUrl}/bookings/listings/${listingId}/availability`
+      );
+      console.log('res.data.bookedDates', res.data);
+      
+      setBookedRanges(res.data.bookedDates || []);
+    } catch (err) {
+      console.error("Error fetching availability", err);
+    }
+  };
+
+  // Convert booked ranges into all disabled dates
+  const getDisabledDates = () => {
+    let disabled = [];
+
+    bookedRanges.forEach((range) => {
+      const start = new Date(range.checkIn);
+      const end = new Date(range.checkOut);
+
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        disabled.push(new Date(d));
+      }
+    });
+
+    return disabled;
+  };
+
+  // Handle Calendar Change
+  const handleRangeChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
+
+    const disabled = getDisabledDates();
+    const overlap = disabled.some(
+      (d) => d >= startDate && d <= endDate
+    );
+
+    if (overlap) {
+      toast.error("Selected range includes booked dates.");
+      return;
+    }
+
+    setFormData({
+      ...formData,
+      startDate,
+      endDate,
+    });
+  };
 
   // Handle Text Inputs
   const handleInputChange = (e) => {
@@ -82,16 +136,6 @@ const BookingForm = () => {
     setFormData({
       ...formData,
       [name]: value,
-    });
-  };
-
-  // Handle Calendar Change
-  const handleRangeChange = (ranges) => {
-    const { startDate, endDate } = ranges.selection;
-    setFormData({
-      ...formData,
-      startDate,
-      endDate,
     });
   };
 
@@ -163,7 +207,7 @@ const BookingForm = () => {
           ? formData.startDate.toISOString()
           : null,
         checkOut: formData.endDate ? formData.endDate.toISOString() : null,
-        listingId: "6929ea1334872125aba99042",
+        listingId,
         returnUrl: window.location.href,
       };
 
@@ -257,10 +301,13 @@ const BookingForm = () => {
               {errors.phone && <p className="error-text">{errors.phone}</p>}
             </div>
 
-            {/* Date Range Picker */}
+            {/* Date Picker */}
             <div
               className="input-container"
-              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              onClick={() => {
+                setIsCalendarOpen(!isCalendarOpen);
+                if (!isCalendarOpen) fetchAvailability(); // ⭐ load booked dates
+              }}
             >
               <FaCalendarAlt className="input-icon" />
               <input
@@ -295,10 +342,16 @@ const BookingForm = () => {
                   onChange={handleRangeChange}
                   moveRangeOnFirstSelection={false}
                   rangeColors={["#148992"]}
-                  months={2} // ALWAYS 2 months
-                  direction={calendarDirection} // horizontal desktop, vertical mobile
+                  months={2}
+                  direction={calendarDirection}
                   minDate={today}
                   locale={enUS}
+                  disabledDates={getDisabledDates()} // ⭐ prevent selecting booked days
+                  disabledDay={(date) =>
+                    getDisabledDates().some(
+                      (d) => d.toDateString() === date.toDateString()
+                    )
+                  }
                 />
               </div>
             )}
