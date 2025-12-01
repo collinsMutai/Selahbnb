@@ -211,7 +211,7 @@ export const getListingAvailability = async (req, res) => {
     }).select("checkIn checkOut");
 console.log('bookings', bookings);
 
-    res.json({ bookedDates: bookings });
+    res.json({ bookedDates: 'hello' });
   } catch (error) {
     console.error("Error fetching availability:", error);
     res.status(500).json({ message: "Error fetching availability" });

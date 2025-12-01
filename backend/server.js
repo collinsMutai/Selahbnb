@@ -23,7 +23,7 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:3000", // Local frontend
-    " https://48f6e15f5218.ngrok-free.app", // Ngrok URL for backend
+    "https://nonforbearing-semiadhesively-isadora.ngrok-free.dev", // Ngrok URL for backend
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -54,6 +54,12 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/tourplaces", tourPlaceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/paypal", paypalRoutes);
+
+app.use('/',(req,res)=>{
+  res.json({
+    message:'hello'
+  })
+})
 
 // Start server
 const PORT = process.env.PORT || 5000;
