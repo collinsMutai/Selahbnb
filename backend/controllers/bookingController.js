@@ -202,11 +202,14 @@ export const updateBookingStatus = async (req, res) => {
 export const getListingAvailability = async (req, res) => {
   try {
     const listingId = req.params.listingId;
+    console.log('listingId',listingId);
+    
 
     const bookings = await Booking.find({
       listing: listingId,
       status: "Confirmed"   // Only confirmed bookings block dates
     }).select("checkIn checkOut");
+console.log('bookings', bookings);
 
     res.json({ bookedDates: bookings });
   } catch (error) {

@@ -23,7 +23,7 @@ const app = express();
 const corsOptions = {
   origin: [
     "http://localhost:3000", // Local frontend
-    "https://6aec2c544806.ngrok-free.app", // Ngrok URL for backend
+    " https://48f6e15f5218.ngrok-free.app", // Ngrok URL for backend
   ],
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -42,6 +42,11 @@ app.use((req, res, next) => {
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log("🔥 Incoming request:", req.method, req.url);
+  next();
+});
+
 
 // Routes
 app.use("/api/users", userRoutes);

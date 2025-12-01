@@ -24,7 +24,7 @@ import "./BookingForm.css";
 import backgroundImage from "../../images/bedroom1_img1.avif";
 
 const apiUrl =
-  process.env.REACT_APP_API_URL || "https://6aec2c544806.ngrok-free.app/api";
+  process.env.REACT_APP_API_URL || "https://48f6e15f5218.ngrok-free.app/api";
 
 const BookingForm = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
