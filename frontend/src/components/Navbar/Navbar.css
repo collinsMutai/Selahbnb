@@ -238,6 +238,23 @@
   background-color: #e60000;
 }
 
+.admin-link {
+  display: flex;
+  align-items: center;
+  color: #3c9d8e;
+  text-decoration: none;
+  margin-bottom: 15px;
+}
+
+.admin-link:hover {
+  text-decoration: underline;
+}
+
+.admin-link svg {
+  margin-right: 8px; /* Space between icon and text */
+}
+
+
 /* Media Queries for Mobile */
 @media (max-width: 768px) {
   .navbar-links {

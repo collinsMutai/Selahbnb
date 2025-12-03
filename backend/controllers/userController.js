@@ -178,16 +178,28 @@ export const getUserProfile = async (req, res) => {
 // Get all bookings for the user
 export const getUserBookings = async (req, res) => {
   try {
+    // If the user is an admin, fetch all bookings
+    if (req.user.role === 'admin') {
+      const bookings = await Booking.find().populate("user"); // Fetch all bookings from all users
+      return res.json(bookings); // Return all bookings
+    }
+
+    // If the user is not an admin, fetch only the bookings for the specific user
     const user = await User.findById(req.user._id).populate("bookings");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.json(user.bookings); // Send back the user's bookings
+    // Ensure the bookings field is always an array, even if empty
+    const bookings = user.bookings || [];
+
+    res.json(bookings); // Return the user's bookings (or an empty array if no bookings)
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // Update user profile (name, email, password)
 export const updateUserProfile = async (req, res) => {
@@ -299,3 +311,5 @@ export const logout = (req, res) => {
   });
   res.status(200).json({ message: "Logged out successfully" });
 };
+
+

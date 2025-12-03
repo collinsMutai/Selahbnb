@@ -21,7 +21,7 @@ const Navbar = () => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.post(
-        "https://a2ceda8e6f53.ngrok-free.app/api/users/refresh-token",
+        "http://localhost:5000/api/users/refresh-token",
         {},
         { withCredentials: true }
       );
@@ -67,7 +67,7 @@ const Navbar = () => {
   const handleGoogleLoginSuccess = async (response) => {
     const { credential } = response;
     try {
-      const res = await fetch("https://nonforbearing-semiadhesively-isadora.ngrok-free.dev/api/users/google-login", {
+      const res = await fetch("http://localhost:5000/api/users/google-login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -110,7 +110,7 @@ const Navbar = () => {
     localStorage.removeItem("bookingDetails");
     dispatch(logout());
     dispatch(setModalOpen(false));
-    navigate('/')
+    navigate('/');
   };
 
   useEffect(() => {
@@ -277,7 +277,7 @@ const Navbar = () => {
 
         <div className="navbar-right">
           <div className="user-icon" onClick={toggleModal}>
-               <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -353,6 +353,17 @@ const Navbar = () => {
             ) : (
               <>
                 <h2>Welcome, {user?.name || "User"}</h2>
+                {user?.role === "admin" && (
+                  <NavLink to="/admin" className="admin-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-home-2">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                      <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                      <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                      <path d="M10 12h4v4h-4z" />
+                    </svg>
+                    Dashboard
+                  </NavLink>
+                )}
                 <button onClick={handleLogout} className="logout-btn">
                   Logout
                 </button>

@@ -21,14 +21,12 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    "http://localhost:3000", // Local frontend
-    "http://localhost:5000", // Ngrok URL for backend
-  ],
+  origin: process.env.CORS_ORIGIN.split(','), // Comma-separated list in .env
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
+
 
 // Enable CORS
 app.use(cors(corsOptions));
