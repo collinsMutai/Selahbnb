@@ -1,5 +1,5 @@
 import express from 'express';
-import { createPaypalPayment, capturePaypalPayment, cancelPaypalPayment } from '../controllers/paypalController.js';
+import { createPaypalPayment, capturePaypalPayment, cancelPaypalPayment, refundPaypalPayment } from '../controllers/paypalController.js';
 import { verifyPaypalWebhook } from '../utils/paypalUtils.js';
 
 const router = express.Router();
@@ -12,6 +12,9 @@ router.post('/capture', capturePaypalPayment);
 
 // Route to cancel PayPal payment
 router.post('/cancel', cancelPaypalPayment);
+
+// Route to issue PayPal refund
+router.post('/refund', refundPaypalPayment);  // New route to handle refund request
 
 // Route to handle PayPal webhooks
 router.post('/webhook', async (req, res) => {
@@ -61,21 +64,17 @@ router.post('/webhook', async (req, res) => {
 });
 
 // Handle payment completion
-// Handle payment completion
 const handlePaymentCompleted = async (paymentData) => {
   const { transaction_id, amount, payer } = paymentData;
 
-  // Check if the payment transaction already exists in the booking database
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
-    // If the booking is already confirmed or processed, skip it
     if (booking.paymentStatus === 'Completed') {
       console.log(`Payment already processed for transaction: ${transaction_id}`);
-      return;  // Prevent duplicate processing
+      return;
     }
 
-    // Otherwise, update the booking status to 'Confirmed' and mark payment as completed
     booking.status = 'Confirmed';
     booking.paymentStatus = 'Completed';
     booking.paymentAmount = amount.total;
@@ -88,7 +87,6 @@ const handlePaymentCompleted = async (paymentData) => {
   }
 };
 
-
 // Handle pending payment
 const handlePaymentPending = async (paymentData) => {
   const { transaction_id } = paymentData;
@@ -96,7 +94,6 @@ const handlePaymentPending = async (paymentData) => {
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
-    // Check if status is already 'Pending' to prevent updating the status again
     if (booking.status === 'Pending') {
       console.log(`Payment already marked as Pending for transaction: ${transaction_id}`);
       return;
@@ -108,14 +105,13 @@ const handlePaymentPending = async (paymentData) => {
   }
 };
 
-// Handle refunded payment
+// Handle refunded payment (this is triggered by the webhook)
 const handlePaymentRefunded = async (paymentData) => {
   const { transaction_id } = paymentData;
 
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
-    // Prevent updating the status if it's already 'Refunded'
     if (booking.status === 'Refunded') {
       console.log(`Payment already refunded for transaction: ${transaction_id}`);
       return;
@@ -134,7 +130,6 @@ const handlePaymentDenied = async (paymentData) => {
   const booking = await Booking.findOne({ paymentTransactionId: transaction_id });
 
   if (booking) {
-    // Prevent updating the status if it's already 'Denied'
     if (booking.status === 'Denied') {
       console.log(`Payment already denied for transaction: ${transaction_id}`);
       return;
@@ -146,5 +141,59 @@ const handlePaymentDenied = async (paymentData) => {
   }
 };
 
+// Refund PayPal payment
+export const refundPaypalPayment = async (req, res) => {
+  const { bookingId } = req.body;
+
+  try {
+    // Step 1: Find the booking associated with the payment
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Ensure that the booking payment has been completed before issuing a refund
+    if (booking.paymentStatus !== 'Completed') {
+      return res.status(400).json({ message: 'Payment not completed or already refunded' });
+    }
+
+    // Step 2: Get the PayPal transaction ID from the booking
+    const paymentTransactionId = booking.paymentTransactionId;
+
+    // Step 3: Create a refund request using PayPal API (using the transaction ID)
+    const accessToken = await getPaypalAccessToken();
+    const refundRequest = new paypal.payments.CapturesRefundRequest(paymentTransactionId);
+    refundRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
+    // Optional: Add amount (in case of partial refunds), here we're doing a full refund
+    refundRequest.requestBody({
+      amount: {
+        value: booking.totalPrice.toString(),
+        currency_code: "USD",
+      },
+    });
+
+    // Step 4: Execute the refund request
+    const refundResponse = await client.execute(refundRequest);
+
+    // Step 5: Check the refund status
+    if (refundResponse.result.status !== "COMPLETED") {
+      return res.status(400).json({ message: 'Failed to refund the payment' });
+    }
+
+    // Step 6: Update the booking status to 'Refunded'
+    booking.status = "Refunded";
+    booking.paymentStatus = "Refunded";
+    await booking.save();
+
+    res.status(200).json({
+      message: 'Payment refunded successfully',
+      booking,
+    });
+  } catch (error) {
+    console.error("Error issuing PayPal refund:", error);
+    res.status(500).json({ message: "Error issuing PayPal refund" });
+  }
+};
 
 export default router;

@@ -238,3 +238,58 @@ export const cancelPaypalPayment = async (req, res) => {
     res.status(500).json({ message: "Error canceling PayPal payment" });
   }
 };
+
+// Issue a refund for a PayPal payment
+export const refundPaypalPayment = async (req, res) => {
+  const { bookingId } = req.body;
+
+  try {
+    // Step 1: Find the booking
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    if (booking.paymentStatus !== "Completed") {
+      return res.status(400).json({ message: "Payment not completed or already refunded" });
+    }
+
+    // Step 2: Get the PayPal transaction ID from the booking
+    const paymentTransactionId = booking.paymentTransactionId;
+
+    // Step 3: Get the PayPal access token
+    const accessToken = await getPaypalAccessToken();
+
+    // Step 4: Create the refund request
+    const refundRequest = new paypal.payments.CapturesRefundRequest(paymentTransactionId);
+    refundRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+
+    // Optional: You can add refund amount and other parameters
+    refundRequest.requestBody({
+      amount: {
+        value: booking.totalPrice.toString(),  // Refund full amount of the booking
+        currency_code: "USD",
+      },
+    });
+
+    // Step 5: Execute the refund request
+    const refundResponse = await client.execute(refundRequest);
+
+    if (refundResponse.result.status !== "COMPLETED") {
+      return res.status(400).json({ message: "Failed to refund the payment" });
+    }
+
+    // Step 6: Update booking status to 'Refunded'
+    booking.status = "Cancelled";
+    booking.paymentStatus = "Refunded";
+    await booking.save();
+
+    res.status(200).json({
+      message: "Payment refunded successfully",
+      booking,
+    });
+  } catch (error) {
+    console.error("Error issuing PayPal refund:", error);
+    res.status(500).json({ message: "Error issuing PayPal refund" });
+  }
+};
