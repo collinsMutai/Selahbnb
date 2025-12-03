@@ -60,10 +60,33 @@ h2 {
   opacity: 0.8;
 }
 
-/* Loading and error messages */
-.loading,
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  color: #148992;
+}
+
+.loading h2 {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* Error state */
 .error {
-  text-align: center;
-  margin-top: 50px;
-  font-size: 1.2em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  color: #e53935;
+}
+
+.error h2 {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: 600;
 }

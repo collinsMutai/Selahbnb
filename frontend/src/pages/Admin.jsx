@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { ThreeDots } from "react-loader-spinner"; // Import the spinner component
 import "./Admin.css"; // Optional for custom styles
 
 const Admin = () => {
@@ -43,6 +44,14 @@ const Admin = () => {
   if (loading) {
     return (
       <div className="loading">
+        <ThreeDots 
+          height="80" 
+          width="80" 
+          radius="9" 
+          color="#148992" 
+          ariaLabel="three-dots-loading"
+          visible={true} 
+        />
         <h2>Loading...</h2>
       </div>
     );

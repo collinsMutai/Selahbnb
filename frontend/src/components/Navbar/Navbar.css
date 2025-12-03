@@ -242,8 +242,12 @@
   display: flex;
   align-items: center;
   color: #3c9d8e;
+  background: none;
+  border: none;
   text-decoration: none;
-  margin-bottom: 15px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 30px;
 }
 
 .admin-link:hover {
@@ -253,6 +257,7 @@
 .admin-link svg {
   margin-right: 8px; /* Space between icon and text */
 }
+
 
 
 /* Media Queries for Mobile */
