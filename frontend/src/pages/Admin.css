@@ -1,6 +1,7 @@
 /* AdminDashboard.css */
 .admin-dashboard {
   padding: 20px;
+  height: 100vh;
 }
 
 h1 {
