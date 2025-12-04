@@ -64,38 +64,39 @@ const Navbar = () => {
   }, [refreshToken]);
 
   // Google login success handler
-  const handleGoogleLoginSuccess = async (response) => {
-    const { credential } = response;
-    try {
-      const res = await fetch("http://localhost:5000/api/users/google-login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token: credential }),
-      });
+const handleGoogleLoginSuccess = async (response) => {
+  const { credential } = response;
+  try {
+    // Immediately close the modal on success
+    dispatch(setModalOpen(false));
 
-      const data = await res.json();
-      if (res.ok) {
-        // Save token and user data in localStorage
-        localStorage.setItem("token", data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
+    // Proceed with the login API call
+    const res = await fetch("http://localhost:5000/api/users/google-login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ token: credential }),
+    });
 
-        // Dispatch login action to Redux store
-        dispatch(login({ user: data.user, token: data.accessToken }));
+    const data = await res.json();
+    if (res.ok) {
+      // Save token and user data in localStorage
+      localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-        // Close modal on successful login
-        dispatch(setModalOpen(false));
-      } else {
-        console.error(
-          "Authentication failed:",
-          data.message || "Unknown error"
-        );
-      }
-    } catch (error) {
-      console.error("Error sending Google login token to backend:", error);
+      // Dispatch login action to Redux store
+      dispatch(login({ user: data.user, token: data.accessToken }));
+    } else {
+      console.error(
+        "Authentication failed:",
+        data.message || "Unknown error"
+      );
     }
-  };
+  } catch (error) {
+    console.error("Error sending Google login token to backend:", error);
+  }
+};
 
   const handleGoogleLoginFailure = (error) => {
     console.log("Google login failed:", error);
