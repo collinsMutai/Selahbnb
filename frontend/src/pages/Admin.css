@@ -57,6 +57,11 @@ h2 {
   color: white;
 }
 
+.booking-table .btn-refund {
+  background-color: #ff9800;
+  color: white;
+}
+
 .booking-table .btn:hover {
   opacity: 0.8;
 }
@@ -90,4 +95,26 @@ h2 {
   margin-top: 20px;
   font-size: 20px;
   font-weight: 600;
+}
+
+/* Filter Section */
+.filter-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.search-input {
+  padding: 8px;
+  width: 250px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+}
+
+.filter-dropdown {
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  cursor: pointer;
 }

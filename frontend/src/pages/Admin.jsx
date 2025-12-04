@@ -5,14 +5,18 @@ import "./Admin.css"; // Optional for custom styles
 
 const Admin = () => {
   const [bookings, setBookings] = useState([]);
+  const [filteredBookings, setFilteredBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // State variables for search and dropdown filter
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterColumn, setFilterColumn] = useState("name"); // default filter column: "name"
 
   // Fetch all bookings from the API
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        // Retrieve the token from localStorage
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -30,7 +34,8 @@ const Admin = () => {
           }
         );
 
-        setBookings(response.data); // Set bookings data
+        setBookings(response.data);
+        setFilteredBookings(response.data);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch bookings: " + err.message);
@@ -41,16 +46,62 @@ const Admin = () => {
     fetchBookings();
   }, []);
 
+  // Handle refund
+  const handleRefund = async (bookingId) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/paypal/refund",
+        { bookingId },
+        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+      );
+
+      if (response.status === 200) {
+        alert("Refund successful!");
+        setBookings(bookings.map((booking) => 
+          booking._id === bookingId ? { ...booking, status: 'Cancelled', paymentStatus: 'Refunded' } : booking
+        ));
+      } else {
+        alert("Failed to issue refund.");
+      }
+    } catch (error) {
+      console.error("Error issuing refund:", error);
+      alert("Error issuing refund. Please try again.");
+    }
+  };
+
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    filterBookings(value, filterColumn);
+  };
+
+  // Handle column filter change (dropdown)
+  const handleFilterColumnChange = (e) => {
+    const column = e.target.value;
+    setFilterColumn(column);
+    filterBookings(searchTerm, column); // Reapply search with the new filter column
+  };
+
+  // Filter bookings based on search term and filter column
+  const filterBookings = (term, column) => {
+    const filtered = bookings.filter((booking) => {
+      const field = booking[column]?.toString().toLowerCase();
+      return field?.includes(term.toLowerCase());
+    });
+    setFilteredBookings(filtered);
+  };
+
   if (loading) {
     return (
       <div className="loading">
-        <ThreeDots 
-          height="80" 
-          width="80" 
-          radius="9" 
-          color="#148992" 
+        <ThreeDots
+          height="80"
+          width="80"
+          radius="9"
+          color="#148992"
           ariaLabel="three-dots-loading"
-          visible={true} 
+          visible={true}
         />
         <h2>Loading...</h2>
       </div>
@@ -70,6 +121,26 @@ const Admin = () => {
       <h1>Admin Dashboard</h1>
       <h2>Bookings Overview</h2>
 
+      {/* Filter Section */}
+      <div className="filter-section">
+        <input
+          type="text"
+          value={searchTerm}
+          placeholder="Search Bookings"
+          onChange={handleSearchChange}
+          className="search-input"
+        />
+        <select value={filterColumn} onChange={handleFilterColumnChange} className="filter-dropdown">
+          <option value="name">Name</option>
+          <option value="phone">Phone</option>
+          <option value="status">Status</option>
+          <option value="paymentStatus">Payment Status</option>
+          <option value="checkIn">Check-in</option>
+          <option value="checkOut">Check-out</option>
+        </select>
+      </div>
+
+      {/* Bookings Table */}
       <table className="booking-table">
         <thead>
           <tr>
@@ -84,12 +155,12 @@ const Admin = () => {
           </tr>
         </thead>
         <tbody>
-          {bookings.length === 0 ? (
+          {filteredBookings.length === 0 ? (
             <tr>
               <td colSpan="8">No bookings available</td>
             </tr>
           ) : (
-            bookings.map((booking) => (
+            filteredBookings.map((booking) => (
               <tr key={booking._id}>
                 <td>{booking.name}</td>
                 <td>{booking.phone}</td>
@@ -101,6 +172,14 @@ const Admin = () => {
                 <td>
                   <button className="btn btn-view">View</button>
                   <button className="btn btn-delete">Delete</button>
+                  {booking.paymentStatus === "Completed" && booking.status !== "Refunded" && (
+                    <button
+                      className="btn btn-refund"
+                      onClick={() => handleRefund(booking._id)}
+                    >
+                      Refund
+                    </button>
+                  )}
                 </td>
               </tr>
             ))
