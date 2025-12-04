@@ -47,46 +47,25 @@ export const createBooking = async (req, res) => {
     const checkInDate = moment.tz(checkIn, "America/Denver");
     const checkOutDate = moment.tz(checkOut, "America/Denver");
 
-    // Ensure the check-in is after 3:00 PM Colorado Springs time (notify, but allow the booking)
+    // Notify user about check-in and check-out restrictions
+    let warningMessage = "";
+
     if (
       checkInDate.hour() < HOUSE_RULES.checkIn.hour ||
       (checkInDate.hour() === HOUSE_RULES.checkIn.hour &&
         checkInDate.minute() < HOUSE_RULES.checkIn.minute)
     ) {
-      return res.status(200).json({
-        message: "Booking is confirmed. Please note that check-in is after 3:00 PM in Colorado Springs.",
-        bookingDetails: {
-          listing: listingId,
-          user: req.user._id,
-          checkIn,
-          checkOut,
-          adults,
-          children,
-          infants,
-          pets,
-        },
-      });
+      warningMessage = "Check-in is after 3:00 PM in Colorado Springs.";
     }
 
-    // Ensure the checkout is before 11:00 AM Colorado Springs time (notify, but allow the booking)
     if (
       checkOutDate.hour() > HOUSE_RULES.checkOut.hour ||
       (checkOutDate.hour() === HOUSE_RULES.checkOut.hour &&
         checkOutDate.minute() > HOUSE_RULES.checkOut.minute)
     ) {
-      return res.status(200).json({
-        message: "Booking is confirmed. Please note that checkout must be before 11:00 AM in Colorado Springs.",
-        bookingDetails: {
-          listing: listingId,
-          user: req.user._id,
-          checkIn,
-          checkOut,
-          adults,
-          children,
-          infants,
-          pets,
-        },
-      });
+      warningMessage = warningMessage
+        ? `${warningMessage} Checkout must be before 11:00 AM in Colorado Springs.`
+        : "Checkout must be before 11:00 AM in Colorado Springs.";
     }
 
     // Calculate the number of days between check-in and check-out
@@ -148,7 +127,8 @@ export const createBooking = async (req, res) => {
           tax: savedBooking.tax.toFixed(2),
           totalPrice: savedBooking.totalPrice.toFixed(2),
         },
-        approvalLink: paymentResponse.data.approvalLink,
+        approvalLink: paymentResponse.data.approvalLink, // Provide the approval link here
+        warningMessage, // Include warning message
       });
     } else {
       res

@@ -203,10 +203,8 @@ const handleSubmit = async (e) => {
 
     const formDataToDispatch = {
       ...formData,
-      checkIn: formData.startDate
-        ? formData.startDate.toISOString()
-        : null,
-      checkOut: formData.endDate ? formData.endDate.toISOString() : null,
+      checkIn: formData.startDate ? formData.startDate.toISOString() : null, // Convert Date to ISO string
+      checkOut: formData.endDate ? formData.endDate.toISOString() : null, // Convert Date to ISO string
       listingId,
       returnUrl: window.location.href,
     };
@@ -223,14 +221,15 @@ const handleSubmit = async (e) => {
         }
       );
 
-      if (response.status === 200) {
-        // Booking confirmed with a warning about check-in and checkout times
-        toast.info(response.data.message); // Display the check-in and checkout warning
-        dispatch(setBookingData(formDataToDispatch));
-        dispatch(setPaymentProcessed(true));
-
+      if (response.status === 201) {
+        // Handle successful booking and redirection to payment form
         const approvalLink = response.data.approvalLink;
-        if (approvalLink) window.location.href = approvalLink;
+        if (approvalLink) {
+          window.location.href = approvalLink;
+        }
+
+        dispatch(setBookingData(formDataToDispatch)); // Dispatch ISO strings
+        dispatch(setPaymentProcessed(true));
 
         setFormData({
           name: "",
@@ -254,6 +253,7 @@ const handleSubmit = async (e) => {
     }
   }
 };
+
 
 
   return (
