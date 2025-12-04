@@ -47,25 +47,45 @@ export const createBooking = async (req, res) => {
     const checkInDate = moment.tz(checkIn, "America/Denver");
     const checkOutDate = moment.tz(checkOut, "America/Denver");
 
-    // Ensure the check-in is after 3:00 PM Colorado Springs time
+    // Ensure the check-in is after 3:00 PM Colorado Springs time (notify, but allow the booking)
     if (
       checkInDate.hour() < HOUSE_RULES.checkIn.hour ||
       (checkInDate.hour() === HOUSE_RULES.checkIn.hour &&
         checkInDate.minute() < HOUSE_RULES.checkIn.minute)
     ) {
-      return res.status(400).json({
-        message: "Check-in must be after 3:00 PM in Colorado Springs.",
+      return res.status(200).json({
+        message: "Booking is confirmed. Please note that check-in is after 3:00 PM in Colorado Springs.",
+        bookingDetails: {
+          listing: listingId,
+          user: req.user._id,
+          checkIn,
+          checkOut,
+          adults,
+          children,
+          infants,
+          pets,
+        },
       });
     }
 
-    // Ensure the check-out is before 11:00 AM Colorado Springs time
+    // Ensure the checkout is before 11:00 AM Colorado Springs time (notify, but allow the booking)
     if (
       checkOutDate.hour() > HOUSE_RULES.checkOut.hour ||
       (checkOutDate.hour() === HOUSE_RULES.checkOut.hour &&
         checkOutDate.minute() > HOUSE_RULES.checkOut.minute)
     ) {
-      return res.status(400).json({
-        message: "Checkout must be before 11:00 AM in Colorado Springs.",
+      return res.status(200).json({
+        message: "Booking is confirmed. Please note that checkout must be before 11:00 AM in Colorado Springs.",
+        bookingDetails: {
+          listing: listingId,
+          user: req.user._id,
+          checkIn,
+          checkOut,
+          adults,
+          children,
+          infants,
+          pets,
+        },
       });
     }
 
@@ -136,16 +156,12 @@ export const createBooking = async (req, res) => {
         .json({ message: paymentResponse.message });
     }
   } catch (error) {
-    console.error(
-      "Error creating booking and initiating PayPal payment:",
-      error
-    );
+    console.error("Error creating booking and initiating PayPal payment:", error);
     res.status(500).json({
       message: "Error creating booking and initiating PayPal payment",
     });
   }
 };
-
 // Get all bookings for a user
 export const getUserBookings = async (req, res) => {
   try {

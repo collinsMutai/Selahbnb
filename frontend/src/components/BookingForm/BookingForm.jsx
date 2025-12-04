@@ -188,70 +188,73 @@ const BookingForm = () => {
   };
 
   // Handle Submit
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!isLoggedIn) {
-      dispatch(setModalOpen(true));
-      return;
-    }
+  if (!isLoggedIn) {
+    dispatch(setModalOpen(true));
+    return;
+  }
 
-    if (paymentProcessed || isSubmitting) return;
+  if (paymentProcessed || isSubmitting) return;
 
-    if (validateForm()) {
-      setIsSubmitting(true);
+  if (validateForm()) {
+    setIsSubmitting(true);
 
-      const formDataToDispatch = {
-        ...formData,
-        checkIn: formData.startDate
-          ? formData.startDate.toISOString()
-          : null,
-        checkOut: formData.endDate ? formData.endDate.toISOString() : null,
-        listingId,
-        returnUrl: window.location.href,
-      };
+    const formDataToDispatch = {
+      ...formData,
+      checkIn: formData.startDate
+        ? formData.startDate.toISOString()
+        : null,
+      checkOut: formData.endDate ? formData.endDate.toISOString() : null,
+      listingId,
+      returnUrl: window.location.href,
+    };
 
-      try {
-        const response = await axios.post(
-          `${apiUrl}/bookings`,
-          formDataToDispatch,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          }
-        );
-
-        if (response.status === 201) {
-          dispatch(setBookingData(formDataToDispatch));
-          dispatch(setPaymentProcessed(true));
-
-          toast.success("Booking successful! Redirecting to payment...");
-
-          const approvalLink = response.data.approvalLink;
-          if (approvalLink) window.location.href = approvalLink;
-
-          setFormData({
-            name: "",
-            phone: "",
-            startDate: null,
-            endDate: null,
-            adults: 0,
-            children: 0,
-            infants: 0,
-            pets: 0,
-          });
+    try {
+      const response = await axios.post(
+        `${apiUrl}/bookings`,
+        formDataToDispatch,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        const errorMessage =
-          error.response?.data?.message || "An error occurred";
-        toast.error(errorMessage);
-      } finally {
-        setIsSubmitting(false);
+      );
+
+      if (response.status === 200) {
+        // Booking confirmed with a warning about check-in and checkout times
+        toast.info(response.data.message); // Display the check-in and checkout warning
+        dispatch(setBookingData(formDataToDispatch));
+        dispatch(setPaymentProcessed(true));
+
+        const approvalLink = response.data.approvalLink;
+        if (approvalLink) window.location.href = approvalLink;
+
+        setFormData({
+          name: "",
+          phone: "",
+          startDate: null,
+          endDate: null,
+          adults: 0,
+          children: 0,
+          infants: 0,
+          pets: 0,
+        });
+      } else {
+        toast.error(response.data.message);
       }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "An error occurred";
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }
+};
+
 
   return (
     <div
