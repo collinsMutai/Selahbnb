@@ -80,6 +80,7 @@ const HeroSlider = forwardRef((props, ref) => {
       caption: "Exciting Gaming Room for Entertainment",
     },
   ];
+  const listingId = "6929ea1334872125aba99042";
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -94,19 +95,18 @@ const HeroSlider = forwardRef((props, ref) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch booked ranges from the backend
-  useEffect(() => {
-    const fetchAvailability = async () => {
-      try {
-        const res = await axios.get(`${apiUrl}/bookings/listings/availability`);
-        setBookedRanges(res.data.bookedDates || []);
-      } catch (err) {
-        console.error("Error fetching availability", err);
-      }
-    };
-
-    fetchAvailability();
-  }, []);
+  // Fetch booked ranges only when calendar is opened
+  const fetchAvailability = async () => {
+    try {
+      const res = await axios.get(
+        `${apiUrl}/bookings/listings/${listingId}/availability`
+      );
+      console.log("Availability data:", res.data);
+      setBookedRanges(res.data.bookedDates || []);
+    } catch (err) {
+      console.error("Error fetching availability", err);
+    }
+  };
 
   // Get disabled dates based on booked ranges
   const getDisabledDates = () => {
@@ -305,7 +305,12 @@ const HeroSlider = forwardRef((props, ref) => {
             {/* Date Picker */}
             <div
               className="input-container"
-              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              onClick={() => {
+                setIsCalendarOpen(!isCalendarOpen);
+                if (!isCalendarOpen) {
+                  fetchAvailability(); // Fetch availability only when opening the calendar
+                }
+              }}
             >
               <FaCalendarAlt className="input-icon" />
               <input

@@ -195,19 +195,36 @@ export const updateBookingStatus = async (req, res) => {
   }
 };
 
+// Get availability for a listing (returns booked dates)
 export const getListingAvailability = async (req, res) => {
   try {
     const listingId = req.params.listingId;
-    console.log('listingId',listingId);
-    
+    console.log('listingId', listingId);
 
+    // Fetch all confirmed bookings for the given listing
     const bookings = await Booking.find({
       listing: listingId,
-      status: "Confirmed"   // Only confirmed bookings block dates
+      status: "Confirmed"  // Only consider confirmed bookings
     }).select("checkIn checkOut");
-console.log('bookings', bookings);
 
-    res.json({ bookedDates: bookings });
+    console.log('bookings', bookings);
+
+    // Convert booked date ranges into a more usable format (Array of booked dates)
+    const bookedDates = [];
+    bookings.forEach(booking => {
+      const startDate = moment(booking.checkIn);
+      const endDate = moment(booking.checkOut);
+
+      // Iterate through the range of dates between checkIn and checkOut
+      while (startDate.isBefore(endDate)) {
+        bookedDates.push(startDate.format('YYYY-MM-DD')); // Add each date to the bookedDates array
+        startDate.add(1, 'days'); // Increment by 1 day
+      }
+    });
+
+    // Return the booked dates
+    res.json({ bookedDates });
+
   } catch (error) {
     console.error("Error fetching availability:", error);
     res.status(500).json({ message: "Error fetching availability" });

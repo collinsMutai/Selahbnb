@@ -15,7 +15,7 @@ router.get("/listing/:id", protect, getListingBookings);
 // Only hosts or admins can update booking status
 router.put("/:id/status", protect, updateBookingStatus);
 
-router.get("/listings/:id/availability", getListingAvailability);
+router.get("/listings/:listingId/availability", getListingAvailability);
 
 
 export default router;
