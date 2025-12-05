@@ -173,7 +173,7 @@ input {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%; /* Position it below input */
+  top: 240px; /* Position it below input */
   left: 0;
   background-color: white;
   border: 1px solid #ccc;
