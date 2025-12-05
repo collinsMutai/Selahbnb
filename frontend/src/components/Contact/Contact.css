@@ -58,7 +58,7 @@
 .contact-two-column {
   display: flex;
   align-items: stretch;
-  gap: 40px;
+  /* gap: 40px; */
   padding: 80px 0;
   width: 100%;
   margin: 0;
@@ -86,7 +86,7 @@
 .contact-form-column {
   flex: 1;
   min-width: 300px;
-  background: #fff;
+  background: #f9f9f9;
   padding: 40px;
   border-radius: 0;
   box-shadow: none;
@@ -116,9 +116,15 @@
 .form-input,
 .form-textarea {
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   font-size: 1rem;
 }
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #0f5f66;  /* Active border color */
+  outline: none;
+}
+
 
 .form-btn {
   padding: 12px;
@@ -150,7 +156,7 @@
 
   .contact-two-column {
     flex-direction: column;
-    gap: 30px;
+    /* gap: 30px; */
     padding: 50px 0;
   }
 
@@ -180,6 +186,9 @@
   .contact-section .contact-card {
     width: 90%;
     max-width: 330px;
+  }
+  .contact-two-column{
+    padding: 0px;
   }
 }
 

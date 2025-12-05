@@ -1,5 +1,10 @@
 import React, { useState, useEffect, forwardRef } from "react";
-import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUser,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -13,7 +18,7 @@ import { enUS } from "date-fns/locale";
 import moment from "moment-timezone"; // Correct import
 import "./HeroSlider.css";
 
-const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const apiUrl = process.env.REACT_APP_API_URL;
 const coloradoSpringsTimeZone = "America/Denver"; // Colorado Springs time zone
 
 const HeroSlider = forwardRef((props, ref) => {
@@ -183,7 +188,9 @@ const HeroSlider = forwardRef((props, ref) => {
       errorMessages.push("Check-out date is required");
       isValid = false;
     } else if (new Date(formData.checkOut) <= new Date(formData.checkIn)) {
-      errorMessages.push("Check-out date must be at least 2 days after check-in.");
+      errorMessages.push(
+        "Check-out date must be at least 2 days after check-in."
+      );
       isValid = false;
     }
 
@@ -220,12 +227,16 @@ const HeroSlider = forwardRef((props, ref) => {
       };
 
       try {
-        const response = await axios.post(`${apiUrl}/bookings`, formDataToDispatch, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        const response = await axios.post(
+          `${apiUrl}/bookings`,
+          formDataToDispatch,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        );
 
         if (response.status === 201) {
           toast.success("Booking successful! Redirecting to payment...");
@@ -313,11 +324,13 @@ const HeroSlider = forwardRef((props, ref) => {
             {isCalendarOpen && (
               <div className="calendar-popup">
                 <DateRange
-                  ranges={[{
-                    startDate: formData.checkIn || new Date(),
-                    endDate: formData.checkOut || new Date(),
-                    key: "selection",
-                  }]}
+                  ranges={[
+                    {
+                      startDate: formData.checkIn || new Date(),
+                      endDate: formData.checkOut || new Date(),
+                      key: "selection",
+                    },
+                  ]}
                   onChange={handleRangeChange}
                   moveRangeOnFirstSelection={false}
                   rangeColors={["#148992"]}
@@ -331,10 +344,7 @@ const HeroSlider = forwardRef((props, ref) => {
             )}
 
             {/* Dropdown menu for guest selection */}
-            <div
-              className="input-container"
-              onClick={toggleDropdown}
-            >
+            <div className="input-container" onClick={toggleDropdown}>
               <span className="input-icon">👨‍👩‍👧‍👦</span>
               <input
                 type="text"
@@ -380,7 +390,11 @@ const HeroSlider = forwardRef((props, ref) => {
             )}
 
             {/* Submit Button */}
-            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            <button
+              type="submit"
+              className="submit-btn"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Processing..." : "Book Now"}
             </button>
           </form>

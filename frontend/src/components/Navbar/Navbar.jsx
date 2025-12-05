@@ -8,6 +8,9 @@ import { login, logout, setUser } from "../../redux/userSlice";
 import { setModalOpen } from "../../redux/modalSlice";
 import "./Navbar.css";
 
+// Fetch the API URL from environment variable
+const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api"; // Fallback to localhost if not set
+
 const Navbar = () => {
   const dispatch = useDispatch();
   const { isLoggedIn, user } = useSelector((state) => state.user);
@@ -21,8 +24,8 @@ const Navbar = () => {
   const refreshToken = useCallback(async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/users/refresh-token",
-        {},
+        `${apiUrl}/users/refresh-token`,
+        {}, // Empty body
         { withCredentials: true }
       );
       const newAccessToken = response.data.accessToken;
@@ -64,39 +67,36 @@ const Navbar = () => {
   }, [refreshToken]);
 
   // Google login success handler
-const handleGoogleLoginSuccess = async (response) => {
-  const { credential } = response;
-  try {
-    // Immediately close the modal on success
-    dispatch(setModalOpen(false));
+  const handleGoogleLoginSuccess = async (response) => {
+    const { credential } = response;
+    try {
+      // Immediately close the modal on success
+      dispatch(setModalOpen(false));
 
-    // Proceed with the login API call
-    const res = await fetch("http://localhost:5000/api/users/google-login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token: credential }),
-    });
+      // Proceed with the login API call
+      const res = await fetch(`${apiUrl}/users/google-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ token: credential }),
+      });
 
-    const data = await res.json();
-    if (res.ok) {
-      // Save token and user data in localStorage
-      localStorage.setItem("token", data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      const data = await res.json();
+      if (res.ok) {
+        // Save token and user data in localStorage
+        localStorage.setItem("token", data.accessToken);
+        localStorage.setItem("user", JSON.stringify(data.user));
 
-      // Dispatch login action to Redux store
-      dispatch(login({ user: data.user, token: data.accessToken }));
-    } else {
-      console.error(
-        "Authentication failed:",
-        data.message || "Unknown error"
-      );
+        // Dispatch login action to Redux store
+        dispatch(login({ user: data.user, token: data.accessToken }));
+      } else {
+        console.error("Authentication failed:", data.message || "Unknown error");
+      }
+    } catch (error) {
+      console.error("Error sending Google login token to backend:", error);
     }
-  } catch (error) {
-    console.error("Error sending Google login token to backend:", error);
-  }
-};
+  };
 
   const handleGoogleLoginFailure = (error) => {
     console.log("Google login failed:", error);
