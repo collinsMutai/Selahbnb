@@ -8,7 +8,8 @@ import { TailSpin } from "react-loader-spinner"; // Import TailSpin spinner
 
 import "./PaypalPaymentSuccess.css"; 
 
-const apiUrl = "https://nonforbearing-semiadhesively-isadora.ngrok-free.dev/api";
+const apiUrl =
+  process.env.REACT_APP_API_URL;
 
 const PaypalPaymentSuccess = () => {
   const dispatch = useDispatch(); 
