@@ -259,7 +259,11 @@ const HeroSlider = forwardRef((props, ref) => {
           });
         }
       } catch (error) {
-        toast.error("Error submitting booking");
+        if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message); // Display the error message from the backend
+      } else {
+        toast.error("Error submitting booking"); // Generic error message
+      }
       } finally {
         setIsSubmitting(false);
       }
