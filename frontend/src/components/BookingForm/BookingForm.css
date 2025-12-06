@@ -1,46 +1,46 @@
 /* Booking Section */
 .booking-section {
   display: flex;
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
-  min-height: 100vh; /* Ensure the section takes full height */
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
   padding: 0 20px;
-  background-image: url('../../images/bedroom1_img1.avif'); /* Background image */
+  background-image: url('../../images/bedroom1_img1.avif');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Keep background fixed */
+  background-attachment: fixed;
   position: relative;
 }
 
-/* Darker overlay on background image */
+/* Background overlay */
 .booking-section .booking-overlay {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Darker overlay with opacity */
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
 }
 
-/* Main content section */
+/* Content wrapper */
 .booking-section .booking-content {
   position: relative;
   display: flex;
   justify-content: space-between;
   width: 100%;
   z-index: 2;
-  flex-wrap: wrap; /* Allow content to wrap on smaller screens */
-  gap: 20px; /* Add gap between elements */
-  max-width: 1200px; /* Prevent excessive width */
+  flex-wrap: wrap;
+  gap: 20px;
+  max-width: 1200px;
 }
 
-/* Text section on the left */
+/* Left text section */
 .booking-section .booking-text {
   width: 45%;
   color: white;
   padding: 30px;
-  margin-top: 10px; /* Adjust margin for better alignment */
+  margin-top: 10px;
 }
 
 .booking-section .booking-text h2 {
@@ -60,16 +60,12 @@
   margin-bottom: 25px;
 }
 
-/* Form container */
+/* Form container (STRUCTURE ONLY — background now handled by .booking-form-only) */
 .booking-section .booking-form-container {
   width: 45%;
-  padding: 20px;
-  background-color: rgba(255, 255, 255, 0.9); /* White background with some opacity */
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
 }
 
+/* Form title (covered by white box thanks to .booking-form-only) */
 .booking-section .booking-form-container h2 {
   text-align: center;
   color: #333;
@@ -77,157 +73,20 @@
   margin-bottom: 20px;
 }
 
-/* Input container styling */
-.booking-section .input-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-/* Input icon styling */
-.booking-section .input-icon {
-  margin-right: 10px;
-  color: #148992;
-  font-size: 18px;
-}
-
-/* Input field styling */
-.booking-section input[type="text"],
-.booking-section input[type="tel"],
-.booking-section input[type="date"] {
-  width: 100%;
-  padding: 12px 15px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.3s ease;
-  padding-right: 35px; /* Accommodate Chevron icon inside */
-}
-
-/* Chevron Icon */
-.booking-section .dropdown-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #148992;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-/* Submit Button */
-.booking-section .submit-btn {
-  width: 100%;
-  padding: 12px;
-  background-color: #148992;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
-}
-
-.booking-section .submit-btn:hover {
-  background-color: #116f71;
-}
-
-/* Dropdown menu visibility */
-.booking-section .dropdown-menu {
-  position: absolute;
-  top: 50px;
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  padding: 10px;
-}
-
-/* Each dropdown item */
-.booking-section .dropdown-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.booking-section .dropdown-item label {
-  font-size: 16px;
-}
-
-/* Quantity control buttons */
-.booking-section .quantity-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.booking-section .quantity-controls button {
-  padding: 5px 10px;
-  background-color: #148992;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.booking-section .quantity-controls button:disabled {
-  background-color: #ddd;
-  cursor: not-allowed;
-}
-
-.booking-section .quantity-controls span {
-  font-size: 16px;
-}
-
-/* Inline Date Inputs */
-.booking-section .input-container-inline {
-  display: flex;
-  gap: 20px; /* Space between Check-in and Check-out */
-  justify-content: space-between; /* Ensure they are spaced correctly */
-}
-
-
-.date-range-wrapper .DateRangePicker {
-  width: 100%;
-}
-
-.DateInput_input {
-  font-size: 16px !important;
-  padding: 10px !important;
-  height: 45px;
-}
-
-.DateRangePickerInput {
-  border-radius: 6px;
-  border: 1px solid #ddd;
-}
-
-.DateInput {
-  width: 100%;
-}
-
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
   .booking-section {
     flex-direction: column;
     padding: 20px;
-    min-height: auto; /* Let the content define the height */
-    justify-content: center; /* Center content vertically */
+    min-height: auto;
+    justify-content: center;
   }
 
-  /* Text section */
   .booking-section .booking-text {
     width: 100%;
     text-align: center;
     padding: 15px;
-    margin-bottom: 30px; /* Added space below text */
+    margin-bottom: 30px;
   }
 
   .booking-section .booking-text h2 {
@@ -239,121 +98,12 @@
     margin-bottom: 20px;
   }
 
-  /* Form section */
   .booking-section .booking-form-container {
     width: 100%;
-    padding: 20px;
-    margin-bottom: 30px; /* Ensure spacing between form and any content below */
+    margin-bottom: 30px;
   }
 
   .booking-section h2 {
     font-size: 22px;
   }
-
-  .booking-section .input-container {
-    margin-bottom: 15px;
-  }
-
-  .booking-section .submit-btn {
-    padding: 10px;
-  }
-
-  .booking-section .input-container-inline {
-    flex-direction: column;
-    gap: 10px;
-  }
-}
-
-/* Styling for Date Picker input */
-.booking-section .date-input {
-  width: 80%; /* Reduced width for date inputs */
-  padding: 12px 15px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.3s ease;
-  padding-right: 35px; /* To accommodate the Chevron icon inside */
-}
-
-.booking-section .date-input:focus {
-  border-color: #148992;
-}
-
-/* React Datepicker specific styles */
-.booking-section .react-datepicker__input-container input {
-  width: 80%; /* Same width for the date input in datepicker */
-  padding: 12px 15px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  outline: none;
-}
-
-/* Date Picker Popup */
-.booking-section .date-picker-popup {
-  position: absolute;
-  top: 80px;
-  left: 0;
-  right: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 15px;
-  z-index: 10;
-}
-
-.booking-section .calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-}
-
-.booking-section .calendar-day {
-  padding: 8px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.booking-section .calendar-day:hover {
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .calendar-day:focus {
-  outline: none;
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .react-datepicker__header {
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .react-datepicker__current-month {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.booking-section .react-datepicker__day:hover {
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .react-datepicker__day:focus {
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .react-datepicker__day--selected {
-  background-color: #148992;
-  color: white;
-}
-
-.booking-section .react-datepicker__day--today {
-  background-color: #148992;
-  color: white;
 }

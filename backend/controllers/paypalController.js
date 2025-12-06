@@ -254,32 +254,39 @@ export const refundPaypalPayment = async (req, res) => {
       return res.status(400).json({ message: "Payment not completed or already refunded" });
     }
 
-    // Step 2: Get the PayPal transaction ID from the booking
-    const paymentTransactionId = booking.paymentTransactionId;
+    // Step 2: Get the PayPal capture ID from the booking (use the capture ID from the payment transaction)
+    const captureId = booking.paymentTransactionId;
 
     // Step 3: Get the PayPal access token
     const accessToken = await getPaypalAccessToken();
 
-    // Step 4: Create the refund request
-    const refundRequest = new paypal.payments.CapturesRefundRequest(paymentTransactionId);
-    refundRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+    // Step 4: Verify the capture exists and is completed
+    const captureStatusRequest = new paypal.payments.CapturesGetRequest(captureId);
+    captureStatusRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+    const captureStatusResponse = await client.execute(captureStatusRequest);
+    const captureStatus = captureStatusResponse.result.status;
 
-    // Optional: You can add refund amount and other parameters
+    if (captureStatus !== "COMPLETED") {
+      return res.status(400).json({ message: "Capture not completed or already refunded" });
+    }
+
+    // Step 5: Create the refund request
+    const refundRequest = new paypal.payments.CapturesRefundRequest(captureId);
+    refundRequest.headers["Authorization"] = `Bearer ${accessToken}`;
     refundRequest.requestBody({
       amount: {
-        value: booking.totalPrice.toString(),  // Refund full amount of the booking
+        value: booking.totalPrice.toString(),
         currency_code: "USD",
       },
     });
 
-    // Step 5: Execute the refund request
+    // Step 6: Execute the refund request
     const refundResponse = await client.execute(refundRequest);
-
     if (refundResponse.result.status !== "COMPLETED") {
       return res.status(400).json({ message: "Failed to refund the payment" });
     }
 
-    // Step 6: Update booking status to 'Refunded'
+    // Step 7: Update booking status to 'Refunded'
     booking.status = "Cancelled";
     booking.paymentStatus = "Refunded";
     await booking.save();

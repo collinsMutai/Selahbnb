@@ -1,0 +1,120 @@
+.booking-form-only,
+.booking-form-only * {
+  box-sizing: border-box;
+}
+
+
+
+/* White box that covers title + form */
+.booking-form-only {
+  width: 100%;
+  background: rgba(255,255,255,0.95);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Input container */
+.input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.input-icon {
+  margin-right: 10px;
+  color: #148992;
+}
+
+/* Input fields */
+.booking-form-only input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  outline: none;
+}
+
+/* Error message */
+.error-text {
+  color: red;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Dropdown icon */
+.dropdown-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.dropdown-icon.rotate {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  position: absolute;
+  top: 55px;
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 20;
+}
+
+.dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+/* Quantity buttons */
+.quantity-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.quantity-controls button {
+  background: #148992;
+  color: white;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+}
+
+/* Submit button */
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  background: #148992;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit-btn:hover {
+  background: #0e6f70;
+}
+
+/* Calendar popup */
+.calendar-popup {
+  position: relative;
+  z-index: 50;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.date-input {
+  width: 100%;
+}

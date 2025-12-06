@@ -219,12 +219,15 @@ input {
   transform: rotate(180deg);
 }
 
+
+
+
 /* Media Query for Mobile */
 @media (max-width: 768px) {
   /* Increase hero height for mobile */
-  /* .hero-slider {
+  .hero-slider {
     height: 110vh; 
-  } */
+  }
 
   .hero-content {
     grid-template-columns: 1fr;

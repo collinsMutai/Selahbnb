@@ -81,6 +81,7 @@ const HeroSlider = forwardRef((props, ref) => {
     },
   ];
   const listingId = "6929ea1334872125aba99042";
+  const today = new Date();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -95,6 +96,12 @@ const HeroSlider = forwardRef((props, ref) => {
     return () => clearInterval(interval);
   }, []);
 
+  // Responsive Calendar State
+  const [calendarDirection, setCalendarDirection] = useState("horizontal");
+
+  useEffect(() => {
+    setCalendarDirection("vertical");
+  }, []);
   // Fetch booked ranges only when calendar is opened
   const fetchAvailability = async () => {
     try {
@@ -259,11 +266,15 @@ const HeroSlider = forwardRef((props, ref) => {
           });
         }
       } catch (error) {
-        if (error.response && error.response.data && error.response.data.message) {
-        toast.error(error.response.data.message); // Display the error message from the backend
-      } else {
-        toast.error("Error submitting booking"); // Generic error message
-      }
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
+          toast.error(error.response.data.message); // Display the error message from the backend
+        } else {
+          toast.error("Error submitting booking"); // Generic error message
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -331,12 +342,18 @@ const HeroSlider = forwardRef((props, ref) => {
 
             {/* Calendar */}
             {isCalendarOpen && (
-              <div className="calendar-popup">
+              <div
+                className="calendar-popup"
+                style={{
+                  maxHeight: window.innerWidth < 768 ? "400px" : "auto",
+                  overflowY: window.innerWidth < 768 ? "auto" : "visible",
+                }}
+              >
                 <DateRange
                   ranges={[
                     {
-                      startDate: formData.checkIn || new Date(),
-                      endDate: formData.checkOut || new Date(),
+                      startDate: formData.startDate || today,
+                      endDate: formData.endDate || today,
                       key: "selection",
                     },
                   ]}
@@ -344,10 +361,15 @@ const HeroSlider = forwardRef((props, ref) => {
                   moveRangeOnFirstSelection={false}
                   rangeColors={["#148992"]}
                   months={2}
-                  direction="horizontal"
-                  minDate={new Date()}
+                  direction={calendarDirection}
+                  minDate={today}
                   locale={enUS}
-                  disabledDates={getDisabledDates()}
+                  disabledDates={getDisabledDates()} // ⭐ prevent selecting booked days
+                  disabledDay={(date) =>
+                    getDisabledDates().some(
+                      (d) => d.toDateString() === date.toDateString()
+                    )
+                  }
                 />
               </div>
             )}
