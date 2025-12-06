@@ -1,39 +1,10 @@
-/* General Slider Styles */
-/* Spinner for loading state */
-.spinner {
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid #fff;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.submit-btn {
-  position: relative;
-  padding: 12px 24px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.submit-btn:disabled {
-  cursor: not-allowed;
-}
-
+/* GENERAL SLIDER STYLES */
 .hero-slider {
   position: relative;
   width: 100%;
-  height: 100vh; /* Default height for larger screens */
-  overflow: hidden; /* Prevent horizontal overflow */
+  height: 100%; /* Full height hero */
+  overflow: hidden;
+  border: 1px solid red;
 }
 
 .hero-slide {
@@ -44,21 +15,23 @@
   transition: background-image 0.8s ease-in-out;
 }
 
+/* HERO CONTENT LAYOUT */
 .hero-content {
   display: grid;
-  grid-template-columns: 50% 50%; /* Two equal columns */
+  grid-template-columns: 50% 50%;
   gap: 20px;
   position: absolute;
-  bottom: 40px; /* Adjusted for more space between content and bottom of screen */
+  bottom: 40px;
   left: 5%;
   right: 5%;
   width: 90%;
   z-index: 5;
   align-items: center;
   padding-right: 5%;
-  box-sizing: border-box; /* Prevent content from overflowing */
+  box-sizing: border-box;
 }
 
+/* CAPTION ANIMATION */
 .hero-caption {
   font-size: 2rem;
   font-family: "Jost", sans-serif;
@@ -70,7 +43,7 @@
   transform: translateY(100%);
   opacity: 0;
   transition: transform 0.5s ease, opacity 0.5s ease;
-  margin-bottom: 40px; /* Increased margin for more space between caption and form */
+  margin-bottom: 40px;
 }
 
 .hero-caption.slide-up {
@@ -78,64 +51,7 @@
   opacity: 1;
 }
 
-.hero-form {
-  display: flex;
-  flex-direction: column;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 2rem;
-  border-radius: 10px;
-  width: 100%; /* Ensure form takes up full width */
-  max-width: 600px; /* Limit form width */
-  z-index: 10;
-  margin: 0 auto;
-  box-sizing: border-box; /* Prevent form from overflowing */
-  transform: translateY(-40px); /* Move form slightly upwards */
-}
-
-.input-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 15px;
-  width: 100%; /* Ensure input containers are 100% width */
-}
-
-.input-icon {
-  margin-right: 10px;
-  font-size: 1.5rem;
-  color: #148992;
-}
-
-input {
-  width: 100%; /* Make inputs 100% width */
-  padding: 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-  box-sizing: border-box; /* Ensure padding is included in width */
-}
-
-.submit-btn {
-  background-color:#148992;
-  color: white;
-  padding: 15px;
-  font-size: 1.2rem;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
-  width: 100%; /* Ensure button fills container */
-  box-sizing: border-box; /* Prevent overflow */
-}
-
-.submit-btn:hover {
-  background-color: #116f71;
-}
-
-.error-text {
-  color: red;
-  font-size: 0.9rem;
-}
-
+/* SLIDER ARROWS */
 .arrow {
   position: absolute;
   top: 50%;
@@ -145,6 +61,11 @@ input {
   background: rgba(0, 0, 0, 0.5);
   padding: 10px;
   cursor: pointer;
+  z-index: 10;
+}
+
+.arrow:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 .left-arrow {
@@ -155,78 +76,10 @@ input {
   right: 10px;
 }
 
-.arrow:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-/* Styles for Inline Date Fields */
-.input-container-inline {
-  display: flex;
-  gap: 20px;
-  width: 100%; /* Ensure inline inputs fit within container */
-}
-
-/* Dropdown for Guests */
-.input-container {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 240px; /* Position it below input */
-  left: 0;
-  background-color: white;
-  border: 1px solid #ccc;
-  width: 100%; /* Ensure dropdown doesn't overflow */
-  padding: 10px;
-  display: block;
-  z-index: 20;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.dropdown-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.quantity-controls {
-  display: flex;
-  align-items: center;
-}
-
-.quantity-controls button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 0 5px;
-  cursor: pointer;
-}
-
-.quantity-controls button:hover {
-  background-color: #218838;
-}
-
-.dropdown-icon {
-  font-size: 1.2rem;
-}
-
-.dropdown-icon.rotate {
-  transform: rotate(180deg);
-}
-
-
-
-
-/* Media Query for Mobile */
+/* MOBILE RESPONSIVE */
 @media (max-width: 768px) {
-  /* Increase hero height for mobile */
   .hero-slider {
-    height: 110vh; 
+    height: 110vh;
   }
 
   .hero-content {
@@ -235,7 +88,6 @@ input {
     left: 5%;
     right: 5%;
     padding-right: 0;
-    display: flex;
     flex-direction: column;
     align-items: center;
     top: 150px;
@@ -245,33 +97,11 @@ input {
   .hero-caption {
     font-size: 1.5rem;
     padding: 0.5rem;
-    margin-top: 40px; 
-    order: 2; /* Move caption below the form */
-  }
-
-  .hero-form {
-    width: 100%;
-    padding: 2rem; /* Increased padding for more spacious form */
-    order: 1; /* Make form appear above caption */
-    transform: none; /* Remove the translateY on mobile */
-    margin-top: 0;
-  }
-
-  .input-container-inline {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .input-container {
-    margin-bottom: 10px;
-  }
-
-  .submit-btn {
-    padding: 16px; /* Increase button padding on mobile */
-    font-size: 1.1rem; /* Slightly larger font size for button */
+    margin-top: 40px;
+    order: 2;
   }
 
   .arrow {
-    display: none; /* Hide the arrows on mobile */
+    display: none;
   }
 }

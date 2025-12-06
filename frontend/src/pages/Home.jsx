@@ -7,10 +7,10 @@ export default function Home() {
   return (
     <div id="home">
       {/* HeroSlider */}
-      <HeroSlider />
+      {/* <HeroSlider /> */}
 
       {/* PropertyGallery */}
-      <PropertyGallery />
+      {/* <PropertyGallery /> */}
 
       {/* Booking Form */}
       <BookingForm />
