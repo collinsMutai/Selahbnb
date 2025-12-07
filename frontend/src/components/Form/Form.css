@@ -59,7 +59,7 @@
 /* Dropdown menu */
 .dropdown-menu {
   position: absolute;
-  top: 55px;
+  top: 100%;
   width: 100%;
   background: white;
   border: 1px solid #ddd;

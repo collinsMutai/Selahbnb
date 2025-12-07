@@ -173,50 +173,52 @@ const handleRangeChange = (ranges) => {
   };
 
   // Submit handler
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Check if user is logged in
-    if (!isLoggedIn) {
-      dispatch(setModalOpen(true)); // Show login modal
-      return;
-    }
+  // Perform form validation first
+  if (!validateForm()) {
+    return; // Don't proceed further if validation fails
+  }
 
-    // Prevent submitting if payment is already processed or if it's submitting
-    if (paymentProcessed || isSubmitting) return;
+  // Check if user is logged in
+  if (!isLoggedIn) {
+    dispatch(setModalOpen(true)); // Show login modal
+    return; // Don't proceed further if not logged in
+  }
 
-    // Perform form validation
-    if (validateForm()) {
-      setIsSubmitting(true);
+  // Prevent submitting if payment is already processed or if it's submitting
+  if (paymentProcessed || isSubmitting) return;
 
-      const payload = {
-        ...formData,
-        checkIn: formData.startDate?.toISOString(),
-        checkOut: formData.endDate?.toISOString(),
-        listingId,
-        returnUrl: window.location.href,
-      };
+  setIsSubmitting(true);
 
-      try {
-        const response = await axios.post(`${apiUrl}/bookings`, payload, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (response.status === 201 && response.data.approvalLink) {
-          dispatch(setBookingData(payload));
-          dispatch(setPaymentProcessed(true));
-          window.location.href = response.data.approvalLink;
-        }
-      } catch (error) {
-        toast.error(error.response?.data?.message || "An error occurred");
-      } finally {
-        setIsSubmitting(false);
-      }
-    }
+  const payload = {
+    ...formData,
+    checkIn: formData.startDate?.toISOString(),
+    checkOut: formData.endDate?.toISOString(),
+    listingId,
+    returnUrl: window.location.href,
   };
+
+  try {
+    const response = await axios.post(`${apiUrl}/bookings`, payload, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
+
+    if (response.status === 201 && response.data.approvalLink) {
+      dispatch(setBookingData(payload));
+      dispatch(setPaymentProcessed(true));
+      window.location.href = response.data.approvalLink;
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || "An error occurred");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   // Update window width state on resize
   useEffect(() => {
