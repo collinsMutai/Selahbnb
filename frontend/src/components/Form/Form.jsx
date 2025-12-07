@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import ReactDOM from "react-dom"; // Importing ReactDOM for Portal
 import {
   FaUser,
   FaPhoneAlt,
@@ -22,15 +23,11 @@ import { enUS } from "date-fns/locale";
 
 import "./Form.css";
 
-
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const Form = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
-  const today = new Date();
-
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -41,11 +38,11 @@ const Form = () => {
     infants: 0,
     pets: 0,
   });
-
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const [bookedRanges, setBookedRanges] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
   const listingId = "6929ea1334872125aba99042";
 
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
@@ -54,18 +51,7 @@ const Form = () => {
   );
   const dispatch = useDispatch();
 
-  // Calendar orientation logic
-  const [calendarDirection, setCalendarDirection] = useState("horizontal");
-
-  useEffect(() => {
-    const handleResize = () => {
-      setCalendarDirection(window.innerWidth < 768 ? "vertical" : "horizontal");
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const formRef = useRef(null); // Reference for form element
 
   // Fetch unavailable dates
   const fetchAvailability = async () => {
@@ -96,23 +82,49 @@ const Form = () => {
   };
 
   // Handle calendar selection
-  const handleRangeChange = (ranges) => {
-    const { startDate, endDate } = ranges.selection;
+ // Handle calendar selection
+const handleRangeChange = (ranges) => {
+  const { startDate, endDate } = ranges.selection;
 
+  // If start date is selected and end date is not, set end date to 1 day after start
+  if (startDate && !endDate) {
+    const newEndDate = new Date(startDate);
+    newEndDate.setDate(newEndDate.getDate() + 1); // Add 1 day to start date (to get 2 full days including start date)
+    setFormData({
+      ...formData,
+      startDate,
+      endDate: newEndDate, // Set 1 day after start date, which makes it 2 full days including start date
+    });
+  } else if (startDate && endDate) {
     const disabled = getDisabledDates();
     const overlap = disabled.some((d) => d >= startDate && d <= endDate);
 
     if (overlap) {
       toast.error("Selected range includes unavailable dates.");
-      return;
+      return; // Don't close the calendar if dates are unavailable
     }
 
+    // Calculate the number of nights, including the start date
+    const nights = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
+
+    // Minimum stay validation
+    if (nights < 2) {
+      toast.error("Minimum stay is 2 nights.");
+      return; // Don't close the calendar if validation fails
+    }
+
+    // If validation passes, update form data
     setFormData({
       ...formData,
       startDate,
       endDate,
     });
-  };
+
+    // Close the calendar only when both dates are selected and validation passes
+    setIsCalendarOpen(false);
+  }
+};
+
 
   // Input handler
   const handleInputChange = (e) => {
@@ -120,39 +132,37 @@ const Form = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // Validation
+  // Validation for all fields
   const validateForm = () => {
     const newErrors = {};
     let valid = true;
 
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required";
       valid = false;
     }
 
+    // Phone validation (assuming a 10-digit phone number)
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = "Enter a valid 10-digit phone number";
       valid = false;
     }
 
+    // Start Date validation (Check-in)
     if (!formData.startDate) {
       newErrors.checkIn = "Check-in date required";
       valid = false;
     }
 
+    // End Date validation (Check-out)
     if (!formData.endDate) {
       newErrors.checkOut = "Check-out date required";
       valid = false;
-    } else {
-      const nights =
-        (formData.endDate - formData.startDate) / (1000 * 60 * 60 * 24);
-      if (nights < 2) {
-        newErrors.checkOut = "Minimum stay is 2 nights";
-        valid = false;
-      }
     }
 
+    // Adults validation (must have at least one adult)
     if (formData.adults <= 0) {
       newErrors.guests = "At least one adult is required";
       valid = false;
@@ -166,13 +176,16 @@ const Form = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if user is logged in
     if (!isLoggedIn) {
-      dispatch(setModalOpen(true));
+      dispatch(setModalOpen(true)); // Show login modal
       return;
     }
 
+    // Prevent submitting if payment is already processed or if it's submitting
     if (paymentProcessed || isSubmitting) return;
 
+    // Perform form validation
     if (validateForm()) {
       setIsSubmitting(true);
 
@@ -205,8 +218,35 @@ const Form = () => {
     }
   };
 
+  // Update window width state on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Detect scroll event to close calendar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isCalendarOpen) {
+        setIsCalendarOpen(false); // Close calendar on scroll
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isCalendarOpen]);
+
+  // Determine the direction based on window width
+  const calendarDirection = windowWidth <= 768 ? "vertical" : "horizontal";
+
   return (
-    <form className="booking-form-only" onSubmit={handleSubmit}>
+    <form className="booking-form-only" onSubmit={handleSubmit} ref={formRef}>
       {/* Name */}
       <div className="input-container">
         <FaUser className="input-icon" />
@@ -255,33 +295,23 @@ const Form = () => {
         />
       </div>
 
-      {isCalendarOpen && (
-        <div
-          className="calendar-popup"
-          style={{
-            maxHeight: window.innerWidth < 768 ? "400px" : "auto",
-            overflowY: window.innerWidth < 768 ? "auto" : "visible", // ⭐ vertical scroll preserved
-          }}
-        >
-          <DateRange
-            ranges={[
-              {
-                startDate: formData.startDate || today,
-                endDate: formData.endDate || today,
-                key: "selection",
-              },
-            ]}
-            onChange={handleRangeChange}
-            moveRangeOnFirstSelection={false}
-            rangeColors={["#148992"]}
-            months={2}
-            direction={calendarDirection}
-            minDate={today}
-            locale={enUS}
-            disabledDates={getDisabledDates()}
-          />
-        </div>
-      )}
+      {isCalendarOpen &&
+        ReactDOM.createPortal(
+          <div className="calendar-modal">
+            <DateRange
+              ranges={[{ startDate: formData.startDate || new Date(), endDate: formData.endDate || new Date(), key: "selection" }]}
+              onChange={handleRangeChange}
+              moveRangeOnFirstSelection={false}
+              rangeColors={["#148992"]}
+              months={2}
+              direction={calendarDirection}
+              minDate={new Date()}
+              locale={enUS}
+              disabledDates={getDisabledDates()}
+            />
+          </div>,
+          document.body // Places the calendar inside the body
+        )}
 
       {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
       {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
@@ -349,7 +379,8 @@ const Form = () => {
         {isSubmitting ? <div className="spinner"></div> : "Book Now"}
       </button>
 
-      <ToastContainer position="top-right" autoClose={5000} />
+      {/* Toast Container for Notifications */}
+      {/* <ToastContainer position="top-right" autoClose={5000} toastContainerClassName="toast-container" /> */}
     </form>
   );
 };

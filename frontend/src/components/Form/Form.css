@@ -1,17 +1,16 @@
+/* General Reset */
 .booking-form-only,
 .booking-form-only * {
   box-sizing: border-box;
 }
 
-
-
 /* White box that covers title + form */
 .booking-form-only {
   width: 100%;
-  background: rgba(255,255,255,0.95);
+  background: rgba(255, 255, 255, 0.95);
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   font-family: Arial, sans-serif;
 }
 
@@ -104,17 +103,82 @@
   background: #0e6f70;
 }
 
-/* Calendar popup */
-.calendar-popup {
-  position: relative;
-  z-index: 50;
-  background: white;
-  padding: 10px;
-  border-radius: 8px;
-  max-height: 400px;
+/* Calendar modal */
+.calendar-modal {
+  position: fixed;
+  top: 45%;
+  right: 5%;
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
+  background-color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  z-index: 1000;
   overflow-y: auto;
+  padding: 15px;
 }
 
+/* Date input field */
 .date-input {
   width: 100%;
+}
+
+/* Add this to your CSS file (Form.css or a global style) */
+.toast-container {
+  z-index: 2000 !important; /* Set a high z-index to ensure it's above the calendar */
+  position: fixed; /* Ensure the toast appears in a fixed position */
+  top: 10px; /* Distance from top */
+  right: 10px; /* Distance from right */
+  max-width: 300px; /* Optional: limit toast width */
+}
+
+/* Mobile Styling for Calendar */
+@media (max-width: 768px) {
+  .calendar-modal {
+    top: 50%; /* Adjust top for smaller screens */
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the calendar */
+    width: 80%;
+    max-width: none; /* Remove max-width to take full width */
+    padding: 10px;
+  }
+
+  /* Ensure calendar wrapper stacks vertically on small screens */
+  .calendar-modal .rdrDateRangeWrapper {
+    flex-direction: column !important; /* Stack months vertically */
+    width: 100% !important; /* Ensure the calendar uses full width */
+  }
+
+  /* Make each month take full width */
+  .calendar-modal .rdrMonth {
+    width: 100% !important;
+    display: block !important; /* Ensure months are block elements */
+  }
+
+  /* Adjust the month and year navigation bar */
+  .calendar-modal .rdrMonthAndYearWrapper {
+    flex-direction: column !important; /* Stack the month/year selector vertically */
+  }
+
+  /* Ensure individual months are aligned and do not overflow */
+  .calendar-modal .rdrMonthPickerWrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center;
+  }
+
+  .calendar-modal .rdrMonthNav {
+    display: none !important; /* Hide navigation arrows on mobile */
+  }
+
+  .calendar-modal .rdrMonthAndYearWrapper {
+    display: block !important; /* Ensure the month and year selector is stacked */
+  }
+
+  /* Styling for calendar navigation */
+  .calendar-modal .rdrPrevButton,
+  .calendar-modal .rdrNextButton {
+    display: none !important; /* Remove prev/next buttons on small screens */
+  }
 }

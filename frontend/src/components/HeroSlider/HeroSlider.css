@@ -2,9 +2,9 @@
 .hero-slider {
   position: relative;
   width: 100%;
-  height: 100%; /* Full height hero */
-  overflow: hidden;
-  border: 1px solid red;
+  height: 100vh; /* Full height hero */
+  overflow: hidden; /* Hide overflow initially */
+  border: 1px solid red;  /* You can remove this if not needed */
 }
 
 .hero-slide {
@@ -18,7 +18,7 @@
 /* HERO CONTENT LAYOUT */
 .hero-content {
   display: grid;
-  grid-template-columns: 50% 50%;
+  grid-template-columns: 50% 50%;  /* Adjust columns for larger screens */
   gap: 20px;
   position: absolute;
   bottom: 40px;
@@ -51,6 +51,15 @@
   opacity: 1;
 }
 
+/* HERO FORM WRAPPER */
+.hero-form-wrapper {
+  position: relative;
+  z-index: 10;  /* Ensure it appears above other elements */
+  width: 100%;
+  height: auto;  /* Allow height to adjust based on content */
+  overflow: visible;  /* Allow form and calendar to overflow */
+}
+
 /* SLIDER ARROWS */
 .arrow {
   position: absolute;
@@ -76,24 +85,37 @@
   right: 10px;
 }
 
-/* MOBILE RESPONSIVE */
+/* CALENDAR POPUP STYLES */
+.calendar-popup {
+  position: relative;
+  z-index: 50;
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  max-height: 400px;  /* Set a max height for desktop */
+  overflow-y: auto;   /* Allow vertical scroll */
+  overflow-x: auto;   /* Allow horizontal scroll on mobile */
+}
+
+/* MOBILE VIEW ADJUSTMENTS */
 @media (max-width: 768px) {
+  /* Hero Slider Adjustments */
   .hero-slider {
-    height: 110vh;
+    height: 110vh;  /* Ensure it covers the screen properly */
   }
 
   .hero-content {
-    grid-template-columns: 1fr;
-    width: 90%;
-    left: 5%;
-    right: 5%;
+    grid-template-columns: 1fr;  /* Stack the content vertically on small screens */
+    width: 100%;
+    left: 0;
+    right: 0;
     padding-right: 0;
-    flex-direction: column;
     align-items: center;
     top: 150px;
     bottom: auto;
   }
 
+  /* Adjust Caption for Mobile */
   .hero-caption {
     font-size: 1.5rem;
     padding: 0.5rem;
@@ -101,7 +123,42 @@
     order: 2;
   }
 
+  /* Ensure the Calendar is Scrollable */
+  .calendar-popup {
+    max-height: 300px;  /* Limit calendar height on mobile */
+    overflow-y: auto;   /* Vertical scroll for mobile */
+    overflow-x: auto;   /* Horizontal scroll if necessary */
+  }
+
+  /* Hide Arrows on Mobile */
   .arrow {
     display: none;
+  }
+
+  /* Hero Form Wrapper Adjustments */
+  .hero-form-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+/* Desktop Specific Adjustments */
+@media (min-width: 769px) {
+  .hero-content {
+    grid-template-columns: 50% 50%;  /* Two columns for larger screens */
+    gap: 20px;
+    width: 90%;
+    left: 5%;
+    right: 5%;
+  }
+
+  .hero-caption {
+    font-size: 2rem;
+    padding: 1rem;
+    margin-bottom: 40px;
+    text-align: center;
   }
 }
