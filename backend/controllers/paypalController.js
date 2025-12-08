@@ -161,6 +161,7 @@ export const capturePaypalPayment = async (req, res) => {
       captureResponse.result.purchase_units[0].payments.captures[0].amount.value; // Store the captured amount
     booking.payerEmail = captureResponse.result.payer.email_address; // Store the payer's email
     booking.paymentTransactionId = captureResponse.result.id; // Store the transaction ID
+    booking.captureId = captureResponse.result.purchase_units[0].payments.captures[0].id; // Store the Capture ID
 
     console.log("Booking status updated:", booking); // Log before saving the booking
 
@@ -210,6 +211,7 @@ export const capturePaypalPayment = async (req, res) => {
   }
 };
 
+
 // Cancel the PayPal payment (if the user decides to cancel)
 export const cancelPaypalPayment = async (req, res) => {
   const { orderId } = req.body;
@@ -255,7 +257,7 @@ export const refundPaypalPayment = async (req, res) => {
     }
 
     // Step 2: Get the PayPal capture ID from the booking (use the capture ID from the payment transaction)
-    const captureId = booking.paymentTransactionId;
+    const captureId = booking.captureId; // Use the stored capture ID
 
     // Step 3: Get the PayPal access token
     const accessToken = await getPaypalAccessToken();
@@ -300,3 +302,4 @@ export const refundPaypalPayment = async (req, res) => {
     res.status(500).json({ message: "Error issuing PayPal refund" });
   }
 };
+

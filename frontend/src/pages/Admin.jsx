@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ThreeDots } from "react-loader-spinner"; // Import the spinner component
 import "./Admin.css"; // Optional for custom styles
+import { toast } from "react-toastify"; // Import toast for showing notifications
 
 const Admin = () => {
   const [bookings, setBookings] = useState([]);
@@ -14,39 +15,32 @@ const Admin = () => {
   const [filterColumn, setFilterColumn] = useState("name"); // default filter column: "name"
 
   // Fetch all bookings from the API
-  useEffect(() => {
-    const fetchBookings = async () => {
-      try {
-        const token = localStorage.getItem("token");
+  const fetchBookings = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        if (!token) {
-          setError("You are not logged in. Please log in first.");
-          setLoading(false);
-          return;
-        }
-
-        const response = await axios.get(
-          "http://localhost:5000/api/users/bookings",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the token in the request header
-            },
-          }
-        );
-
-        setBookings(response.data);
-        setFilteredBookings(response.data);
+      if (!token) {
+        setError("You are not logged in. Please log in first.");
         setLoading(false);
-      } catch (err) {
-        setError("Failed to fetch bookings: " + err.message);
-        setLoading(false);
+        return;
       }
-    };
 
-    fetchBookings();
-  }, []);
+      const response = await axios.get("http://localhost:5000/api/users/bookings", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token in the request header
+        },
+      });
 
-  // Handle refund
+      setBookings(response.data);
+      setFilteredBookings(response.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to fetch bookings: " + err.message);
+      setLoading(false);
+    }
+  };
+
+  // Handle refund action
   const handleRefund = async (bookingId) => {
     try {
       const response = await axios.post(
@@ -56,16 +50,14 @@ const Admin = () => {
       );
 
       if (response.status === 200) {
-        alert("Refund successful!");
-        setBookings(bookings.map((booking) => 
-          booking._id === bookingId ? { ...booking, status: 'Cancelled', paymentStatus: 'Refunded' } : booking
-        ));
+        toast.success("Refund successful!"); // Show success toast
+        fetchBookings(); // Re-fetch bookings to reflect the refund
       } else {
-        alert("Failed to issue refund.");
+        toast.error("Failed to issue refund."); // Show error toast
       }
     } catch (error) {
       console.error("Error issuing refund:", error);
-      alert("Error issuing refund. Please try again.");
+      toast.error("Error issuing refund. Please try again."); // Show error toast on exception
     }
   };
 
@@ -91,6 +83,11 @@ const Admin = () => {
     });
     setFilteredBookings(filtered);
   };
+
+  // Fetch bookings when the component mounts
+  useEffect(() => {
+    fetchBookings();
+  }, []);
 
   if (loading) {
     return (
@@ -130,7 +127,11 @@ const Admin = () => {
           onChange={handleSearchChange}
           className="search-input"
         />
-        <select value={filterColumn} onChange={handleFilterColumnChange} className="filter-dropdown">
+        <select
+          value={filterColumn}
+          onChange={handleFilterColumnChange}
+          className="filter-dropdown"
+        >
           <option value="name">Name</option>
           <option value="phone">Phone</option>
           <option value="status">Status</option>

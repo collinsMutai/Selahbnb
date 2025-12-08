@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 // Booking Schema definition
 const bookingSchema = new mongoose.Schema(
   {
@@ -32,7 +31,8 @@ const bookingSchema = new mongoose.Schema(
       default: "Pending",
     }, // Payment status
     paymentTransactionId: { type: String, unique: true, required: true }, // Unique transaction ID for the payment
-    paypalOrderId: { type: String, unique: true },
+    paypalOrderId: { type: String, unique: true }, // PayPal Order ID
+    captureId: { type: String }, // Add Capture ID field
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt timestamps
 );
