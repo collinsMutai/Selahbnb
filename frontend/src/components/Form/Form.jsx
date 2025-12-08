@@ -177,7 +177,17 @@ const Form = () => {
 
       if (response.status === 201 && response.data.approvalLink) {
         dispatch(setBookingData(payload));
-        window.location.href = response.data.approvalLink; // NO setting paymentProcessed here!
+
+        // ✅ Show booking confirmed toast BEFORE redirect
+        toast.success("Booking confirmed! Redirecting to payment...", {
+          autoClose: 1200,
+          hideProgressBar: true,
+        });
+
+        // ✅ Give the toast time to appear then redirect
+        setTimeout(() => {
+          window.location.href = response.data.approvalLink;
+        }, 1200);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "An error occurred");
@@ -340,10 +350,17 @@ const Form = () => {
       </div>
 
       <button className="submit-btn" type="submit" disabled={isSubmitting}>
-        {isSubmitting ? <div className="spinner"></div> : "Book Now"}
+        {isSubmitting ? (
+          <div className="button-loading">
+            <div className="small-spinner"></div>
+            <span>Submitting...</span>
+          </div>
+        ) : (
+          "Book Now"
+        )}
       </button>
 
-      <ToastContainer />
+      {/* <ToastContainer /> */}
     </form>
   );
 };

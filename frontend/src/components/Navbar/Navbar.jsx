@@ -91,7 +91,10 @@ const Navbar = () => {
         // Dispatch login action to Redux store
         dispatch(login({ user: data.user, token: data.accessToken }));
       } else {
-        console.error("Authentication failed:", data.message || "Unknown error");
+        console.error(
+          "Authentication failed:",
+          data.message || "Unknown error"
+        );
       }
     } catch (error) {
       console.error("Error sending Google login token to backend:", error);
@@ -362,9 +365,10 @@ const Navbar = () => {
             ) : (
               <>
                 <h2>Welcome, {user?.name || "User"}</h2>
-                {user?.role === "admin" && (
-                  <>
-                    {user?.role === "admin" && (
+                {user && (
+                  <div className="role-links">
+                    {/* ✅ Admin → Dashboard */}
+                    {user.role === "admin" && (
                       <button
                         onClick={handleAdminRedirect}
                         className="admin-link"
@@ -379,7 +383,6 @@ const Navbar = () => {
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          className="icon icon-tabler icons-tabler-home-2"
                           style={{ marginRight: "8px" }}
                         >
                           <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -390,8 +393,37 @@ const Navbar = () => {
                         Dashboard
                       </button>
                     )}
-                  </>
+
+                    {/* ✅ Normal Users → Bookings */}
+                    {user.role !== "admin" && (
+                      <button
+                        onClick={() => {
+                          dispatch(setModalOpen(false));
+                          navigate("/bookings");
+                        }}
+                        className="admin-link"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          style={{ marginRight: "8px" }}
+                        >
+                          <rect x="4" y="4" width="16" height="16" rx="2" />
+                          <path d="M4 10h16" />
+                        </svg>
+                        Bookings
+                      </button>
+                    )}
+                  </div>
                 )}
+
                 <button onClick={handleLogout} className="logout-btn">
                   Logout
                 </button>

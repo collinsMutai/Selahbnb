@@ -8,6 +8,7 @@ import Places from "./components/Places/Places";
 import ContactPage from "./pages/Contact";
 import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
 import AdminDashboard from "./pages/Admin";
+import Bookings from "./components/Bookings/Bookings";
 
 // Import ToastContainer for global toasts
 import { ToastContainer } from 'react-toastify';
@@ -27,6 +28,7 @@ function App() {
           element={<PaypalPaymentSuccess />}
         />{" "}
         {/* New route for PayPal success */}
+         <Route path="/bookings" element={<Bookings />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
 

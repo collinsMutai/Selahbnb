@@ -1,0 +1,104 @@
+.card {
+  /* background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  padding: 20px;
+
+  max-width: 900px;
+  margin: 40px auto;
+  margin-top: 130px;
+
+  height: 100vh; /* Fixed height */
+  overflow: hidden; /* Keep card clean */
+  display: flex;
+  flex-direction: column;
+}
+
+.subtitle {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+/* ✅ Scrollable table wrapper */
+.table-wrapper {
+  overflow-y: auto;
+  flex: 1; /* fill remaining height */
+  padding-right: 4px; /* a little spacing for scrollbar */
+}
+
+/* ✅ Table styling */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.table tr:nth-child(even) td {
+  background-color: #fafafa;
+}
+
+.table tr:hover td {
+  background-color: #eef6ff; /* subtle hover */
+}
+
+/* ✅ Spinner */
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  height: 100vh;
+  flex-direction: column;
+}
+
+.spinner-container h1,
+.spinner-container p {
+  margin: 10px 0;
+  color: #222;
+}
+
+.pagination-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #148992;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+
+/* ✅ Mobile */
+@media (max-width: 768px) {
+  .card {
+    height: 380px;
+    margin-top: 100px;
+    padding: 15px;
+  }
+
+  .table {
+    font-size: 12px;
+  }
+
+  .subtitle {
+    font-size: 18px;
+  }
+}
