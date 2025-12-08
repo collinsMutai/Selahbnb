@@ -26,80 +26,37 @@ const PaypalPaymentSuccess = () => {
   const storedBookingData = JSON.parse(localStorage.getItem("bookingDetails"));
   const [bookingDetails, setBookingDetails] = useState(storedBookingData || null);
 
-  useEffect(() => {
-    // Check if the toast has already been shown using localStorage
-    const toastShown = localStorage.getItem("toastShown");
-
-    // If booking data is available and toast hasn't been shown before
-    if (bookingDetails && toastShown !== "true") {
-      // Show success toast
-      toast.success("Thank you for booking with us! You will receive a confirmation email shortly.");
-      
-      // Mark the toast as shown in localStorage
-      localStorage.setItem("toastShown", "true");
-    }
-
-    // If payment has already been processed, skip the capture process
-    if (isPaymentProcessed) {
-      setLoading(false);
-      return;
-    }
-
+ useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     const payerID = params.get("PayerID");
 
-    // Only fetch payment if we don't have the paymentProcessed flag and booking data in localStorage
-    if (token && payerID && !isPaymentProcessed) {
-      const capturePayment = async () => {
-        try {
-          const response = await axios.post(`${apiUrl}/paypal/capture`, {
-            orderId: token,
-            payerId: payerID,
-          });
+    if (token && payerID) {
+        const capturePayment = async () => {
+            try {
+                const response = await axios.post(`${apiUrl}/paypal/capture`, {
+                    orderId: token,
+                    payerId: payerID,
+                });
 
-          if (response.status === 200 && response.data.booking) {
-            const bookingData = response.data.booking;
+                const bookingData = response.data.booking;
 
-            // Dispatch Redux actions to update the store with the booking data
-            dispatch(setBookingData({
-              name: bookingData.name,
-              phone: bookingData.phone,
-              checkIn: bookingData.checkIn,
-              checkOut: bookingData.checkOut,
-              adults: bookingData.adults,
-              children: bookingData.children,
-              infants: bookingData.infants,
-              pets: bookingData.pets,
-              totalPrice: bookingData.totalPrice,
-              status: bookingData.status,
-              paymentStatus: bookingData.paymentStatus,
-              paymentProcessed: true, // Set paymentProcessed flag to true
-              listingId: "6929ea1334872125aba99042",
-            }));
+                setBookingDetails(bookingData);
+                setLoading(false);
 
-            // Set payment as processed in Redux and store it in localStorage to prevent re-triggering
-            dispatch(setPaymentProcessed(true));
-            localStorage.setItem("paymentProcessed", "true");
+            } catch (error) {
+                console.error("Error capturing payment:", error);
+                setError("An error occurred while processing your payment.");
+                setLoading(false);
+            }
+        };
 
-            // Store booking details in localStorage for re-use after page reload
-            localStorage.setItem("bookingDetails", JSON.stringify(bookingData));
-
-            setBookingDetails(bookingData); // Set booking data to state
-            setLoading(false);
-          }
-        } catch (error) {
-          console.error("Error capturing payment:", error);
-          setError("An error occurred while processing your payment.");
-          setLoading(false);
-        }
-      };
-
-      capturePayment();
+        capturePayment();
     } else {
-      setLoading(false); // No payment capture needed if data is already present in localStorage
+        setLoading(false);
     }
-  }, [dispatch, isPaymentProcessed, bookingDetails]); // Dependency on bookingDetails to show the toast only when the booking is confirmed
+}, []);
+
 
   if (loading) {
     return (

@@ -30,8 +30,8 @@ const bookingSchema = new mongoose.Schema(
       enum: ["Pending", "Completed", "Failed", "Refunded"],
       default: "Pending",
     }, // Payment status
-    paymentTransactionId: { type: String, unique: true, required: true }, // Unique transaction ID for the payment
-    paypalOrderId: { type: String, unique: true }, // PayPal Order ID
+    paymentTransactionId: { type: String, required: true }, // Unique transaction ID for the payment
+    paypalOrderId: { type: String }, // PayPal Order ID
     captureId: { type: String }, // Add Capture ID field
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt timestamps
