@@ -53,7 +53,7 @@ const Form = () => {
 
   const formRef = useRef(null); // Reference for form element
 
-  // Fetch unavailable dates
+  // Fetch unavailable dates from the server
   const fetchAvailability = async () => {
     try {
       const res = await axios.get(
@@ -69,62 +69,56 @@ const Form = () => {
   const getDisabledDates = () => {
     let disabled = [];
 
-    bookedRanges.forEach((range) => {
-      const start = new Date(range.checkIn);
-      const end = new Date(range.checkOut);
-
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        disabled.push(new Date(d));
-      }
+    bookedRanges.forEach((date) => {
+      disabled.push(new Date(date));
     });
 
     return disabled;
   };
 
   // Handle calendar selection
- // Handle calendar selection
-const handleRangeChange = (ranges) => {
-  const { startDate, endDate } = ranges.selection;
+  const handleRangeChange = (ranges) => {
+    const { startDate, endDate } = ranges.selection;
 
-  // If start date is selected and end date is not, set end date to 1 day after start
-  if (startDate && !endDate) {
-    const newEndDate = new Date(startDate);
-    newEndDate.setDate(newEndDate.getDate() + 1); // Add 1 day to start date (to get 2 full days including start date)
-    setFormData({
-      ...formData,
-      startDate,
-      endDate: newEndDate, // Set 1 day after start date, which makes it 2 full days including start date
-    });
-  } else if (startDate && endDate) {
-    const disabled = getDisabledDates();
-    const overlap = disabled.some((d) => d >= startDate && d <= endDate);
+    // If start date is selected and end date is not, set end date to 1 day after start
+    if (startDate && !endDate) {
+      const newEndDate = new Date(startDate);
+      newEndDate.setDate(newEndDate.getDate() + 1); // Add 1 day to start date (to get 2 full days including start date)
+      setFormData({
+        ...formData,
+        startDate,
+        endDate: newEndDate, // Set 1 day after start date, which makes it 2 full days including start date
+      });
+    } else if (startDate && endDate) {
+      // Check if the selected date range overlaps with any booked dates
+      const disabled = getDisabledDates();
+      const overlap = disabled.some((d) => d >= startDate && d <= endDate);
 
-    if (overlap) {
-      toast.error("Selected range includes unavailable dates.");
-      return; // Don't close the calendar if dates are unavailable
+      if (overlap) {
+        toast.error("Selected range includes unavailable dates.");
+        return; // Don't close the calendar if dates are unavailable
+      }
+
+      // Calculate the number of nights, including the start date
+      const nights = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
+
+      // Minimum stay validation
+      if (nights < 2) {
+        toast.error("Minimum stay is 2 nights.");
+        return; // Don't close the calendar if validation fails
+      }
+
+      // If validation passes, update form data
+      setFormData({
+        ...formData,
+        startDate,
+        endDate,
+      });
+
+      // Close the calendar only when both dates are selected and validation passes
+      setIsCalendarOpen(false);
     }
-
-    // Calculate the number of nights, including the start date
-    const nights = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
-
-    // Minimum stay validation
-    if (nights < 2) {
-      toast.error("Minimum stay is 2 nights.");
-      return; // Don't close the calendar if validation fails
-    }
-
-    // If validation passes, update form data
-    setFormData({
-      ...formData,
-      startDate,
-      endDate,
-    });
-
-    // Close the calendar only when both dates are selected and validation passes
-    setIsCalendarOpen(false);
-  }
-};
-
+  };
 
   // Input handler
   const handleInputChange = (e) => {
@@ -173,52 +167,52 @@ const handleRangeChange = (ranges) => {
   };
 
   // Submit handler
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // Perform form validation first
-  if (!validateForm()) {
-    return; // Don't proceed further if validation fails
-  }
-
-  // Check if user is logged in
-  if (!isLoggedIn) {
-    dispatch(setModalOpen(true)); // Show login modal
-    return; // Don't proceed further if not logged in
-  }
-
-  // Prevent submitting if payment is already processed or if it's submitting
-  if (paymentProcessed || isSubmitting) return;
-
-  setIsSubmitting(true);
-
-  const payload = {
-    ...formData,
-    checkIn: formData.startDate?.toISOString(),
-    checkOut: formData.endDate?.toISOString(),
-    listingId,
-    returnUrl: window.location.href,
-  };
-
-  try {
-    const response = await axios.post(`${apiUrl}/bookings`, payload, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
-
-    if (response.status === 201 && response.data.approvalLink) {
-      dispatch(setBookingData(payload));
-      dispatch(setPaymentProcessed(true));
-      window.location.href = response.data.approvalLink;
+    // Perform form validation first
+    if (!validateForm()) {
+      return; // Don't proceed further if validation fails
     }
-  } catch (error) {
-    toast.error(error.response?.data?.message || "An error occurred");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+
+    // Check if user is logged in
+    if (!isLoggedIn) {
+      dispatch(setModalOpen(true)); // Show login modal
+      return; // Don't proceed further if not logged in
+    }
+
+    // Prevent submitting if payment is already processed or if it's submitting
+    if (paymentProcessed || isSubmitting) return;
+
+    setIsSubmitting(true);
+
+    const payload = {
+      ...formData,
+      checkIn: formData.startDate?.toISOString(),
+      checkOut: formData.endDate?.toISOString(),
+      listingId,
+      returnUrl: window.location.href,
+    };
+
+    try {
+      const response = await axios.post(`${apiUrl}/bookings`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (response.status === 201 && response.data.approvalLink) {
+        dispatch(setBookingData(payload));
+        dispatch(setPaymentProcessed(true));
+        window.location.href = response.data.approvalLink;
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "An error occurred");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Update window width state on resize
   useEffect(() => {
@@ -301,7 +295,11 @@ const handleSubmit = async (e) => {
         ReactDOM.createPortal(
           <div className="calendar-modal">
             <DateRange
-              ranges={[{ startDate: formData.startDate || new Date(), endDate: formData.endDate || new Date(), key: "selection" }]}
+              ranges={[{
+                startDate: formData.startDate || new Date(),
+                endDate: formData.endDate || new Date(),
+                key: "selection"
+              }]}
               onChange={handleRangeChange}
               moveRangeOnFirstSelection={false}
               rangeColors={["#148992"]}
@@ -309,7 +307,7 @@ const handleSubmit = async (e) => {
               direction={calendarDirection}
               minDate={new Date()}
               locale={enUS}
-              disabledDates={getDisabledDates()}
+              disabledDates={getDisabledDates()} // Disabled dates from backend
             />
           </div>,
           document.body // Places the calendar inside the body
@@ -382,7 +380,7 @@ const handleSubmit = async (e) => {
       </button>
 
       {/* Toast Container for Notifications */}
-      {/* <ToastContainer position="top-right" autoClose={5000} toastContainerClassName="toast-container" /> */}
+      <ToastContainer position="top-right" autoClose={5000} toastContainerClassName="toast-container" />
     </form>
   );
 };
