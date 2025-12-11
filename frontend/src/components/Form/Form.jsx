@@ -1,12 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react"; 
 import ReactDOM from "react-dom";
-import {
-  FaUser,
-  FaPhoneAlt,
-  FaCalendarAlt,
-  FaChevronDown,
-} from "react-icons/fa";
-
+import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -45,13 +39,12 @@ const Form = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const listingId = "6929ea1334872125aba99042";
-
   const isLoggedIn = useSelector((state) => state.user.isLoggedIn);
   const dispatch = useDispatch();
 
   const formRef = useRef(null);
+  const calendarRef = useRef(null);
 
-  // Reset everything on form load (VERY IMPORTANT)
   useEffect(() => {
     dispatch(setPaymentProcessed(false));
     localStorage.removeItem("paymentProcessed");
@@ -77,14 +70,12 @@ const Form = () => {
   const handleRangeChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
 
-    if (startDate && !endDate) {
-      const newEndDate = new Date(startDate);
-      newEndDate.setDate(newEndDate.getDate() + 1);
-      setFormData({ ...formData, startDate, endDate: newEndDate });
-      return;
+    // If startDate is clicked, set it as startDate and clear endDate
+    if (startDate && !formData.startDate) {
+      setFormData({ ...formData, startDate, endDate: null });
     }
-
-    if (startDate && endDate) {
+    // If endDate is clicked, set it as endDate and check for validation
+    else if (endDate && formData.startDate) {
       const disabled = getDisabledDates();
       const overlap = disabled.some((d) => d >= startDate && d <= endDate);
 
@@ -101,7 +92,7 @@ const Form = () => {
       }
 
       setFormData({ ...formData, startDate, endDate });
-      setIsCalendarOpen(false);
+      setIsCalendarOpen(false); // Close calendar after selection
     }
   };
 
@@ -154,7 +145,6 @@ const Form = () => {
       return;
     }
 
-    // ✨ Only prevent double submit (NOT paymentProcessed)
     if (isSubmitting) return;
 
     setIsSubmitting(true);
@@ -178,13 +168,11 @@ const Form = () => {
       if (response.status === 201 && response.data.approvalLink) {
         dispatch(setBookingData(payload));
 
-        // ✅ Show booking confirmed toast BEFORE redirect
         toast.success("Booking confirmed! Redirecting to payment...", {
           autoClose: 1200,
           hideProgressBar: true,
         });
 
-        // ✅ Give the toast time to appear then redirect
         setTimeout(() => {
           window.location.href = response.data.approvalLink;
         }, 1200);
@@ -266,7 +254,7 @@ const Form = () => {
 
       {isCalendarOpen &&
         ReactDOM.createPortal(
-          <div className="calendar-modal">
+          <div ref={calendarRef} className="calendar-modal">
             <DateRange
               ranges={[
                 {
@@ -297,13 +285,11 @@ const Form = () => {
         onClick={() => setIsDropdownVisible(!isDropdownVisible)}
       >
         <span className="input-icon">👨‍👩‍👧‍👦</span>
-
         <input
           type="text"
           readOnly
           value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
         />
-
         <FaChevronDown
           className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
         />
@@ -313,7 +299,6 @@ const Form = () => {
             {["adults", "children", "infants", "pets"].map((type) => (
               <div className="dropdown-item" key={type}>
                 <label>{type.charAt(0).toUpperCase() + type.slice(1)}</label>
-
                 <div className="quantity-controls">
                   <button
                     type="button"
