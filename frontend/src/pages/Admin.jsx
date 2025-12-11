@@ -25,7 +25,7 @@ const Admin = () => {
         return;
       }
 
-      const response = await axios.get("http://localhost:5000/api/users/bookings", {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/bookings`, {
         headers: {
           Authorization: `Bearer ${token}`, // Include the token in the request header
         },
@@ -44,7 +44,7 @@ const Admin = () => {
   const handleRefund = async (bookingId) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/paypal/refund",
+        `${process.env.REACT_APP_API_URL}/paypal/refund`,
         { bookingId },
         { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
       );

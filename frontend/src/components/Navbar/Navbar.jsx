@@ -9,7 +9,7 @@ import { setModalOpen } from "../../redux/modalSlice";
 import "./Navbar.css";
 
 // Fetch the API URL from environment variable
-const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000/api"; // Fallback to localhost if not set
+const apiUrl = process.env.REACT_APP_API_URL; // Fallback to localhost if not set
 
 const Navbar = () => {
   const dispatch = useDispatch();

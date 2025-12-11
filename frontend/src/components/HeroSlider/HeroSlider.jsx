@@ -1,6 +1,13 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import "./HeroSlider.css";
 import Form from "../Form/Form"; // ✅ USE SHARED FORM COMPONENT
+import Front_View_of_the_Property from "../../images/exterior_img1.avif";
+import Spacious_Living_Room from "../../images/livingroom1_img5.avif";
+import Full_Open_Kitchen_with_Modern_Amenities from "../../images/fullkitchen_img1.avif";
+import Elegant_Dining_Room_for_Family_Meals from "../../images/diningarea_img1.avif";
+import Six_Bedrooms_for_Comfort_and_Relaxation from "../../images/bedroom1_img1.avif";
+import Full_Bathroom_with_Luxury_Features from "../../images/fullbathroom2_img1.avif";
+import Exciting_Gaming_Room_for_Entertainment from "../../images/gamingarea_img5.avif";
 
 const HeroSlider = forwardRef((props, ref) => {
   const [current, setCurrent] = useState(0);
@@ -8,38 +15,31 @@ const HeroSlider = forwardRef((props, ref) => {
 
   const slides = [
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/05d2e101-b217-4c0e-9ba8-55dca12f3a8f.jpeg?im_w=1200",
+      image: Front_View_of_the_Property,
       caption: "Front View of the Property",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/19960d67-7f8f-4ee7-a679-13ce81f7e534.jpeg?im_w=1200",
+      image: Spacious_Living_Room,
       caption: "Spacious Living Room",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/ca24cc0e-34c7-4b18-b80f-e9ed639ea963.jpeg?im_w=1200",
+      image: Full_Open_Kitchen_with_Modern_Amenities,
       caption: "Full Open Kitchen with Modern Amenities",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f88455c8-3f02-4b1d-a107-0fbaee382798.jpeg?im_w=1200",
+      image: Elegant_Dining_Room_for_Family_Meals,
       caption: "Elegant Dining Room for Family Meals",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/f4179e2e-7d5f-4c7f-8cbe-423a683d2d77.jpeg?im_w=1200",
+      image: Six_Bedrooms_for_Comfort_and_Relaxation,
       caption: "Six Bedrooms for Comfort and Relaxation",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/951caa35-ee85-475f-b8cf-69dffc91d5d9.jpeg?im_w=1200",
+      image: Full_Bathroom_with_Luxury_Features,
       caption: "Full Bathroom with Luxury Features",
     },
     {
-      image:
-        "https://a0.muscache.com/im/pictures/hosting/Hosting-1510422806091021624/original/1722b722-bf9f-4508-a01a-402679439b21.jpeg?im_w=1440",
+      image: Exciting_Gaming_Room_for_Entertainment,
       caption: "Exciting Gaming Room for Entertainment",
     },
   ];
@@ -79,4 +79,3 @@ const HeroSlider = forwardRef((props, ref) => {
 });
 
 export default HeroSlider;
-  
