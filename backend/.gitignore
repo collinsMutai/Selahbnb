@@ -1,2 +1,11 @@
+# Ignore all .env files
 .env
-node_modules
+.env.*
+
+# Optionally ignore other environment files
+.env.production
+.env.local
+.env.test
+
+# Ignore node_modules
+node_modules/
