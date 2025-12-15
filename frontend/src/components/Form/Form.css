@@ -22,11 +22,6 @@
   margin-bottom: 18px;
 }
 
-.input-icon {
-  margin-right: 10px;
-  color: #148992;
-}
-
 /* Input fields */
 .booking-form-only input {
   width: 100%;
@@ -34,6 +29,12 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   outline: none;
+}
+
+/* Input icons */
+.input-icon {
+  margin-right: 10px;
+  color: #148992;
 }
 
 /* Error message */
@@ -124,41 +125,70 @@
   width: 100%;
 }
 
-/* Add this to your CSS file (Form.css or a global style) */
+/* Toast notification positioning */
 .toast-container {
-  z-index: 2000 !important; /* Set a high z-index to ensure it's above the calendar */
-  position: fixed; /* Ensure the toast appears in a fixed position */
-  top: 10px; /* Distance from top */
-  right: 10px; /* Distance from right */
-  max-width: 300px; /* Optional: limit toast width */
+  z-index: 2000 !important;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  max-width: 300px;
+}
+
+/* Buttons below calendar (Clear Dates & Close Calendar) */
+.calendar-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.clear-dates-btn,
+.close-calendar-btn {
+  padding: 10px 15px;
+  background: #148992;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.clear-dates-btn:hover,
+.close-calendar-btn:hover {
+  background: #0e6f70;
+}
+
+.clear-dates-btn:disabled,
+.close-calendar-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 /* Mobile Styling for Calendar */
 @media (max-width: 768px) {
   .calendar-modal {
-    top: 50%; /* Adjust top for smaller screens */
+    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* Center the calendar */
-    width: 80%;
-    max-width: none; /* Remove max-width to take full width */
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    max-width: none;
     padding: 10px;
   }
 
   /* Ensure calendar wrapper stacks vertically on small screens */
   .calendar-modal .rdrDateRangeWrapper {
-    flex-direction: column !important; /* Stack months vertically */
-    width: 100% !important; /* Ensure the calendar uses full width */
+    flex-direction: column !important;
+    width: 100% !important;
   }
 
   /* Make each month take full width */
   .calendar-modal .rdrMonth {
     width: 100% !important;
-    display: block !important; /* Ensure months are block elements */
+    display: block !important;
   }
 
   /* Adjust the month and year navigation bar */
   .calendar-modal .rdrMonthAndYearWrapper {
-    flex-direction: column !important; /* Stack the month/year selector vertically */
+    flex-direction: column !important;
   }
 
   /* Ensure individual months are aligned and do not overflow */
@@ -169,16 +199,12 @@
   }
 
   .calendar-modal .rdrMonthNav {
-    display: none !important; /* Hide navigation arrows on mobile */
+    display: none !important;
   }
 
-  .calendar-modal .rdrMonthAndYearWrapper {
-    display: block !important; /* Ensure the month and year selector is stacked */
-  }
-
-  /* Styling for calendar navigation */
+  /* Hide prev/next buttons on small screens */
   .calendar-modal .rdrPrevButton,
   .calendar-modal .rdrNextButton {
-    display: none !important; /* Remove prev/next buttons on small screens */
+    display: none !important;
   }
 }

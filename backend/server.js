@@ -8,6 +8,8 @@ import listingRoutes from "./routes/listingRoutes.js";
 import tourPlaceRoutes from "./routes/tourPlaceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paypalRoutes from "./routes/paypalRoutes.js";
+import contactRoutes from './routes/contactRoutes.js';
+
 
 dotenv.config();
 connectDB();
@@ -33,6 +35,8 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/tourplaces", tourPlaceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/paypal", paypalRoutes);
+app.use('/api/contact', contactRoutes);
+
 
 app.get("/", (req, res) => {
   res.json({ message: "Server is running" });

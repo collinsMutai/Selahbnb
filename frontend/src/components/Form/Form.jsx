@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"; 
+import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
 import { DateRange } from "react-date-range";
@@ -51,7 +51,6 @@ const Form = () => {
     localStorage.removeItem("bookingDetails");
   }, [dispatch]);
 
-  // Fetch unavailable dates
   const fetchAvailability = async () => {
     try {
       const res = await axios.get(
@@ -70,12 +69,9 @@ const Form = () => {
   const handleRangeChange = (ranges) => {
     const { startDate, endDate } = ranges.selection;
 
-    // If startDate is clicked, set it as startDate and clear endDate
     if (startDate && !formData.startDate) {
       setFormData({ ...formData, startDate, endDate: null });
-    }
-    // If endDate is clicked, set it as endDate and check for validation
-    else if (endDate && formData.startDate) {
+    } else if (endDate && formData.startDate) {
       const disabled = getDisabledDates();
       const overlap = disabled.some((d) => d >= startDate && d <= endDate);
 
@@ -92,13 +88,20 @@ const Form = () => {
       }
 
       setFormData({ ...formData, startDate, endDate });
-      setIsCalendarOpen(false); // Close calendar after selection
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleClearDates = () => {
+    setFormData({ ...formData, startDate: null, endDate: null });
+  };
+
+  const handleCloseCalendar = () => {
+    setIsCalendarOpen(false);
   };
 
   const validateForm = () => {
@@ -193,12 +196,16 @@ const Form = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isCalendarOpen) setIsCalendarOpen(false);
+      // Only close calendar if window width > 768 (non-mobile)
+      if (windowWidth > 768 && isCalendarOpen) {
+        setIsCalendarOpen(false);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [isCalendarOpen]);
+  }, [isCalendarOpen, windowWidth]);
 
   const calendarDirection = windowWidth <= 768 ? "vertical" : "horizontal";
 
@@ -255,14 +262,20 @@ const Form = () => {
       {isCalendarOpen &&
         ReactDOM.createPortal(
           <div ref={calendarRef} className="calendar-modal">
+            {/* Render Custom Label Above Calendar */}
+            <div className="custom-range-labels">
+              <h3>
+                {formData.startDate && formData.endDate
+                  ? `Check-in: ${formData.startDate.toLocaleDateString()} → Check-out: ${formData.endDate.toLocaleDateString()}`
+                  : formData.startDate
+                  ? `Check-in: ${formData.startDate.toLocaleDateString()} → Select Check-out Date`
+                  : formData.endDate
+                  ? `Select Check-in Date → Check-out: ${formData.endDate.toLocaleDateString()}`
+                  : "Select Check-in and Check-out Dates"}
+              </h3>
+            </div>
             <DateRange
-              ranges={[
-                {
-                  startDate: formData.startDate || new Date(),
-                  endDate: formData.endDate || new Date(),
-                  key: "selection",
-                },
-              ]}
+              ranges={[{ startDate: formData.startDate || new Date(), endDate: formData.endDate || new Date(), key: "selection" }]}
               onChange={handleRangeChange}
               moveRangeOnFirstSelection={false}
               rangeColors={["#148992"]}
@@ -272,6 +285,14 @@ const Form = () => {
               locale={enUS}
               disabledDates={getDisabledDates()}
             />
+            <div className="calendar-actions">
+              <button type="button" onClick={handleClearDates} className="clear-dates-btn">
+                Clear Dates
+              </button>
+              <button type="button" onClick={handleCloseCalendar} className="close-calendar-btn">
+                Close Calendar
+              </button>
+            </div>
           </div>,
           document.body
         )}
@@ -280,58 +301,14 @@ const Form = () => {
       {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
 
       {/* Guest Selector */}
-      <div
-        className="input-container"
-        onClick={() => setIsDropdownVisible(!isDropdownVisible)}
-      >
+      <div className="input-container" onClick={() => setIsDropdownVisible(!isDropdownVisible)}>
         <span className="input-icon">👨‍👩‍👧‍👦</span>
         <input
           type="text"
           readOnly
           value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
         />
-        <FaChevronDown
-          className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
-        />
-
-        {isDropdownVisible && (
-          <div className="dropdown-menu">
-            {["adults", "children", "infants", "pets"].map((type) => (
-              <div className="dropdown-item" key={type}>
-                <label>{type.charAt(0).toUpperCase() + type.slice(1)}</label>
-                <div className="quantity-controls">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFormData({
-                        ...formData,
-                        [type]: Math.max(formData[type] - 1, 0),
-                      });
-                    }}
-                  >
-                    −
-                  </button>
-
-                  <span>{formData[type]}</span>
-
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFormData({
-                        ...formData,
-                        [type]: formData[type] + 1,
-                      });
-                    }}
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <FaChevronDown className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`} />
       </div>
 
       <button className="submit-btn" type="submit" disabled={isSubmitting}>
@@ -344,8 +321,6 @@ const Form = () => {
           "Book Now"
         )}
       </button>
-
-      {/* <ToastContainer /> */}
     </form>
   );
 };

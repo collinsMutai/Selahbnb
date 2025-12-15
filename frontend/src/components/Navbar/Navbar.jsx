@@ -156,6 +156,7 @@ const Navbar = () => {
   const handleHomeClick = (e) => {
     e.preventDefault(); // Prevent default anchor behavior
 
+    // If we are already on the home page, scroll to the "home" section
     if (location.pathname === "/") {
       const heroSection = document.getElementById("home");
       if (heroSection) {
@@ -166,7 +167,14 @@ const Navbar = () => {
         });
       }
     } else {
+      // If on another route, navigate to the homepage and scroll to the top
       navigate("/", { replace: true });
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0, // Scroll to top of the page
+          behavior: "smooth",
+        });
+      }, 100); // Add a short delay to make sure the page loads before scrolling
     }
 
     setIsMenuOpen(false); // Close mobile menu after navigation
@@ -327,7 +335,9 @@ const Navbar = () => {
           </div>
 
           <div className="book-now">
-            <button className="book-now-btn">Book Now</button>
+            <button onClick={handleHomeClick} className="book-now-btn">
+              Book Now
+            </button>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import Form from "../Form/Form";
 const BookingForm = () => {
   return (
     <div
+      id="form"
       className="booking-section"
       style={{
         backgroundImage: `url(${backgroundImage})`,
@@ -21,7 +22,9 @@ const BookingForm = () => {
         {/* Left Text Content */}
         <div className="booking-text">
           <h2>Book Your Stay at Selah</h2>
-          <p>Your tranquil retreat in Colorado Springs is just a few clicks away.</p>
+          <p>
+            Your tranquil retreat in Colorado Springs is just a few clicks away.
+          </p>
         </div>
 
         {/* Form Container */}

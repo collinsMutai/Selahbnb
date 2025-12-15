@@ -1,3 +1,5 @@
+@import url("https://cdn.syncfusion.com/ej2/material.css");
+
 .toast-container {
   z-index: 2001 !important; /* Ensure the toast is above the calendar modal */
   position: fixed;

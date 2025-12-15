@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 import "./Places.css";
 
@@ -14,121 +14,67 @@ import redrockcanyonopenspace from "../../images/red-rock-canyon-open-space.jpg"
 import sevenfalls from "../../images/seven-falls.jpeg";
 
 const places = [
-  {
-    id: 1,
-    name: "Garden of the Gods",
-    image: gardenofthegods,
-    description: "A stunning natural park with massive red rock formations.",
-  },
-  {
-    id: 2,
-    name: "Pikes Peak",
-    image: pikespeak,
-    description:
-      "The famous mountain offering breathtaking views of Colorado Springs.",
-  },
-  {
-    id: 3,
-    name: "Cheyenne Mountain Zoo",
-    image: cheyennemountain,
-    description: "A unique zoo located on the side of a mountain.",
-  },
-  {
-    id: 4,
-    name: "Old Colorado City",
-    image: oldcoloradocity,
-    description: "A historic district with unique shops and restaurants.",
-  },
-  {
-    id: 5,
-    name: "Colorado Springs Pioneers Museum",
-    image: coloradospringspioneersmuseum,
-    description: "A museum showcasing the history of Colorado Springs.",
-  },
-  {
-    id: 6,
-    name: "Manitou Springs Penny Arcade",
-    image: manitouspringspennyarcade,
-    description: "A nostalgic arcade with vintage games and memorabilia.",
-  },
-  {
-    id: 7,
-    name: "The Broadmoor Seven Falls",
-    image: sevenfalls,
-    description: "A series of seven stunning waterfalls.",
-  },
-  {
-    id: 8,
-    name: "Air Force Academy",
-    image: airforceacademy,
-    description: "A prestigious military academy with striking architecture.",
-  },
-  {
-    id: 9,
-    name: "Red Rock Canyon Open Space",
-    image: redrockcanyonopenspace,
-    description: "A hidden gem for hiking and outdoor activities.",
-  },
-  {
-    id: 10,
-    name: "Mount Cutler Trail",
-    image: mountcutlertrail,
-    description: "A popular trail with sweeping views of the city.",
-  },
+  { id: 1, name: "Garden of the Gods", image: gardenofthegods },
+  { id: 2, name: "Pikes Peak", image: pikespeak },
+  { id: 3, name: "Cheyenne Mountain Zoo", image: cheyennemountain },
+  { id: 4, name: "Old Colorado City", image: oldcoloradocity },
+  { id: 5, name: "Colorado Springs Pioneers Museum", image: coloradospringspioneersmuseum },
+  { id: 6, name: "Manitou Springs Penny Arcade", image: manitouspringspennyarcade },
+  { id: 7, name: "The Broadmoor Seven Falls", image: sevenfalls },
+  { id: 8, name: "Air Force Academy", image: airforceacademy },
+  { id: 9, name: "Red Rock Canyon Open Space", image: redrockcanyonopenspace },
+  { id: 10, name: "Mount Cutler Trail", image: mountcutlertrail },
 ];
 
 const Places = () => {
-  const [selectedPlace, setSelectedPlace] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [itemsToShow, setItemsToShow] = useState(3);
+  const [visibleImages, setVisibleImages] = useState(places.slice(0, 4)); // Start with first 4 images
 
-  const trackRef = useRef();
-
-  const updateItemsToShow = () => {
-    const width = window.innerWidth;
-    if (width <= 768) setItemsToShow(1);
-    else if (width <= 1024) setItemsToShow(2);
-    else setItemsToShow(3);
+  // Function to update visible images in the carousel
+  const moveCarousel = () => {
+    setVisibleImages((prevImages) => {
+      const nextImages = [
+        ...prevImages.slice(1),
+        places[(places.indexOf(prevImages[prevImages.length - 1]) + 1) % places.length],
+      ]; // Shift images and add the next one
+      return nextImages;
+    });
   };
 
+  // Auto move carousel every 3 seconds
   useEffect(() => {
-    updateItemsToShow();
-    window.addEventListener("resize", updateItemsToShow);
-    return () => window.removeEventListener("resize", updateItemsToShow);
+    const interval = setInterval(moveCarousel, 3000); // Slide every 3 seconds
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []);
 
- const moveCarousel = (direction) => {
-  if (!trackRef.current) return;
-
-  const cardWidth = trackRef.current.children[0].offsetWidth + 15; // card width + gap
-  const totalCards = places.length;
-  const maxIndex = totalCards - itemsToShow;
-
-  let newIndex = currentIndex + direction;
-
-  if (newIndex > maxIndex) newIndex = 0;
-  if (newIndex < 0) newIndex = maxIndex;
-
-  setCurrentIndex(newIndex);
-
-  trackRef.current.style.transform = `translateX(-${newIndex * cardWidth}px)`;
-};
-
-
+  // Adjust number of visible images based on screen width
   useEffect(() => {
-    const interval = setInterval(() => moveCarousel(1), 3000);
-    return () => clearInterval(interval);
-  }, [currentIndex, itemsToShow]);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width <= 768) {
+        setVisibleImages(places.slice(0, 1)); // 1 image for mobile
+      } else if (width <= 1024) {
+        setVisibleImages(places.slice(0, 2)); // 2 images for tablets
+      } else {
+        setVisibleImages(places.slice(0, 4)); // 4 images for desktop
+      }
+    };
 
-  const handleCardClick = (place) => {
-    setSelectedPlace(place);
+    handleResize(); // Initialize on mount
+    window.addEventListener("resize", handleResize); // Update on window resize
+
+    return () => window.removeEventListener("resize", handleResize); // Cleanup on unmount
+  }, []);
+
+  const handleImageClick = (image) => {
+    setSelectedImage(image);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setSelectedPlace(null);
+    setSelectedImage(null);
   };
 
   return (
@@ -137,62 +83,33 @@ const Places = () => {
 
       <div className="carousel-container">
         <div className="carousel-wrapper">
-          <div
-            className="carousel-track"
-            ref={trackRef}
-            style={{
-              transform: `translateX(-${
-                currentIndex *
-                (trackRef.current
-                  ? trackRef.current.children[0].offsetWidth + 10
-                  : 0)
-              }px)`,
-            }}
-          >
-            {places.map((place) => (
-              <div
-                key={place.id}
-                className="place-card"
-                onClick={() => handleCardClick(place)}
-              >
-                <img src={place.image} alt={place.name} />
-                <h3>{place.name}</h3>
-                <p>{place.description}</p>
-              </div>
-            ))}
-          </div>
+          {visibleImages.map((place) => (
+            <div
+              key={place.id}
+              className="carousel-image-container"
+              onClick={() => handleImageClick(place.image)}
+            >
+              <img src={place.image} alt={place.name} className="carousel-image" />
+            </div>
+          ))}
         </div>
-
-        <button
-          className="carousel-button prev"
-          onClick={() => moveCarousel(-1)}
-        >
-          Prev
-        </button>
-        <button
-          className="carousel-button next"
-          onClick={() => moveCarousel(1)}
-        >
-          Next
-        </button>
       </div>
 
+      {/* Modal to view image in detail */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={handleCloseModal}
-        contentLabel="Place Details"
+        contentLabel="Image Details"
         className="modal-content"
         overlayClassName="modal-overlay"
       >
-        {selectedPlace && (
+        {selectedImage && (
           <div className="modal-content-wrapper">
-            <h3>{selectedPlace.name}</h3>
             <img
-              src={selectedPlace.image}
-              alt={selectedPlace.name}
+              src={selectedImage}
+              alt="Selected"
               className="modal-image"
             />
-            <p>{selectedPlace.description}</p>
             <button onClick={handleCloseModal}>Close</button>
           </div>
         )}
