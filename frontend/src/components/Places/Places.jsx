@@ -78,7 +78,8 @@ const Places = () => {
   };
 
   return (
-    <div className="places-container">
+    <div className="main-container">
+      <div className="places-container">
       <h2>Places to Visit in Colorado Springs</h2>
 
       <div className="carousel-container">
@@ -90,6 +91,7 @@ const Places = () => {
               onClick={() => handleImageClick(place.image)}
             >
               <img src={place.image} alt={place.name} className="carousel-image" />
+              <div className="carousel-caption">{place.name}</div> {/* Image name below the image */}
             </div>
           ))}
         </div>
@@ -114,6 +116,7 @@ const Places = () => {
           </div>
         )}
       </Modal>
+    </div>
     </div>
   );
 };

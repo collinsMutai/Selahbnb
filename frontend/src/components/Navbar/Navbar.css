@@ -1,5 +1,5 @@
-/* Navbar container */
-.navbar {
+/* selahnavbar container */
+.selahnavbar {
   width: 100%;
   background-color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
@@ -10,8 +10,8 @@
   z-index: 1000;
 }
 
-/* Navbar container for layout */
-.navbar-container {
+/* selahnavbar container for layout */
+.selahnavbar-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -21,7 +21,7 @@
 }
 
 /* Logo (Text-based) */
-.navbar-logo {
+.selahnavbar-logo {
   font-size: 24px;
   font-weight: bold;
   color: #000;
@@ -29,7 +29,7 @@
 }
 
 /* Left-aligned links (Desktop) */
-.navbar-links {
+.selahnavbar-links {
   display: flex;
   list-style: none;
   padding: 0;
@@ -39,11 +39,11 @@
   width: auto;
 }
 
-.navbar-links li {
+.selahnavbar-links li {
   padding: 10px 20px; /* Horizontal padding between links */
 }
 
-.navbar-link {
+.selahnavbar-link {
   text-decoration: none;
   color: black; /* Default text color */
   font-size: 16px;
@@ -51,17 +51,17 @@
   transition: color 0.3s ease;
 }
 
-.navbar-link:hover {
+.selahnavbar-link:hover {
   color: #148992; /* Link color on hover */
 }
 
-.navbar-link.active {
+.selahnavbar-link.active {
   color: #148992; /* Active link color */
   font-weight: bold; /* Bold active links */
 }
 
 /* Right-aligned elements (e.g., user icon, phone number) */
-.navbar-right {
+.selahnavbar-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -69,20 +69,20 @@
 }
 
 /* User Icon (SVG) */
-.user-icon {
+.selah-user-icon {
   display: flex;
   align-items: center;
   cursor: pointer;
 }
 
-.user-icon svg {
+.selah-user-icon svg {
   width: 30px;
   height: 30px;
   color: #333; /* Default color */
   transition: color 0.3s ease;
 }
 
-.user-icon svg:hover {
+.selah-user-icon svg:hover {
   color: #116f71; /* Change color on hover */
 }
 
@@ -132,35 +132,32 @@
   outline: none;
 }
 
-/* Hamburger Icon (Mobile) */
-.hamburger {
+/* selah-hamburger Icon (Mobile) */
+.selah-hamburger {
   display: none;
   cursor: pointer;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 15px;
-  width: 15px;
   background-color: #148992;
+  color: #fff;
   border-radius: 10px;
   padding: 10px;
 }
 
-.hamburger-line {
+.selah-hamburger-line {
   background-color: white;
   height: 3px;
   width: 100%;
   transition: all 0.3s ease;
 }
 
-.hamburger.active .hamburger-line:nth-child(1) {
+.selah-hamburger.active .selah-hamburger-line:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
 
-.hamburger.active .hamburger-line:nth-child(2) {
+.selah-hamburger.active .selah-hamburger-line:nth-child(2) {
   opacity: 0;
 }
 
-.hamburger.active .hamburger-line:nth-child(3) {
+.selah-hamburger.active .selah-hamburger-line:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
 }
 
@@ -179,7 +176,7 @@
   cursor: pointer; /* Change cursor to pointer to indicate clickable overlay */
 }
 
-.modal-content {
+.selah-modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -212,7 +209,7 @@
   padding: 20px;
 }
 
-.modal-content {
+.selah-modal-content {
   background-color: white;
   padding: 20px;
   border-radius: 8px;
@@ -258,11 +255,9 @@
   margin-right: 8px; /* Space between icon and text */
 }
 
-
-
 /* Media Queries for Mobile */
 @media (max-width: 768px) {
-  .navbar-links {
+  .selahnavbar-links {
     position: absolute;
     top: 80px;
     right: 0;
@@ -276,18 +271,18 @@
     transition: transform 0.4s cubic-bezier(0.42, 0, 0.58, 1);
   }
 
-  .navbar-links.active {
+  .selahnavbar-links.active {
     transform: translateX(0); /* Slide in on mobile */
   }
 
-  .navbar-links li {
+  .selahnavbar-links li {
     padding: 20px 0;
     width: 100%; /* Make links full width */
     text-align: center; /* Center align links */
   }
 
-  .hamburger {
-    display: flex; /* Display hamburger icon */
+  .selah-hamburger {
+    display: flex; /* Display selah-hamburger icon */
   }
 
   /* Right-aligned section (hide on mobile) */
@@ -296,7 +291,7 @@
     display: none !important; /* Hide these on mobile */
   }
 
-  .user-icon {
+  .selah-user-icon {
     margin-right: 3rem;
   }
 
@@ -309,7 +304,7 @@
     cursor: pointer;
   }
 
-  .google-login-modal .modal-content {
+  .google-login-modal .selah-modal-content {
     pointer-events: all; /* Prevent modal content from closing the modal on click */
   }
 }

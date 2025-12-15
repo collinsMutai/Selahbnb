@@ -1,6 +1,11 @@
 /* Main container */
+.main-container{
+  padding: 120px 20px;
+}
+
 .places-container {
   padding: 20px;
+
   margin: 0 auto; /* Center the container horizontally */
   max-width: 1200px; /* Max width for the main container */
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -25,11 +30,10 @@
   margin-bottom: 50px;
 }
 
-/* This ensures the carousel images slide horizontally with padding on mobile */
 .carousel-wrapper {
   display: flex;
   gap: 15px;
-  justify-content: center;
+  justify-content: center; /* Center the images inside the carousel */
   transition: transform 0.3s ease;
 }
 
@@ -41,8 +45,11 @@
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
+  flex-direction: column; /* Stack image and caption vertically */
   justify-content: center;
   align-items: center;
+  position: relative;
+  margin: 0 auto;
 }
 
 .carousel-image {
@@ -54,6 +61,15 @@
 
 .carousel-image:hover {
   transform: scale(1.05);
+}
+
+/* Caption Styling */
+.carousel-caption {
+  margin-top: 10px; /* Add space between image and caption */
+  font-size: 1rem;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
 }
 
 /* Modal */
@@ -89,6 +105,10 @@
 
 /* Tablets and smaller screens */
 @media (max-width: 1024px) {
+  .carousel-container {
+    margin-bottom: 0px;
+  }
+
   .places-container {
     padding: 20px;
   }
@@ -113,6 +133,9 @@
 
 /* Mobile – 1 card per row and heading adjustments */
 @media (max-width: 768px) {
+  .main-container{
+ padding-bottom: 60px;
+}
   .places-container {
     padding: 20px;
   }
@@ -122,40 +145,24 @@
     margin-bottom: 15px;
   }
 
-  /* This ensures the carousel images will take full width, with some padding */
   .carousel-wrapper {
     gap: 10px;
-    width: calc(100% - 40px); /* Take full width minus padding */
-    padding: 0 20px; /* Add padding to the left and right */
   }
 
   .carousel-image-container {
-    width: 100%;  /* Make the carousel items full-width */
-    height: 200px;
+    width: 350px; /* Fixed width for mobile */
+    height: 200px; /* Fixed height for consistency */
+    margin-bottom: 15px; /* Add space between images */
   }
 
   .carousel-image {
-    object-fit: cover;
+    width: 100%; /* Make image fill container width */
+    height: 100%; /* Make image fill container height */
+    object-fit: cover; /* Ensure it fills the container with the right aspect ratio */
   }
 
   .modal-content {
     width: 90%;
     max-width: 100%;
-  }
-}
-
-/* Small mobile screens */
-@media (max-width: 480px) {
-  .carousel-wrapper {
-    gap: 5px;  /* Adjust gap between images */
-  }
-
-  .carousel-image-container {
-    width: 100%; /* Make carousel items full width */
-    height: 180px;
-  }
-
-  .places-container h2 {
-    font-size: 1.3rem; /* Further reduce heading size */
   }
 }

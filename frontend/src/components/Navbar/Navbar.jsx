@@ -160,7 +160,8 @@ const Navbar = () => {
     if (location.pathname === "/") {
       const heroSection = document.getElementById("home");
       if (heroSection) {
-        const navbarHeight = document.querySelector(".navbar").offsetHeight;
+        const navbarHeight =
+          document.querySelector(".selahnavbar").offsetHeight;
         window.scrollTo({
           top: heroSection.offsetTop - navbarHeight,
           behavior: "smooth",
@@ -187,7 +188,8 @@ const Navbar = () => {
       const overviewSection = document.getElementById("overview");
 
       if (overviewSection) {
-        const navbarHeight = document.querySelector(".navbar").offsetHeight;
+        const navbarHeight =
+          document.querySelector(".selahnavbar").offsetHeight;
 
         setTimeout(() => {
           window.scrollTo({
@@ -203,7 +205,8 @@ const Navbar = () => {
         const overviewSection = document.getElementById("overview");
 
         if (overviewSection) {
-          const navbarHeight = document.querySelector(".navbar").offsetHeight;
+          const navbarHeight =
+            document.querySelector(".selahnavbar").offsetHeight;
           window.scrollTo({
             top: overviewSection.offsetTop - navbarHeight,
             behavior: "smooth",
@@ -240,26 +243,56 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar" id="navbar">
-      <div className="navbar-container">
+    <div className="selahnavbar" id="selahnavbar">
+      <div className="selahnavbar-container">
         <div className="logo">
-          <span className="navbar-logo">Selah</span>
+          <span className="selahnavbar-logo">Selah</span>
         </div>
 
-        <div
-          className={`hamburger ${isMenuOpen ? "active" : ""}`}
-          onClick={toggleMenu}
-        >
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
-          <span className="hamburger-line"></span>
+        <div className="selah-hamburger" onClick={toggleMenu}>
+          {isMenuOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-x"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M18 6l-12 12" />
+              <path d="M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-menu-2"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M4 6l16 0" />
+              <path d="M4 12l16 0" />
+              <path d="M4 18l16 0" />
+            </svg>
+          )}
         </div>
 
-        <ul className={`navbar-links ${isMenuOpen ? "active" : ""}`}>
+        <ul className={`selahnavbar-links ${isMenuOpen ? "active" : ""}`}>
           <li>
             <NavLink
               to="/"
-              className="navbar-link"
+              className="selahnavbar-link"
               end
               onClick={handleHomeClick}
             >
@@ -269,7 +302,7 @@ const Navbar = () => {
           <li>
             <a
               href="#overview"
-              className="navbar-link"
+              className="selahnavbar-link"
               onClick={handleOverviewClick}
             >
               Overview
@@ -278,7 +311,7 @@ const Navbar = () => {
           <li>
             <a
               href="/places"
-              className="navbar-link"
+              className="selahnavbar-link"
               onClick={handlePlacesClick}
             >
               Places
@@ -287,7 +320,7 @@ const Navbar = () => {
           <li>
             <a
               href="/contact"
-              className="navbar-link"
+              className="selahnavbar-link"
               onClick={handleContactClick}
             >
               Contact
@@ -295,8 +328,8 @@ const Navbar = () => {
           </li>
         </ul>
 
-        <div className="navbar-right">
-          <div className="user-icon" onClick={toggleModal}>
+        <div className="selahnavbar-right">
+          <div className="selah-user-icon" onClick={toggleModal}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -352,7 +385,7 @@ const Navbar = () => {
             }
           }}
         >
-          <div className="modal-content">
+          <div className="selah-modal-content">
             {loading ? ( // Show loading state while user data is being fetched
               <div>Loading...</div>
             ) : !isLoggedIn ? (
@@ -442,7 +475,7 @@ const Navbar = () => {
           </div>
         </div>
       )}
-    </nav>
+    </div>
   );
 };
 
