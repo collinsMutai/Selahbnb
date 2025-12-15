@@ -11,7 +11,7 @@ const PropertyGallery = () => {
     "./mount-cutler-trail.jpg",
     "./red-rock-canyon-open-space.jpg",
     "./seven-falls.avif",
-    "./seven-falls.jpeg"
+    "./seven-falls.jpeg",
   ];
 
   // Function to dynamically load images from 'src/images' folder
@@ -24,28 +24,25 @@ const PropertyGallery = () => {
 
     // Log out the list of paths that require.context is providing
     const imagePaths = context.keys();
-    console.log("Image Paths: ", imagePaths); // Check what paths are returned by require.context
 
     // Extract image paths and metadata, and exclude the unwanted images
-    const images = imagePaths.map((key) => {
-      const imageName = key.replace("./", "").replace(/\.[^/.]+$/, ""); // Clean up filename (remove path and extension)
+    const images = imagePaths
+      .map((key) => {
+        const imageName = key.replace("./", "").replace(/\.[^/.]+$/, ""); // Clean up filename (remove path and extension)
 
-      // Log to check if exclusion works
-      console.log("Processing image:", key); // Log the full path for debugging
+        // Check if the image should be excluded
+        const isExcluded = excludedImages.includes(key);
+        if (isExcluded) {
+          return null; // Skip this image
+        }
 
-      // Check if the image should be excluded
-      const isExcluded = excludedImages.includes(key);
-      if (isExcluded) {
-        console.log("Excluding image:", key);
-        return null; // Skip this image
-      }
-
-      return {
-        src: context(key), // Path to the image
-        name: imageName, // Cleaned up filename
-        category: getCategory(key), // Determine category based on filename
-      };
-    }).filter(Boolean); // Remove null values from the array
+        return {
+          src: context(key), // Path to the image
+          name: imageName, // Cleaned up filename
+          category: getCategory(key), // Determine category based on filename
+        };
+      })
+      .filter(Boolean); // Remove null values from the array
 
     return images;
   }, []); // Empty dependency array ensures `loadImages` is stable across renders

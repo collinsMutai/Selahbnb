@@ -58,7 +58,7 @@
 }
 
 /* Dropdown menu */
-.dropdown-menu {
+.selah-dropdown-menu {
   position: absolute;
   top: 100%;
   width: 100%;
@@ -69,24 +69,48 @@
   z-index: 20;
 }
 
-.dropdown-item {
+/* Dropdown item container */
+.selah-dropdown-item {
   display: flex;
+  align-items: center;  /* Ensure label and controls are inline */
   justify-content: space-between;
   padding: 6px 0;
+  gap: 8px; /* Space between label and controls */
 }
 
-/* Quantity buttons */
+/* Label styling */
+.selah-dropdown-item label {
+  font-weight: bold;
+  width: 120px;  /* Fixed width for labels */
+  margin-right: 10px;  /* Space between label and controls */
+}
+
+/* Quantity controls */
 .quantity-controls {
   display: flex;
   gap: 8px;
+  align-items: center;  /* Ensure buttons and span are vertically centered */
 }
 
+/* Quantity control buttons */
 .quantity-controls button {
   background: #148992;
   color: white;
   padding: 4px 8px;
   border: none;
   border-radius: 4px;
+  cursor: pointer;
+}
+
+.quantity-controls button:focus {
+  outline: none;
+}
+
+.quantity-controls span {
+  display: inline-block;
+  font-size: 14px;
+  text-align: center;
+  min-width: 30px;  /* Fixed width for number */
 }
 
 /* Submit button */
@@ -207,4 +231,9 @@
   .calendar-modal .rdrNextButton {
     display: none !important;
   }
+}
+
+/* General Styling */
+.booking-form-only {
+  font-family: Arial, sans-serif;
 }

@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import { FaUser, FaPhoneAlt, FaCalendarAlt, FaChevronDown } from "react-icons/fa";
+import {
+  FaUser,
+  FaPhoneAlt,
+  FaCalendarAlt,
+  FaChevronDown,
+} from "react-icons/fa";
 import { DateRange } from "react-date-range";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
@@ -194,20 +199,11 @@ const Form = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      // Only close calendar if window width > 768 (non-mobile)
-      if (windowWidth > 768 && isCalendarOpen) {
-        setIsCalendarOpen(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isCalendarOpen, windowWidth]);
-
   const calendarDirection = windowWidth <= 768 ? "vertical" : "horizontal";
+
+  const handleDropdownClick = () => {
+    setIsDropdownVisible(!isDropdownVisible);
+  };
 
   return (
     <form className="booking-form-only" onSubmit={handleSubmit} ref={formRef}>
@@ -275,7 +271,11 @@ const Form = () => {
               </h3>
             </div>
             <DateRange
-              ranges={[{ startDate: formData.startDate || new Date(), endDate: formData.endDate || new Date(), key: "selection" }]}
+              ranges={[{
+                startDate: formData.startDate || new Date(),
+                endDate: formData.endDate || new Date(),
+                key: "selection",
+              }]}
               onChange={handleRangeChange}
               moveRangeOnFirstSelection={false}
               rangeColors={["#148992"]}
@@ -286,10 +286,18 @@ const Form = () => {
               disabledDates={getDisabledDates()}
             />
             <div className="calendar-actions">
-              <button type="button" onClick={handleClearDates} className="clear-dates-btn">
+              <button
+                type="button"
+                onClick={handleClearDates}
+                className="clear-dates-btn"
+              >
                 Clear Dates
               </button>
-              <button type="button" onClick={handleCloseCalendar} className="close-calendar-btn">
+              <button
+                type="button"
+                onClick={handleCloseCalendar}
+                className="close-calendar-btn"
+              >
                 Close Calendar
               </button>
             </div>
@@ -297,18 +305,50 @@ const Form = () => {
           document.body
         )}
 
-      {errors.checkIn && <p className="error-text">{errors.checkIn}</p>}
-      {errors.checkOut && <p className="error-text">{errors.checkOut}</p>}
-
       {/* Guest Selector */}
-      <div className="input-container" onClick={() => setIsDropdownVisible(!isDropdownVisible)}>
+      <div className="input-container" onClick={handleDropdownClick}>
         <span className="input-icon">👨‍👩‍👧‍👦</span>
         <input
           type="text"
           readOnly
           value={`Adults: ${formData.adults}, Children: ${formData.children}, Infants: ${formData.infants}, Pets: ${formData.pets}`}
         />
-        <FaChevronDown className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`} />
+        <FaChevronDown
+          className={`dropdown-icon ${isDropdownVisible ? "rotate" : ""}`}
+        />
+        {isDropdownVisible && (
+          <div className="selah-dropdown-menu show">
+            {["adults", "children", "infants", "pets"].map((type) => (
+              <div className="selah-dropdown-item" key={type}>
+                <label>{type.charAt(0).toUpperCase() + type.slice(1)}</label>
+                <div className="quantity-controls">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFormData({
+                        ...formData,
+                        [type]: Math.max(formData[type] - 1, 0),
+                      });
+                    }}
+                  >
+                    −
+                  </button>
+                  <span>{formData[type]}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFormData({ ...formData, [type]: formData[type] + 1 });
+                    }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <button className="submit-btn" type="submit" disabled={isSubmitting}>
