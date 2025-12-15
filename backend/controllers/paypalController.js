@@ -68,7 +68,7 @@ export const createPaypalPayment = async (req) => {
         },
       ],
       application_context: {
-        return_url: process.env.returnUrl,
+        return_url: process.env.return_url,
         cancel_url: process.env.cancel_url,
       },
     };
