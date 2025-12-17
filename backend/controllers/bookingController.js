@@ -1,148 +1,160 @@
+import mongoose from "mongoose";
 import Booking from "../models/Booking.js";
-import { v4 as uuidv4 } from "uuid"; // Import uuidv4 to generate unique IDs
-import Listing from "../models/Listing.js"; // To fetch listing details
-import { createPaypalPayment } from "./paypalController.js"; // Import PayPal payment method
+import Listing from "../models/Listing.js";
 import moment from "moment-timezone";
+import { createPaypalPayment } from "./paypalController.js";
 
-// Define the check-in and check-out restrictions in Colorado Springs time (America/Denver timezone)
-const HOUSE_RULES = {
-  checkIn: { hour: 15, minute: 0 }, // 3:00 PM
-  checkOut: { hour: 11, minute: 0 }, // 11:00 AM
-};
+// America/Denver timezone
+const TIMEZONE = "America/Denver";
+const HOUSE_RULES = { checkIn: { hour: 15, minute: 0 }, checkOut: { hour: 11, minute: 0 } };
 
-// Create a new booking and initiate PayPal payment
+/**
+ * Create a new booking and initiate PayPal payment
+ */
 export const createBooking = async (req, res) => {
-  try {
-    const {
-      listingId,
-      name,
-      phone,
-      checkIn,
-      checkOut,
-      adults,
-      children,
-      infants,
-      pets,
-    } = req.body;
-    const listing = await Listing.findById(listingId);
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-    // If listing not found, return an error
+  try {
+    const { listingId, checkIn: rawCheckIn, checkOut: rawCheckOut } = req.body;
+
+    // Ensure listing exists
+    const listing = await Listing.findById(listingId).session(session);
     if (!listing) {
+      await session.abortTransaction();
+      session.endSession();
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Check for double booking - Same listing, overlapping dates
-    const overlappingBooking = await Booking.findOne({
+    // Normalize check-in and check-out dates
+    const checkInDate = moment(rawCheckIn).tz(TIMEZONE).startOf('day');
+    const checkOutDate = moment(rawCheckOut).tz(TIMEZONE).startOf('day');
+    const numberOfDays = checkOutDate.diff(checkInDate, "days");
+
+    // Enforce minimum 2-night stay
+    if (numberOfDays < 2) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Minimum stay is 2 nights." });
+    }
+
+    // Apply house rules to check-in/check-out
+    const checkIn = moment(rawCheckIn)
+      .tz(TIMEZONE)
+      .hour(HOUSE_RULES.checkIn.hour)
+      .minute(HOUSE_RULES.checkIn.minute)
+      .second(0)
+      .millisecond(0)
+      .toDate();
+
+    const checkOut = moment(rawCheckOut)
+      .tz(TIMEZONE)
+      .hour(HOUSE_RULES.checkOut.hour)
+      .minute(HOUSE_RULES.checkOut.minute)
+      .second(0)
+      .millisecond(0)
+      .toDate();
+
+    // Check for overlapping bookings
+    const conflict = await Booking.findOne({
       listing: listingId,
-      status: "Confirmed", // only consider confirmed bookings
-      checkIn: { $lt: new Date(checkOut) },
-      checkOut: { $gt: new Date(checkIn) },
-    });
+      status: { $in: ["HOLD", "CONFIRMED"] },
+      checkIn: { $lt: checkOut },
+      checkOut: { $gt: checkIn },
+    }).session(session);
 
-    if (overlappingBooking) {
-      return res.status(400).json({ message: "Dates are already booked." });
+    if (conflict) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(409).json({ message: "Dates unavailable" });
     }
 
-    // Convert the check-in and check-out times to Colorado Springs time (America/Denver timezone)
-    const checkInDate = moment.tz(checkIn, "America/Denver");
-    const checkOutDate = moment.tz(checkOut, "America/Denver");
+    // Set booking expiration (15 minutes TTL)
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
-    // Notify user about check-in and check-out restrictions
-    let warningMessage = "";
+    // Calculate total price
+    const subtotal = listing.price * numberOfDays;
+    const tax = subtotal * 0.1; // example 10% tax
+    const totalPrice = subtotal + tax;
 
-    if (
-      checkInDate.hour() < HOUSE_RULES.checkIn.hour ||
-      (checkInDate.hour() === HOUSE_RULES.checkIn.hour &&
-        checkInDate.minute() < HOUSE_RULES.checkIn.minute)
-    ) {
-      warningMessage = "Check-in is after 3:00 PM in Colorado Springs.";
+    // Ensure total price is greater than zero
+    if (totalPrice <= 0) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Total price must be greater than zero." });
     }
 
-    if (
-      checkOutDate.hour() > HOUSE_RULES.checkOut.hour ||
-      (checkOutDate.hour() === HOUSE_RULES.checkOut.hour &&
-        checkOutDate.minute() > HOUSE_RULES.checkOut.minute)
-    ) {
-      warningMessage = warningMessage
-        ? `${warningMessage} Checkout must be before 11:00 AM in Colorado Springs.`
-        : "Checkout must be before 11:00 AM in Colorado Springs.";
-    }
-
-    // Calculate the number of days between check-in and check-out
-    const checkInDateJS = new Date(checkIn);
-    const checkOutDateJS = new Date(checkOut);
-    const numberOfDays = Math.ceil(
-      (checkOutDateJS - checkInDateJS) / (1000 * 60 * 60 * 24)
+    // Create booking
+    const booking = await Booking.create(
+      [
+        {
+          ...req.body,
+          listing: listingId,
+          user: req.user._id,
+          checkIn,
+          checkOut,
+          subtotal,
+          tax,
+          totalPrice,
+          numberOfDays,
+          status: "HOLD",
+          expiresAt,
+        },
+      ],
+      { session }
     );
 
-    // Colorado Springs / El Paso County lodging tax
-    const TAX_RATE = 0.112; // 11.2%
+    console.log("Booking created successfully:", booking);  // Log booking creation
 
-    const subtotal = listing.price * numberOfDays;
-    const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
-    const totalPrice = Number((subtotal + taxAmount).toFixed(2));
+    // Create PayPal order
+    let paypalOrder;
+    try {
+      paypalOrder = await createPaypalPayment({
+        body: {
+          bookingId: booking[0]._id,
+          totalPrice: booking[0].totalPrice,
+        },
+      });
 
-    // Generate a unique transaction ID (UUID) for local tracking
-    const paymentTransactionId = uuidv4();
+      console.log("PayPal order created successfully:", paypalOrder);  // Log PayPal order creation
+    } catch (paypalError) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error("PayPal order creation failed:", paypalError);
+      return res.status(500).json({ message: "Payment initialization failed" });
+    }
 
-    // Create a new booking
-    const booking = new Booking({
-      listing: listingId,
-      user: req.user._id,
-      name,
-      phone,
+    // Save PayPal order ID to booking
+    await Booking.findByIdAndUpdate(
+      booking[0]._id,
+      { paypalOrderId: paypalOrder.data.orderId },
+      { session }
+    );
+
+    await session.commitTransaction();
+    session.endSession();
+
+    // Return booking info with PayPal approval link
+    res.status(201).json({
+      bookingId: booking[0]._id,
+      approvalLink: paypalOrder.data.approvalLink,
+      expiresAt,
       checkIn,
       checkOut,
-      adults,
-      children,
-      infants,
-      pets,
-      subtotal,
-      tax: taxAmount,
       totalPrice,
-      numberOfDays,
-      paymentTransactionId,
     });
 
-    // Save the booking to the database
-    const savedBooking = await booking.save();
-
-    // Now trigger the PayPal payment flow after saving the booking
-    // Call the createPaypalPayment function with the booking ID
-    const paymentResponse = await createPaypalPayment({
-      body: { bookingId: savedBooking._id, totalPrice },
-    });
-
-    // If payment creation was successful, return the booking and approval link
-    if (paymentResponse.status === 200) {
-      // Save the PayPal Order ID
-      await Booking.findByIdAndUpdate(savedBooking._id, {
-        paypalOrderId: paymentResponse.data.orderId,
-      });
-
-      res.status(201).json({
-        booking: {
-          ...savedBooking._doc,
-          subtotal: savedBooking.subtotal.toFixed(2),
-          tax: savedBooking.tax.toFixed(2),
-          totalPrice: savedBooking.totalPrice.toFixed(2),
-        },
-        approvalLink: paymentResponse.data.approvalLink, // Provide the approval link here
-        warningMessage, // Include warning message
-      });
-    } else {
-      res
-        .status(paymentResponse.status)
-        .json({ message: paymentResponse.message });
-    }
-  } catch (error) {
-    console.error("Error creating booking and initiating PayPal payment:", error);
-    res.status(500).json({
-      message: "Error creating booking and initiating PayPal payment",
-    });
+  } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Booking creation failed:", err);
+    res.status(500).json({ message: "Booking creation failed" });
   }
 };
-// Get all bookings for a user
+
+/**
+ * Get all bookings for a user
+ */
 export const getUserBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ user: req.user._id })
@@ -154,79 +166,38 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-// Get all bookings for a listing (for hosts to manage their bookings)
+/**
+ * Get all bookings for a listing (hosts)
+ */
 export const getListingBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ listing: req.params.id }).populate(
-      "user",
-      "name email"
-    );
+    const bookings = await Booking.find({ listing: req.params.id }).populate("user", "name email");
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Update booking status (Only admin or host can do this)
-export const updateBookingStatus = async (req, res) => {
-  try {
-    const { status } = req.body;
-    const booking = await Booking.findById(req.params.id);
-
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    if (
-      booking.listing.host.toString() !== req.user._id.toString() &&
-      !req.user.isAdmin
-    ) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to update this booking" });
-    }
-
-    booking.status = status;
-    const updatedBooking = await booking.save();
-
-    res.status(200).json(updatedBooking);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Get availability for a listing (returns booked dates)
+/**
+ * Get availability for a listing
+ */
 export const getListingAvailability = async (req, res) => {
   try {
-    const listingId = req.params.listingId;
-    console.log('listingId', listingId);
-
-    // Fetch all confirmed bookings for the given listing
-    const bookings = await Booking.find({
-      listing: listingId,
-      status: "Confirmed"  // Only consider confirmed bookings
-    }).select("checkIn checkOut");
-
-    console.log('bookings', bookings);
-
-    // Convert booked date ranges into a more usable format (Array of booked dates)
+    const bookings = await Booking.find({ listing: req.params.listingId, status: "CONFIRMED" }).select("checkIn checkOut");
     const bookedDates = [];
-    bookings.forEach(booking => {
-      const startDate = moment(booking.checkIn);
-      const endDate = moment(booking.checkOut);
 
-      // Iterate through the range of dates between checkIn and checkOut
-      while (startDate.isBefore(endDate)) {
-        bookedDates.push(startDate.format('YYYY-MM-DD')); // Add each date to the bookedDates array
-        startDate.add(1, 'days'); // Increment by 1 day
+    bookings.forEach((booking) => {
+      const start = moment(booking.checkIn);
+      const end = moment(booking.checkOut);
+      while (start.isBefore(end)) {
+        bookedDates.push(start.format("YYYY-MM-DD"));
+        start.add(1, "day");
       }
     });
 
-    // Return the booked dates
     res.json({ bookedDates });
-
   } catch (error) {
-    console.error("Error fetching availability:", error);
+    console.error(error);
     res.status(500).json({ message: "Error fetching availability" });
   }
 };
