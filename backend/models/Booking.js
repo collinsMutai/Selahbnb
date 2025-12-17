@@ -1,55 +1,40 @@
 import mongoose from "mongoose";
-
+// Booking Schema definition
 const bookingSchema = new mongoose.Schema(
   {
-    listing: { type: mongoose.Schema.Types.ObjectId, ref: "Listing", required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-
-    name: String,
-    phone: String,
-
-    adults: Number,
-    children: Number,
-    infants: Number,
-    pets: Number,
-
-    checkIn: { type: Date, required: true },
-    checkOut: { type: Date, required: true },
-
-    subtotal: Number,
-    tax: Number,
-    totalPrice: Number,
-    numberOfDays: Number,
-
+    listing: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Listing",
+      required: true,
+    }, // Reference to the listing
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to the user
+    name: { type: String, required: true }, // Guest's full name
+    phone: { type: String, required: true }, // Guest's phone number
+    adults: { type: Number, required: true }, // Number of adults
+    children: { type: Number, default: 0 }, // Number of children
+    infants: { type: Number, default: 0 }, // Number of infants
+    pets: { type: Number, default: 0 }, // Number of pets
+    checkIn: { type: Date, required: true }, // Check-in date
+    checkOut: { type: Date, required: true }, // Check-out date
+    totalPrice: { type: Number, required: true }, // Total price of the booking
+    subtotal: { type: Number, required: true },
+    tax: { type: Number, required: true },
+    numberOfDays: { type: Number, required: true }, // Number of days the guest stays
     status: {
       type: String,
-      enum: ["HOLD", "CONFIRMED", "CANCELLED"],
-      default: "HOLD",
-    },
-
+      default: "Pending",
+      enum: ["Pending", "Confirmed", "Cancelled"],
+    }, // Status of the booking
     paymentStatus: {
       type: String,
-      enum: ["PENDING", "COMPLETED", "REFUNDED"],
-      default: "PENDING",
-    },
-
-    paypalOrderId: { type: String, unique: true, sparse: true },
-    captureId: { type: String, sparse: true },
-
-    expiresAt: { type: Date, required: true },
+      enum: ["Pending", "Completed", "Failed", "Refunded"],
+      default: "Pending",
+    }, // Payment status
+    paymentTransactionId: { type: String, required: true }, // Unique transaction ID for the payment
+    paypalOrderId: { type: String }, // PayPal Order ID
+    captureId: { type: String }, // Add Capture ID field
   },
-  { timestamps: true }
+  { timestamps: true } // Automatically adds createdAt and updatedAt timestamps
 );
-
-// -----------------------------
-// TTL: Automatically remove expired HOLD bookings
-// -----------------------------
-bookingSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-// Prevent overlapping CONFIRMED/HOLD bookings
-bookingSchema.index({ listing: 1, checkIn: 1, checkOut: 1, status: 1 });
-
-// Fast lookup by PayPal Order ID
-bookingSchema.index({ paypalOrderId: 1 });
 
 export default mongoose.model("Booking", bookingSchema);

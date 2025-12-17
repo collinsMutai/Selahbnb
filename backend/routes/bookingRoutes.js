@@ -1,6 +1,6 @@
 // routes/bookingRoutes.js
 import express from "express";
-import { createBooking, getUserBookings, getListingBookings, getListingAvailability } from "../controllers/bookingController.js";
+import { createBooking, getUserBookings, getListingBookings, updateBookingStatus, getListingAvailability } from "../controllers/bookingController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -12,6 +12,8 @@ router.post("/", protect, createBooking);
 router.get("/user", protect, getUserBookings);
 router.get("/listing/:id", protect, getListingBookings);
 
+// Only hosts or admins can update booking status
+router.put("/:id/status", protect, updateBookingStatus);
 
 router.get("/listings/:listingId/availability", getListingAvailability);
 
