@@ -68,8 +68,14 @@ export const createPaypalPayment = async (req) => {
         },
       ],
       application_context: {
-        return_url: `http://localhost:3000/paypalpayment/success`,
+        return_url: returnUrl || `http://localhost:3000/paypalpayment/success`,
         cancel_url: `http://localhost:3000/paypalpayment/cancel`,
+      },
+      payment_method: {
+        allowedFunding: [
+          paypal.FUNDING.BALANCE, // Allow PayPal balance
+          paypal.FUNDING.CREDIT,  // Allow linked credit cards
+        ],
       },
     };
 

@@ -24,6 +24,7 @@ export const createBooking = async (req, res) => {
       infants,
       pets,
     } = req.body;
+
     const listing = await Listing.findById(listingId);
 
     // If listing not found, return an error
@@ -31,53 +32,34 @@ export const createBooking = async (req, res) => {
       return res.status(404).json({ message: "Listing not found" });
     }
 
-    // Check for double booking - Same listing, overlapping dates
-    const overlappingBooking = await Booking.findOne({
-      listing: listingId,
-      status: "Confirmed", // only consider confirmed bookings
-      checkIn: { $lt: new Date(checkOut) },
-      checkOut: { $gt: new Date(checkIn) },
-    });
-
-    if (overlappingBooking) {
-      return res.status(400).json({ message: "Dates are already booked." });
-    }
-
-    // Convert the check-in and check-out times to Colorado Springs time (America/Denver timezone)
+    // Convert the check-in and check-out times to Colorado Springs time
     const checkInDate = moment.tz(checkIn, "America/Denver");
     const checkOutDate = moment.tz(checkOut, "America/Denver");
 
-    // Notify user about check-in and check-out restrictions
-    let warningMessage = "";
+    // Check for double booking - Same listing, overlapping dates
+    const overlappingBooking = await Booking.findOne({
+      listing: listingId,
+      status: { $in: ["Confirmed", "Hold"] }, // Check for confirmed or held bookings
+      checkIn: { $lt: new Date(checkOutDate) }, // Check if check-in of existing booking is before new check-out
+      checkOut: { $gt: new Date(checkInDate) }, // Check if check-out of existing booking is after new check-in
+    });
 
-    if (
-      checkInDate.hour() < HOUSE_RULES.checkIn.hour ||
-      (checkInDate.hour() === HOUSE_RULES.checkIn.hour &&
-        checkInDate.minute() < HOUSE_RULES.checkIn.minute)
-    ) {
-      warningMessage = "Check-in is after 3:00 PM in Colorado Springs.";
-    }
-
-    if (
-      checkOutDate.hour() > HOUSE_RULES.checkOut.hour ||
-      (checkOutDate.hour() === HOUSE_RULES.checkOut.hour &&
-        checkOutDate.minute() > HOUSE_RULES.checkOut.minute)
-    ) {
-      warningMessage = warningMessage
-        ? `${warningMessage} Checkout must be before 11:00 AM in Colorado Springs.`
-        : "Checkout must be before 11:00 AM in Colorado Springs.";
+    // If the overlapping booking is held by the same user, allow the booking
+    if (overlappingBooking && overlappingBooking.user.toString() !== req.user._id.toString()) {
+      return res
+        .status(400)
+        .json({ message: "Dates are already booked or held." });
     }
 
     // Calculate the number of days between check-in and check-out
-    const checkInDateJS = new Date(checkIn);
-    const checkOutDateJS = new Date(checkOut);
+    const checkInDateJS = new Date(checkInDate);
+    const checkOutDateJS = new Date(checkOutDate);
     const numberOfDays = Math.ceil(
       (checkOutDateJS - checkInDateJS) / (1000 * 60 * 60 * 24)
     );
 
     // Colorado Springs / El Paso County lodging tax
     const TAX_RATE = 0.112; // 11.2%
-
     const subtotal = listing.price * numberOfDays;
     const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
     const totalPrice = Number((subtotal + taxAmount).toFixed(2));
@@ -85,14 +67,17 @@ export const createBooking = async (req, res) => {
     // Generate a unique transaction ID (UUID) for local tracking
     const paymentTransactionId = uuidv4();
 
-    // Create a new booking
+    // Set the hold expiration time (15 minutes from now)
+    const holdExpiration = moment().add(15, "minutes").toDate();
+
+    // Create a new booking with "Hold" status
     const booking = new Booking({
       listing: listingId,
       user: req.user._id,
       name,
       phone,
-      checkIn,
-      checkOut,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
       adults,
       children,
       infants,
@@ -102,13 +87,14 @@ export const createBooking = async (req, res) => {
       totalPrice,
       numberOfDays,
       paymentTransactionId,
+      status: "Hold", // Set status to "Hold"
+      holdExpiration, // Set the expiration time for hold
     });
 
     // Save the booking to the database
     const savedBooking = await booking.save();
 
     // Now trigger the PayPal payment flow after saving the booking
-    // Call the createPaypalPayment function with the booking ID
     const paymentResponse = await createPaypalPayment({
       body: { bookingId: savedBooking._id, totalPrice },
     });
@@ -127,8 +113,7 @@ export const createBooking = async (req, res) => {
           tax: savedBooking.tax.toFixed(2),
           totalPrice: savedBooking.totalPrice.toFixed(2),
         },
-        approvalLink: paymentResponse.data.approvalLink, // Provide the approval link here
-        warningMessage, // Include warning message
+        approvalLink: paymentResponse.data.approvalLink,
       });
     } else {
       res
@@ -136,12 +121,19 @@ export const createBooking = async (req, res) => {
         .json({ message: paymentResponse.message });
     }
   } catch (error) {
-    console.error("Error creating booking and initiating PayPal payment:", error);
-    res.status(500).json({
-      message: "Error creating booking and initiating PayPal payment",
-    });
+    console.error(
+      "Error creating booking and initiating PayPal payment:",
+      error
+    );
+    res
+      .status(500)
+      .json({
+        message: "Error creating booking and initiating PayPal payment",
+      });
   }
 };
+
+
 // Get all bookings for a user
 export const getUserBookings = async (req, res) => {
   try {
@@ -196,35 +188,39 @@ export const updateBookingStatus = async (req, res) => {
 };
 
 // Get availability for a listing (returns booked dates)
+
 export const getListingAvailability = async (req, res) => {
   try {
     const listingId = req.params.listingId;
-    console.log('listingId', listingId);
+    const userId = req.user.id; // Assuming user is authenticated and user ID is available in the request
+    console.log("listingId", listingId);
 
-    // Fetch all confirmed bookings for the given listing
+    // Fetch all confirmed and held bookings for the given listing
     const bookings = await Booking.find({
       listing: listingId,
-      status: "Confirmed"  // Only consider confirmed bookings
-    }).select("checkIn checkOut");
+      $or: [
+        { status: "Confirmed" }, // Only consider confirmed bookings
+        { status: "Held", user: userId }, // Allow the current user to book held dates
+      ],
+    }).select("checkIn checkOut status user");
 
-    console.log('bookings', bookings);
+    console.log("bookings", bookings);
 
     // Convert booked date ranges into a more usable format (Array of booked dates)
     const bookedDates = [];
-    bookings.forEach(booking => {
+    bookings.forEach((booking) => {
       const startDate = moment(booking.checkIn);
       const endDate = moment(booking.checkOut);
 
       // Iterate through the range of dates between checkIn and checkOut
       while (startDate.isBefore(endDate)) {
-        bookedDates.push(startDate.format('YYYY-MM-DD')); // Add each date to the bookedDates array
-        startDate.add(1, 'days'); // Increment by 1 day
+        bookedDates.push(startDate.format("YYYY-MM-DD")); // Add each date to the bookedDates array
+        startDate.add(1, "days"); // Increment by 1 day
       }
     });
 
     // Return the booked dates
     res.json({ bookedDates });
-
   } catch (error) {
     console.error("Error fetching availability:", error);
     res.status(500).json({ message: "Error fetching availability" });
