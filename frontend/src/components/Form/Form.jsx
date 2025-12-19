@@ -56,16 +56,29 @@ const Form = () => {
     localStorage.removeItem("bookingDetails");
   }, [dispatch]);
 
+  // UPDATED: fetchAvailability now sends the token if it exists
   const fetchAvailability = async () => {
     try {
+      const token = localStorage.getItem("token");
       const res = await axios.get(
-        `${apiUrl}/bookings/listings/${listingId}/availability`
+        `${apiUrl}/bookings/listings/${listingId}/availability`,
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : "",
+          },
+        }
       );
       setBookedRanges(res.data.bookedDates || []);
     } catch (err) {
       console.error("Error fetching availability", err);
     }
   };
+
+  // NEW: Refresh availability when login state changes 
+  // (e.g., if they log in while the form is open, their holds become available)
+  useEffect(() => {
+    fetchAvailability();
+  }, [isLoggedIn]);
 
   const getDisabledDates = () => {
     return bookedRanges.map((date) => new Date(date));
@@ -187,6 +200,8 @@ const Form = () => {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "An error occurred");
+      // Refresh availability in case someone else booked those dates
+      fetchAvailability();
     } finally {
       setIsSubmitting(false);
     }
@@ -194,7 +209,6 @@ const Form = () => {
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -258,7 +272,6 @@ const Form = () => {
       {isCalendarOpen &&
         ReactDOM.createPortal(
           <div ref={calendarRef} className="calendar-modal">
-            {/* Render Custom Label Above Calendar */}
             <div className="custom-range-labels">
               <h3>
                 {formData.startDate && formData.endDate
@@ -271,11 +284,13 @@ const Form = () => {
               </h3>
             </div>
             <DateRange
-              ranges={[{
-                startDate: formData.startDate || new Date(),
-                endDate: formData.endDate || new Date(),
-                key: "selection",
-              }]}
+              ranges={[
+                {
+                  startDate: formData.startDate || new Date(),
+                  endDate: formData.endDate || new Date(),
+                  key: "selection",
+                },
+              ]}
               onChange={handleRangeChange}
               moveRangeOnFirstSelection={false}
               rangeColors={["#148992"]}
@@ -339,7 +354,10 @@ const Form = () => {
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setFormData({ ...formData, [type]: formData[type] + 1 });
+                      setFormData({
+                        ...formData,
+                        [type]: formData[type] + 1,
+                      });
                     }}
                   >
                     +
