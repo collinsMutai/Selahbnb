@@ -18,7 +18,7 @@ const transporter = nodemailer.createTransport({
 
 // Send email function with retry logic
 const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetails, listingDetails) => {
-  const { name, checkIn, checkOut, totalPrice, paymentTransactionId } = bookingDetails;
+  const { name, checkIn, checkOut, subtotal, tax, totalPrice, paymentTransactionId } = bookingDetails;
   const { title, location } = listingDetails;
 
   // Format the check-in and check-out dates
@@ -43,7 +43,9 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
       <ul>
         <li><strong>Check-in:</strong> ${formattedCheckIn}</li>
         <li><strong>Check-out:</strong> ${formattedCheckOut}</li>
-        <li><strong>Total Price:</strong> $${Number(totalPrice).toFixed(2)}</li>
+        <li><strong>Subtotal:</strong> $${Number(subtotal).toFixed(2)}</li>
+        <li><strong>Tax:</strong> $${Number(tax).toFixed(2)}</li>
+        <li><strong>Total price:</strong> $${Number(totalPrice).toFixed(2)}</li>
         <li><strong>Payment Transaction ID:</strong> ${paymentTransactionId}</li>
       </ul>
 

@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import Listing from "../models/Listing.js";
 import { createPaypalPayment } from "./paypalController.js";
 import moment from "moment-timezone";
+import mongoose from "mongoose";
 
 // Define house rules for timezone-specific calculations
 const HOUSE_RULES = {
@@ -151,13 +152,27 @@ export const getListingAvailability = async (req, res) => {
 };
 
 // Get all bookings for a user
+// controllers/bookingController.js
+
 export const getUserBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id })
-      .populate("listing", "title location price")
-      .populate("user", "name email");
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "No user found in request" });
+    }
+
+    // Explicitly cast to ObjectId to avoid String vs ObjectId mismatches
+    const userId = new mongoose.Types.ObjectId(req.user._id);
+
+    const bookings = await Booking.find({ user: userId })
+      .populate("listing", "title location price images")
+      .sort({ createdAt: -1 });
+
+    // Debugging: Log this in your terminal to see if the DB returns anything
+    console.log(`Querying for ${userId}. Found: ${bookings.length} bookings`);
+
     res.json(bookings);
   } catch (error) {
+    console.error("Fetch Error:", error);
     res.status(500).json({ message: error.message });
   }
 };
