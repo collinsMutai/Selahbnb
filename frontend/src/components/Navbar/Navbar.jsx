@@ -88,7 +88,7 @@ const Navbar = () => {
             purchase_units: [
               {
                 amount: {
-                  value: "65.00", // Replace with your dynamic price
+                  value: "6500.00", // Replace with your dynamic price
                 },
               },
             ],
