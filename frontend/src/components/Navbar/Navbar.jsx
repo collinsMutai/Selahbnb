@@ -112,6 +112,7 @@ const Navbar = () => {
                 amount: details.purchase_units[0].amount.value, // Payment amount
                 approvalLink: data.approval_url, // PayPal approval URL
                 status: 'COMPLETED', // Payment status
+                payerName: details.payer.name.given_name,
               }),
             });
 

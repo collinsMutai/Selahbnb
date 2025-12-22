@@ -7,6 +7,7 @@ import {
 } from "../controllers/paypalController.js";
 import { verifyPaypalWebhook } from "../utils/paypalUtils.js";
 import PaypalTransaction from "../models/PaypalTransaction.js";
+import { sendBookingConfirmationEmail, sendMonthlyChargeEmail } from "../controllers/emailController.js"; // Import email functions
 
 const router = express.Router();
 
@@ -33,101 +34,12 @@ router.post("/webhook", async (req, res) => {
     res.status(400).send("Webhook verification failed");
   }
 });
-// Handle payment completion
-const handlePaymentCompleted = async (paymentData) => {
-  const { transaction_id, amount, payer } = paymentData;
 
-  const booking = await Booking.findOne({
-    paymentTransactionId: transaction_id,
-  });
-
-  if (booking) {
-    if (booking.paymentStatus === "Completed") {
-      console.log(
-        `Payment already processed for transaction: ${transaction_id}`
-      );
-      return;
-    }
-
-    booking.status = "Confirmed";
-    booking.paymentStatus = "Completed";
-    booking.paymentAmount = amount.total;
-    booking.payerEmail = payer.payer_info.email;
-
-    await booking.save();
-    console.log(`Payment confirmed for transaction: ${transaction_id}`);
-  } else {
-    console.log(`Booking not found for transaction: ${transaction_id}`);
-  }
-};
-
-// Handle pending payment
-const handlePaymentPending = async (paymentData) => {
-  const { transaction_id } = paymentData;
-
-  const booking = await Booking.findOne({
-    paymentTransactionId: transaction_id,
-  });
-
-  if (booking) {
-    if (booking.status === "Pending") {
-      console.log(
-        `Payment already marked as Pending for transaction: ${transaction_id}`
-      );
-      return;
-    }
-
-    booking.status = "Pending";
-    await booking.save();
-    console.log(`Payment pending for transaction: ${transaction_id}`);
-  }
-};
-
-// Handle refunded payment (this is triggered by the webhook)
-const handlePaymentRefunded = async (paymentData) => {
-  const { transaction_id } = paymentData;
-
-  const booking = await Booking.findOne({
-    paymentTransactionId: transaction_id,
-  });
-
-  if (booking) {
-    if (booking.status === "Refunded") {
-      console.log(
-        `Payment already refunded for transaction: ${transaction_id}`
-      );
-      return;
-    }
-
-    booking.status = "Refunded";
-    await booking.save();
-    console.log(`Payment refunded for transaction: ${transaction_id}`);
-  }
-};
-
-// Handle denied payment
-const handlePaymentDenied = async (paymentData) => {
-  const { transaction_id } = paymentData;
-
-  const booking = await Booking.findOne({
-    paymentTransactionId: transaction_id,
-  });
-
-  if (booking) {
-    if (booking.status === "Denied") {
-      console.log(`Payment already denied for transaction: ${transaction_id}`);
-      return;
-    }
-
-    booking.status = "Denied";
-    await booking.save();
-    console.log(`Payment denied for transaction: ${transaction_id}`);
-  }
-};
-
-// Route to save PayPal transaction
+// Route to save PayPal transaction and send emails
 router.post("/transactions", async (req, res) => {
-  const { orderId, payerEmail, amount, approvalLink, status } = req.body;
+  console.log('req',req);
+  
+  const { orderId, payerEmail, amount, approvalLink, status, payerName } = req.body;
 
   // Create a new PaypalTransaction document
   const transaction = new PaypalTransaction({
@@ -141,7 +53,25 @@ router.post("/transactions", async (req, res) => {
   try {
     // Save the transaction in the database
     await transaction.save();
-    res.status(200).json({ message: "Transaction saved successfully" });
+    console.log("Transaction saved successfully");
+
+    // Check if it's a monthly charge or a booking transaction
+    if (status === "COMPLETED") {
+      // If the transaction is a monthly charge, send the charge confirmation email
+      await sendMonthlyChargeEmail(payerEmail, 'collinsfrontend@gmail.com', payerName, amount, orderId, new Date());
+
+      // If it's a booking-related payment (you can add conditions based on your app's logic)
+      // Example: You might want to send booking confirmation for certain transaction types
+      await sendBookingConfirmationEmail(payerEmail, 'collinsfrontend@gmail.com', { 
+        name: payerName, 
+        subtotal: amount, 
+        tax: 0, // You can adjust this based on your app's calculation
+        totalPrice: amount, 
+        paymentTransactionId: orderId 
+      }, { title: "Selah Springs Lodge", location: "Colorado Springs" });
+    }
+
+    res.status(200).json({ message: "Transaction saved and emails sent successfully" });
   } catch (error) {
     console.error("Error saving PayPal transaction:", error);
     res.status(500).json({ message: "Internal Server Error" });
