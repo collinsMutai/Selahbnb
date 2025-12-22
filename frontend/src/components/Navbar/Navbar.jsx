@@ -1,3 +1,4 @@
+import { toast } from "react-toastify"; // Import toast for notifications
 import React, { useState, useEffect, useCallback } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
@@ -13,6 +14,7 @@ const apiUrl = process.env.REACT_APP_API_URL; // Fallback to localhost if not se
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const { isLoggedIn, user } = useSelector((state) => state.user);
   const { isModalOpen } = useSelector((state) => state.modal);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -65,6 +67,71 @@ const Navbar = () => {
 
     return null; // If no token exists
   }, [refreshToken]);
+
+  // Open the PayPal Modal
+  const handlePayNow = () => {
+    setIsPayModalOpen(true); // Open the modal when "Pay Now" is clicked
+  };
+
+  // Close the PayPal Modal
+  const closePayModal = () => {
+    setIsPayModalOpen(false); // Close the modal after payment is done or canceled
+  };
+
+  // Function to initialize the PayPal Button inside the Modal
+ useEffect(() => {
+  if (window.paypal && isPayModalOpen) {
+    window.paypal
+      .Buttons({
+        createOrder: (data, actions) => {
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: "65.00", // Replace with your dynamic price
+                },
+              },
+            ],
+          });
+        },
+        onApprove: async (data, actions) => {
+          try {
+            // Capture the payment
+            const details = await actions.order.capture();
+            toast.success(`Payment Successful: ${details.payer.name.given_name}`);
+
+            // Call the backend to save the transaction in the database
+            const response = await fetch(`${apiUrl}/paypal/transactions`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                orderId: data.orderID, // PayPal order ID
+                payerEmail: details.payer.email_address, // Payer email
+                amount: details.purchase_units[0].amount.value, // Payment amount
+                approvalLink: data.approval_url, // PayPal approval URL
+                status: 'COMPLETED', // Payment status
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Failed to save the PayPal transaction");
+            }
+
+            closePayModal(); // Close the modal after successful payment
+          } catch (error) {
+            toast.error("Error completing payment.");
+          }
+        },
+        onError: (err) => {
+          toast.error("There was an error with the PayPal payment.");
+        },
+      })
+      .render("#paypal-button-container");
+  }
+}, [isPayModalOpen]);
+
 
   // Google login success handler
   const handleGoogleLoginSuccess = async (response) => {
@@ -366,7 +433,41 @@ const Navbar = () => {
             </svg>
             <span>+17194920042</span>
           </div>
-
+          <div className="phone-number" onClick={handlePayNow}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-brand-paypal"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10 13l2.5 0c2.5 0 5 -2.5 5 -5c0 -3 -1.9 -5 -5 -5h-5.5c-.5 0 -1 .5 -1 1l-2 14c0 .5 .5 1 1 1h2.8l1.2 -5c.1 -.6 .4 -1 1 -1zm7.5 -5.8c1.7 1 2.5 2.8 2.5 4.8c0 2.5 -2.5 4.5 -5 4.5h-2.6l-.6 3.6a1 1 0 0 1 -1 .8l-2.7 0a.5 .5 0 0 1 -.5 -.6l.2 -1.4" />
+            </svg>
+            <span>Pay Now</span>
+          </div>
+          {isPayModalOpen && (
+            <div className="paypal-modal-overlay" onClick={closePayModal}>
+              <div
+                className="paypal-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="paypal-modal-content">
+                  <h2>Complete Your Payment</h2>
+                  {/* PayPal Button container */}
+                  <div id="paypal-button-container"></div>
+                  <button className="close-modal-btn" onClick={closePayModal}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="book-now">
             <button onClick={handleHomeClick} className="book-now-btn">
               Book Now
