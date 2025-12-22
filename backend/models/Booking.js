@@ -33,12 +33,15 @@ const bookingSchema = new mongoose.Schema(
     paymentTransactionId: { type: String, required: true },
     paypalOrderId: { type: String },
     captureId: { type: String },
-    holdExpiration: { type: Date }, // This field holds the expiration time for the hold
+    holdExpiration: { type: Date }, // Holds the expiration time for the hold
   },
   { timestamps: true }
 );
 
-// Create a TTL index on the holdExpiration field that expires in 15 minutes (900 seconds)
-bookingSchema.index({ holdExpiration: 1 }, { expireAfterSeconds: 900 });
+// Create a TTL index with a partial filter expression
+bookingSchema.index(
+  { holdExpiration: 1 },
+  { expireAfterSeconds: 900, partialFilterExpression: { status: "Hold" } }
+);
 
 export default mongoose.model("Booking", bookingSchema);

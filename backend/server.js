@@ -8,6 +8,7 @@ import listingRoutes from "./routes/listingRoutes.js";
 import tourPlaceRoutes from "./routes/tourPlaceRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paypalRoutes from "./routes/paypalRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -24,16 +25,22 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Apply express.raw() middleware specifically to the PayPal webhook route
+// This ensures we handle the raw body correctly for signature verification
 app.use("/api/paypal/webhook", express.raw({ type: "application/json" }));
 
-app.use(express.json());
+// Apply general body parsers after
+app.use(express.json());  // For other API routes that require JSON body parsing
 
+// Your route handlers
 app.use("/api/users", userRoutes);
 app.use("/api/listings", listingRoutes);
 app.use("/api/tourplaces", tourPlaceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/paypal", paypalRoutes);
+app.use("/api/contact", contactRoutes);
 
+// Test route to check if server is running
 app.get("/", (req, res) => {
   res.json({ message: "Server is running" });
 });

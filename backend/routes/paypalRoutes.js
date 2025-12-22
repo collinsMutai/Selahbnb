@@ -18,51 +18,15 @@ router.post('/refund', refundPaypalPayment);  // New route to handle refund requ
 
 // Route to handle PayPal webhooks
 router.post('/webhook', async (req, res) => {
-  const body = req.body;
-  const signature = req.headers['paypal-transmission-sig'];
-  const timestamp = req.headers['paypal-transmission-time'];
-  const webhookId = process.env.PAYPAL_WEBHOOK_ID;
+  const webhookId = process.env.PAYPAL_WEBHOOK_ID; // Your PayPal Webhook ID
+  const success = await verifyPaypalWebhook(req, webhookId);
 
-  // Verify PayPal webhook
-  const isVerified = await verifyPaypalWebhook(body, signature, timestamp, webhookId);
-
-  if (!isVerified) {
-    return res.status(400).json({ message: 'Invalid PayPal webhook' });
-  }
-
-  try {
-    const event = body.event_type;
-
-    // Handle different PayPal events
-    switch (event) {
-      case 'PAYMENT.SALE.COMPLETED':
-        // Handle completed payment
-        await handlePaymentCompleted(body.resource);
-        break;
-      case 'PAYMENT.SALE.PENDING':
-        // Handle pending payment
-        await handlePaymentPending(body.resource);
-        break;
-      case 'PAYMENT.SALE.REFUNDED':
-        // Handle refunded payment
-        await handlePaymentRefunded(body.resource);
-        break;
-      case 'PAYMENT.SALE.DENIED':
-        // Handle denied payment
-        await handlePaymentDenied(body.resource);
-        break;
-      default:
-        console.log(`Unhandled PayPal event: ${event}`);
-        break;
-    }
-
-    res.status(200).json({ message: 'Webhook processed successfully' });
-  } catch (error) {
-    console.error('Error processing PayPal webhook:', error);
-    res.status(500).json({ message: 'Error processing PayPal webhook' });
+  if (success) {
+    res.status(200).send('Webhook verified successfully');
+  } else {
+    res.status(400).send('Webhook verification failed');
   }
 });
-
 // Handle payment completion
 const handlePaymentCompleted = async (paymentData) => {
   const { transaction_id, amount, payer } = paymentData;

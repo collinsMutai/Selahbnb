@@ -171,8 +171,8 @@ const Admin = () => {
                 <td>{booking.status}</td>
                 <td>{booking.paymentStatus}</td>
                 <td>
-                  <button className="btn btn-view">View</button>
-                  <button className="btn btn-delete">Delete</button>
+                  {/* <button className="btn btn-view">View</button> */}
+                  {/* <button className="btn btn-delete">Delete</button> */}
                   {booking.paymentStatus === "Completed" && booking.status !== "Refunded" && (
                     <button
                       className="btn btn-refund"
