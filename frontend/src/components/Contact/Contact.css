@@ -3,7 +3,8 @@
 /* ================================================== */
 .contact-section {
   text-align: center;
-  padding: 120px 20px 80px 20px;
+    padding: 120px 20px;
+  padding-top: 180px;
 }
 
 .contact-section .contact-title {
@@ -196,6 +197,7 @@
 @media (max-width: 480px) {
     .contact-section {
     padding: 100px 15px !important;
+    padding-top: 160px !important;
 }
   .contact-section .contact-title {
     font-size: 1.75rem;

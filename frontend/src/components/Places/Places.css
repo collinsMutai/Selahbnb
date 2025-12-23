@@ -1,6 +1,7 @@
 /* Main container */
-.main-container{
+.main-container {
   padding: 120px 20px;
+  padding-top: 180px;
 }
 
 .places-container {
@@ -133,9 +134,10 @@
 
 /* Mobile – 1 card per row and heading adjustments */
 @media (max-width: 768px) {
-  .main-container{
- padding-bottom: 60px;
-}
+  .main-container {
+    padding-bottom: 60px;
+    padding-top: 160px !important;
+  }
   .places-container {
     padding: 20px;
   }

@@ -74,7 +74,7 @@ const Form = () => {
     }
   };
 
-  // NEW: Refresh availability when login state changes 
+  // NEW: Refresh availability when login state changes
   // (e.g., if they log in while the form is open, their holds become available)
   useEffect(() => {
     fetchAvailability();
@@ -98,14 +98,17 @@ const Form = () => {
         return;
       }
 
-      const nights = (endDate - startDate) / (1000 * 60 * 60 * 24) + 1;
+      // Calculate the number of nights, subtracting 1 to exclude checkout day
+      const nights = (endDate - startDate) / (1000 * 60 * 60 * 24);
 
-      if (nights < 2) {
+      if (nights < 1) {
         toast.error("Minimum stay is 2 nights.");
         return;
       }
 
-      setFormData({ ...formData, startDate, endDate });
+      // Calculate total price based on the number of nights and price per night
+      const totalPrice = nights * 217;
+      setFormData({ ...formData, startDate, endDate, totalPrice });
     }
   };
 
@@ -221,6 +224,11 @@ const Form = () => {
 
   return (
     <form className="booking-form-only" onSubmit={handleSubmit} ref={formRef}>
+       {formData.totalPrice &&
+                formData.startDate &&
+                formData.endDate && (
+                  <h4>Total Price: ${formData.totalPrice}</h4>
+                )}
       {/* Name */}
       <div className="input-container">
         <FaUser className="input-icon" />
@@ -282,6 +290,11 @@ const Form = () => {
                   ? `Select Check-in Date → Check-out: ${formData.endDate.toLocaleDateString()}`
                   : "Select Check-in and Check-out Dates"}
               </h3>
+              {formData.totalPrice &&
+                formData.startDate &&
+                formData.endDate && (
+                  <h4>Total Price: ${formData.totalPrice}</h4>
+                )}
             </div>
             <DateRange
               ranges={[

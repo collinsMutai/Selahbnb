@@ -10,14 +10,13 @@ import { setModalOpen } from "../../redux/modalSlice";
 import "./Navbar.css";
 import Selah_Logo from "../../images/Selah_Logo.png"; // Import the logo image
 
-
 // Fetch the API URL from environment variable
 const apiUrl = process.env.REACT_APP_API_URL; // Fallback to localhost if not set
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const paypalButtonContainerRef = useRef(null);
-  const [paymentAmount, setPaymentAmount] = useState("1.00"); 
+  const [paymentAmount, setPaymentAmount] = useState("1.00");
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const { isLoggedIn, user } = useSelector((state) => state.user);
   const { isModalOpen } = useSelector((state) => state.modal);
@@ -83,79 +82,71 @@ const Navbar = () => {
   };
 
   // Function to initialize the PayPal Button inside the Modal
- // Handle changes to the payment amount
+  // Handle changes to the payment amount
   const handleAmountChange = (e) => {
     setPaymentAmount(e.target.value);
   };
 
   // Function to initialize the PayPal Button inside the Modal
-useEffect(() => {
-  // Check if PayPal SDK is loaded and modal is open
-  if (window.paypal && isPayModalOpen && paypalButtonContainerRef.current) {
-    // Clear the previous PayPal button if it exists (check null first)
-    if (paypalButtonContainerRef.current) {
-      paypalButtonContainerRef.current.innerHTML = '';
-      console.log('Clearing previous PayPal button');
-    }
-
-    // Render PayPal button inside the container
-    const paypalButtons = window.paypal.Buttons({
-      createOrder: (data, actions) => {
-        console.log('Creating Order with amount:', paymentAmount);
-        return actions.order.create({
-          purchase_units: [
-            {
-              amount: {
-                value: paymentAmount,
-              },
-            },
-          ],
-        });
-      },
-      onApprove: async (data, actions) => {
-        try {
-          const details = await actions.order.capture();
-          console.log('Payment successful:', details);
-          closePayModal(); // Close modal after successful payment
-        } catch (error) {
-          console.error('Error completing payment:', error);
-        }
-      },
-      onError: (err) => {
-        console.error('Error with PayPal payment:', err);
-      },
-    });
-
-    // Only render the button if the container exists and modal is open
-    if (paypalButtonContainerRef.current) {
-      paypalButtons.render(paypalButtonContainerRef.current);
-    }
-
-    // Cleanup when the component is unmounted or modal is closed
-    return () => {
-      // If the container is still there, clear its content
+  useEffect(() => {
+    // Check if PayPal SDK is loaded and modal is open
+    if (window.paypal && isPayModalOpen && paypalButtonContainerRef.current) {
+      // Clear the previous PayPal button if it exists (check null first)
       if (paypalButtonContainerRef.current) {
-        paypalButtonContainerRef.current.innerHTML = '';
-        console.log('Cleanup: Clearing PayPal button');
+        paypalButtonContainerRef.current.innerHTML = "";
+        console.log("Clearing previous PayPal button");
       }
 
-      // Also destroy PayPal buttons if necessary (optional)
-      if (paypalButtons) {
-        paypalButtons.close(); // Close PayPal button component (optional)
+      // Render PayPal button inside the container
+      const paypalButtons = window.paypal.Buttons({
+        createOrder: (data, actions) => {
+          console.log("Creating Order with amount:", paymentAmount);
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: paymentAmount,
+                },
+              },
+            ],
+          });
+        },
+        onApprove: async (data, actions) => {
+          try {
+            const details = await actions.order.capture();
+            console.log("Payment successful:", details);
+            closePayModal(); // Close modal after successful payment
+          } catch (error) {
+            console.error("Error completing payment:", error);
+          }
+        },
+        onError: (err) => {
+          console.error("Error with PayPal payment:", err);
+        },
+      });
+
+      // Only render the button if the container exists and modal is open
+      if (paypalButtonContainerRef.current) {
+        paypalButtons.render(paypalButtonContainerRef.current);
       }
-    };
-  } else {
-    console.error('PayPal container is not available or modal is not open.');
-  }
-}, [isPayModalOpen, paymentAmount]);
 
+      // Cleanup when the component is unmounted or modal is closed
+      return () => {
+        // If the container is still there, clear its content
+        if (paypalButtonContainerRef.current) {
+          paypalButtonContainerRef.current.innerHTML = "";
+          console.log("Cleanup: Clearing PayPal button");
+        }
 
-
-
-
-
-
-
+        // Also destroy PayPal buttons if necessary (optional)
+        if (paypalButtons) {
+          paypalButtons.close(); // Close PayPal button component (optional)
+        }
+      };
+    } else {
+      console.error("PayPal container is not available or modal is not open.");
+    }
+  }, [isPayModalOpen, paymentAmount]);
 
   // Google login success handler
   const handleGoogleLoginSuccess = async (response) => {
@@ -484,21 +475,36 @@ useEffect(() => {
                 className="paypal-modal"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="paypal-modal-content">
-                  <h2>Complete Your Payment</h2>
-                  <input
-                    type="number"
-                    value={paymentAmount}
-                    onChange={handleAmountChange}
-                    min="0.01"
-                    step="0.01"
-                    placeholder="Enter amount"
-                  />
-                  {/* PayPal Button container */}
-                    <div ref={paypalButtonContainerRef}></div>
-                  <button className="close-modal-btn" onClick={closePayModal}>
-                    Close
-                  </button>
+                <div className="paypal-modal-overlay" onClick={closePayModal}>
+                  <div
+                    className="paypal-modal"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="paypal-modal-content">
+                      <h2>Complete Your Payment</h2>
+
+                      {/* Label and Input for Payment Amount */}
+                      <label htmlFor="paymentAmount">Enter Amount:</label>
+                      <input
+                        id="paymentAmount"
+                        type="number"
+                        value={paymentAmount}
+                        onChange={handleAmountChange}
+                        min="0.01"
+                        step="0.01"
+                      />
+
+                      {/* PayPal Button container */}
+                      <div ref={paypalButtonContainerRef}></div>
+
+                      <button
+                        className="close-modal-btn"
+                        onClick={closePayModal}
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

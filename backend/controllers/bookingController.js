@@ -43,23 +43,38 @@ export const createBooking = async (req, res) => {
       checkOut: { $gt: new Date(checkInDate) },
     });
 
-    // logic: If overlapping booking exists, only allow if it belongs to the SAME user
-    if (overlappingBooking && overlappingBooking.user.toString() !== req.user._id.toString()) {
-      return res.status(400).json({ message: "Dates are already booked or held." });
+    // Logic: If overlapping booking exists, only allow if it belongs to the SAME user
+    if (
+      overlappingBooking &&
+      overlappingBooking.user.toString() !== req.user._id.toString()
+    ) {
+      return res
+        .status(400)
+        .json({ message: "Dates are already booked or held." });
     }
 
+    // Calculate the number of nights excluding the checkout day
     const numberOfDays = Math.ceil(
       (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24)
     );
 
-    const TAX_RATE = 0.112; 
+    if (numberOfDays <= 0) {
+      return res
+        .status(400)
+        .json({ message: "Check-out date must be after the check-in date." });
+    }
+
+    // Calculate subtotal, tax, and total price
+    const TAX_RATE = 0.112; // 11.2% tax rate
     const subtotal = listing.price * numberOfDays;
     const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
     const totalPrice = Number((subtotal + taxAmount).toFixed(2));
 
+    // Create a unique transaction ID
     const paymentTransactionId = uuidv4();
     const holdExpiration = moment().add(15, "minutes").toDate();
 
+    // Create a new booking
     const booking = new Booking({
       listing: listingId,
       user: req.user._id,
@@ -82,6 +97,7 @@ export const createBooking = async (req, res) => {
 
     const savedBooking = await booking.save();
 
+    // Create PayPal payment
     const paymentResponse = await createPaypalPayment({
       body: { bookingId: savedBooking._id, totalPrice },
     });
@@ -101,11 +117,15 @@ export const createBooking = async (req, res) => {
         approvalLink: paymentResponse.data.approvalLink,
       });
     } else {
-      res.status(paymentResponse.status).json({ message: paymentResponse.message });
+      res
+        .status(paymentResponse.status)
+        .json({ message: paymentResponse.message });
     }
   } catch (error) {
     console.error("Error creating booking:", error);
-    res.status(500).json({ message: "Error creating booking and initiating payment" });
+    res
+      .status(500)
+      .json({ message: "Error creating booking and initiating payment" });
   }
 };
 
@@ -113,7 +133,7 @@ export const createBooking = async (req, res) => {
 export const getListingAvailability = async (req, res) => {
   try {
     const { listingId } = req.params;
-    
+
     // Extract user ID if they are logged in (populated by optionalProtect middleware)
     const currentUserId = req.user ? req.user._id.toString() : null;
 
@@ -128,9 +148,10 @@ export const getListingAvailability = async (req, res) => {
     bookings.forEach((booking) => {
       // LOGIC: If the status is 'Hold' and it belongs to the user asking,
       // we DON'T add it to the bookedDates array (keep it selectable for them).
-      const isMyHold = booking.status === "Hold" && 
-                       currentUserId && 
-                       booking.user.toString() === currentUserId;
+      const isMyHold =
+        booking.status === "Hold" &&
+        currentUserId &&
+        booking.user.toString() === currentUserId;
 
       if (!isMyHold) {
         let startDate = moment(booking.checkIn).tz("America/Denver");
@@ -199,7 +220,10 @@ export const updateBookingStatus = async (req, res) => {
     if (!booking) return res.status(404).json({ message: "Booking not found" });
 
     // Authorization check
-    if (booking.listing.host.toString() !== req.user._id.toString() && !req.user.isAdmin) {
+    if (
+      booking.listing.host.toString() !== req.user._id.toString() &&
+      !req.user.isAdmin
+    ) {
       return res.status(401).json({ message: "Not authorized" });
     }
 

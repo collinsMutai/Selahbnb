@@ -49,6 +49,30 @@
   margin-top: 20px;
 }
 
+/* Style for the input inside the modal */
+.paypal-modal-content input {
+  width: 100px; /* Reduce input width */
+  margin-top: 10px; /* Adds space between label and input */
+  margin-bottom: 20px; /* Adds space below the input */
+  margin-left: 40px;
+  padding: 8px; /* Padding for better appearance */
+  font-size: 16px; /* Adjust font size */
+  border-radius: 4px; /* Rounded corners */
+  border: 1px solid #ccc; /* Light border */
+}
+
+/* Hide number input arrows for all browsers */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;  /* For WebKit browsers like Chrome/Safari */
+  margin: 0;  /* Remove margin for proper spacing */
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* For Firefox */
+  appearance: textfield;      /* For other browsers */
+}
+
 /* Animation for the Modal */
 @keyframes fadeIn {
   0% {
@@ -60,6 +84,7 @@
     transform: scale(1);
   }
 }
+
 
 /* selahnavbar container */
 .selahnavbar {
@@ -399,5 +424,8 @@
 
   .pay-now span {
     font-size: 14px; /* Adjust font size for mobile */
+  }
+  .paypal-modal-content input {
+    margin-left: 10px;
   }
 }
