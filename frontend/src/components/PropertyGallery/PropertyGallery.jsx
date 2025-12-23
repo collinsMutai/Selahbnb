@@ -12,6 +12,10 @@ const PropertyGallery = () => {
     "./red-rock-canyon-open-space.jpg",
     "./seven-falls.avif",
     "./seven-falls.jpeg",
+    "./Selah_Logo.png",
+    "./colorado-springs-pioneers-museum.jpg",
+    "./garden-of-gods.jpg",
+
   ];
 
   // Function to dynamically load images from 'src/images' folder
