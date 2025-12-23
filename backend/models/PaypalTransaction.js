@@ -10,6 +10,10 @@ const paypalTransactionSchema = new mongoose.Schema({
     type: String,
     required: true, // Email of the payer
   },
+  payerName: {
+    type: String,
+    required: true, // Name of the payer
+  },
   amount: {
     type: Number,
     required: true, // Payment amount

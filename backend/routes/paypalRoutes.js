@@ -45,6 +45,7 @@ router.post("/transactions", async (req, res) => {
   const transaction = new PaypalTransaction({
     orderId,
     payerEmail,
+    payerName,
     amount,
     approvalLink,
     status,
@@ -77,5 +78,18 @@ router.post("/transactions", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
+
+// Route to fetch PayPal transactions
+router.get("/transactions", async (req, res) => {
+  try {
+    const transactions = await PaypalTransaction.find();
+    res.status(200).json(transactions);
+  } catch (error) {
+    console.error("Error fetching PayPal transactions:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 
 export default router;
