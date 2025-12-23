@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Footer.css";
 import { FaFacebook, FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa"; // Correct import after installation
 import { useNavigate, useLocation } from "react-router-dom"; // Import useNavigate
+import Selah_Logo from "../../images/Selah_Logo.png";
 
 const Footer = () => {
   const navigate = useNavigate(); // Initialize navigate function
@@ -69,7 +70,9 @@ const Footer = () => {
       <div className="footer-content">
         {/* Left section (Logo and menu links) */}
         <div className="footer-left">
-          <h2 className="footer-logo">Selah Springs</h2>
+             <div className="logo">
+            <img src={Selah_Logo} alt="Selah Logo" className="selahnavbar-logo" />
+          </div>
           <div className="footer-links">
             <a href="/" onClick={(e) => handleLinkClick(e, "/")}>
               Home

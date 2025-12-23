@@ -1,5 +1,5 @@
 import { toast } from "react-toastify"; // Import toast for notifications
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
@@ -8,12 +8,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { login, logout, setUser } from "../../redux/userSlice";
 import { setModalOpen } from "../../redux/modalSlice";
 import "./Navbar.css";
+import Selah_Logo from "../../images/Selah_Logo.png"; // Import the logo image
+
 
 // Fetch the API URL from environment variable
 const apiUrl = process.env.REACT_APP_API_URL; // Fallback to localhost if not set
 
 const Navbar = () => {
   const dispatch = useDispatch();
+  const paypalButtonContainerRef = useRef(null);
+  const [paymentAmount, setPaymentAmount] = useState("1.00"); 
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const { isLoggedIn, user } = useSelector((state) => state.user);
   const { isModalOpen } = useSelector((state) => state.modal);
@@ -79,59 +83,78 @@ const Navbar = () => {
   };
 
   // Function to initialize the PayPal Button inside the Modal
- useEffect(() => {
-  if (window.paypal && isPayModalOpen) {
-    window.paypal
-      .Buttons({
-        createOrder: (data, actions) => {
-          return actions.order.create({
-            purchase_units: [
-              {
-                amount: {
-                  value: "6500.00", // Replace with your dynamic price
-                },
+ // Handle changes to the payment amount
+  const handleAmountChange = (e) => {
+    setPaymentAmount(e.target.value);
+  };
+
+  // Function to initialize the PayPal Button inside the Modal
+useEffect(() => {
+  // Check if PayPal SDK is loaded and modal is open
+  if (window.paypal && isPayModalOpen && paypalButtonContainerRef.current) {
+    // Clear the previous PayPal button if it exists (check null first)
+    if (paypalButtonContainerRef.current) {
+      paypalButtonContainerRef.current.innerHTML = '';
+      console.log('Clearing previous PayPal button');
+    }
+
+    // Render PayPal button inside the container
+    const paypalButtons = window.paypal.Buttons({
+      createOrder: (data, actions) => {
+        console.log('Creating Order with amount:', paymentAmount);
+        return actions.order.create({
+          purchase_units: [
+            {
+              amount: {
+                value: paymentAmount,
               },
-            ],
-          });
-        },
-        onApprove: async (data, actions) => {
-          try {
-            // Capture the payment
-            const details = await actions.order.capture();
-            toast.success(`Payment Successful: ${details.payer.name.given_name}`);
+            },
+          ],
+        });
+      },
+      onApprove: async (data, actions) => {
+        try {
+          const details = await actions.order.capture();
+          console.log('Payment successful:', details);
+          closePayModal(); // Close modal after successful payment
+        } catch (error) {
+          console.error('Error completing payment:', error);
+        }
+      },
+      onError: (err) => {
+        console.error('Error with PayPal payment:', err);
+      },
+    });
 
-            // Call the backend to save the transaction in the database
-            const response = await fetch(`${apiUrl}/paypal/transactions`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                orderId: data.orderID, // PayPal order ID
-                payerEmail: details.payer.email_address, // Payer email
-                amount: details.purchase_units[0].amount.value, // Payment amount
-                approvalLink: data.approval_url, // PayPal approval URL
-                status: 'COMPLETED', // Payment status
-                payerName: details.payer.name.given_name,
-              }),
-            });
+    // Only render the button if the container exists and modal is open
+    if (paypalButtonContainerRef.current) {
+      paypalButtons.render(paypalButtonContainerRef.current);
+    }
 
-            if (!response.ok) {
-              throw new Error("Failed to save the PayPal transaction");
-            }
+    // Cleanup when the component is unmounted or modal is closed
+    return () => {
+      // If the container is still there, clear its content
+      if (paypalButtonContainerRef.current) {
+        paypalButtonContainerRef.current.innerHTML = '';
+        console.log('Cleanup: Clearing PayPal button');
+      }
 
-            closePayModal(); // Close the modal after successful payment
-          } catch (error) {
-            toast.error("Error completing payment.");
-          }
-        },
-        onError: (err) => {
-          toast.error("There was an error with the PayPal payment.");
-        },
-      })
-      .render("#paypal-button-container");
+      // Also destroy PayPal buttons if necessary (optional)
+      if (paypalButtons) {
+        paypalButtons.close(); // Close PayPal button component (optional)
+      }
+    };
+  } else {
+    console.error('PayPal container is not available or modal is not open.');
   }
-}, [isPayModalOpen]);
+}, [isPayModalOpen, paymentAmount]);
+
+
+
+
+
+
+
 
 
   // Google login success handler
@@ -313,8 +336,11 @@ const Navbar = () => {
   return (
     <div className="selahnavbar" id="selahnavbar">
       <div className="selahnavbar-container">
-        <div className="logo">
+        {/* <div className="logo">
           <span className="selahnavbar-logo">Selah</span>
+        </div> */}
+        <div className="logo">
+          <img src={Selah_Logo} alt="Selah Logo" className="selahnavbar-logo" />
         </div>
 
         <div className="selah-hamburger" onClick={toggleMenu}>
@@ -434,7 +460,7 @@ const Navbar = () => {
             </svg>
             <span>+17194920042</span>
           </div>
-          <div className="phone-number" onClick={handlePayNow}>
+          <div className="phone-number pay-now" onClick={handlePayNow}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -460,8 +486,16 @@ const Navbar = () => {
               >
                 <div className="paypal-modal-content">
                   <h2>Complete Your Payment</h2>
+                  <input
+                    type="number"
+                    value={paymentAmount}
+                    onChange={handleAmountChange}
+                    min="0.01"
+                    step="0.01"
+                    placeholder="Enter amount"
+                  />
                   {/* PayPal Button container */}
-                  <div id="paypal-button-container"></div>
+                    <div ref={paypalButtonContainerRef}></div>
                   <button className="close-modal-btn" onClick={closePayModal}>
                     Close
                   </button>

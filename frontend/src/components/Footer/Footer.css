@@ -33,6 +33,11 @@
   margin: 0; /* Remove extra margin */
 }
 
+ .selahnavbar-logo {
+  height: 100px; /* Adjust the height of the logo */
+  width: auto;  /* Maintain the aspect ratio */
+}
+
 /* Menu links layout (inline) */
 .footer-links {
   display: flex; /* Make the links inline */
@@ -108,6 +113,10 @@
 
 /* Responsive Design: Adjustments for smaller screens */
 @media (max-width: 768px) {
+   .selahnavbar-logo {
+  height: 50px; /* Adjust the height of the logo */
+  width: auto;  /* Maintain the aspect ratio */
+}
   .footer-content {
     flex-direction: column; /* Stack sections vertically on smaller screens */
     align-items: center;

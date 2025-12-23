@@ -58,11 +58,11 @@ router.post("/transactions", async (req, res) => {
     // Check if it's a monthly charge or a booking transaction
     if (status === "COMPLETED") {
       // If the transaction is a monthly charge, send the charge confirmation email
-      await sendMonthlyChargeEmail(payerEmail, 'collinsfrontend@gmail.com', payerName, amount, orderId, new Date());
+      await sendMonthlyChargeEmail(payerEmail, 'selahsprings48@gmail.com', payerName, amount, orderId, new Date());
 
       // If it's a booking-related payment (you can add conditions based on your app's logic)
       // Example: You might want to send booking confirmation for certain transaction types
-      await sendBookingConfirmationEmail(payerEmail, 'collinsfrontend@gmail.com', { 
+      await sendBookingConfirmationEmail(payerEmail, 'selahsprings48@gmail.com', { 
         name: payerName, 
         subtotal: amount, 
         tax: 0, // You can adjust this based on your app's calculation

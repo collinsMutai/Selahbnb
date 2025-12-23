@@ -61,7 +61,6 @@
   }
 }
 
-
 /* selahnavbar container */
 .selahnavbar {
   width: 100%;
@@ -85,11 +84,15 @@
 }
 
 /* Logo (Text-based) */
-.selahnavbar-logo {
+/* .selahnavbar-logo {
   font-size: 24px;
   font-weight: bold;
   color: #000;
-  text-transform: uppercase; /* Capitalize logo text */
+  text-transform: uppercase; 
+} */
+.selahnavbar-logo {
+  height: 100px; /* Adjust the height of the logo */
+  width: auto; /* Maintain the aspect ratio */
 }
 
 /* Left-aligned links (Desktop) */
@@ -321,6 +324,14 @@
 
 /* Media Queries for Mobile */
 @media (max-width: 768px) {
+  .selahnavbar-logo {
+    height: 50px; /* Adjust the height of the logo */
+    width: auto; /* Maintain the aspect ratio */
+  }
+
+  .selahnavbar-right {
+    gap: 0;
+  }
   .selahnavbar-links {
     position: absolute;
     top: 80px;
@@ -370,5 +381,23 @@
 
   .google-login-modal .selah-modal-content {
     pointer-events: all; /* Prevent modal content from closing the modal on click */
+  }
+
+  .pay-now {
+    display: flex !important; /* Ensure these are displayed on mobile */
+    gap: 10px; /* Space between icon and text */
+    font-size: 16px; /* Adjust text size for mobile */
+    align-items: center; /* Align icon and text */
+  }
+
+  /* Ensure Pay Now button and Phone Number have similar styling */
+
+  .pay-now svg {
+    width: 24px; /* Adjust size for mobile */
+    height: 24px;
+  }
+
+  .pay-now span {
+    font-size: 14px; /* Adjust font size for mobile */
   }
 }
