@@ -27,7 +27,7 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
 
   // Selah Springs contact details
   // const contactEmail = 'selahsprings48@gmail.com';
-   const contactEmail = 'collinsfrontend@gmail.com';
+   const contactEmail = 'selahsprings48@gmail.com';
   const contactPhone = '+17194920042';
 
   const mailOptions = {
@@ -96,7 +96,7 @@ const sendMonthlyChargeEmail = async (payerEmail, adminEmail, payerName, amount,
   const formattedPaymentDate = moment(paymentDate).format('MMMM Do YYYY, h:mm A');
   
   // Contact details
-  const contactEmail = 'collinsfrontend@gmail.com';
+  const contactEmail = 'selahsprings48@gmail.com';
   const contactPhone = '+17194920042';
   const logoUrl = 'https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png';
 
