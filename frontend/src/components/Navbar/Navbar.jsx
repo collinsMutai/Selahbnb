@@ -115,6 +115,23 @@ const Navbar = () => {
           try {
             const details = await actions.order.capture();
             console.log("Payment successful:", details);
+            const transactionData = {
+              orderId: details.id,
+              payerEmail: details.payer.email_address,
+              payerName: details.payer.name.given_name,
+              amount: paymentAmount,
+              approvalLink:
+                details.links.find((link) => link.rel === "approve")?.href ||
+                "No approval link available",
+              status: details.status, // Payment status
+            };
+
+            // Send the transaction data to your backend API
+            const response = await axios.post(
+              `${apiUrl}/paypal/transactions`,
+              transactionData
+            );
+            console.log("Transaction saved and emails sent:", response.data);
             closePayModal(); // Close modal after successful payment
           } catch (error) {
             console.error("Error completing payment:", error);
