@@ -14,6 +14,7 @@ import {
 import { getPaypalAccessToken } from "../controllers/paypalController.js";
 import axios from "axios";
 import Booking from "../models/Booking.js";
+import User from "../models/User.js";
 
 const router = express.Router();
 
@@ -82,10 +83,26 @@ router.post("/webhook", async (req, res) => {
           paymentTransactionId: event.resource.id,
         },
         { new: true }
-      );
+      ).populate("listing");
 
       if (updatedBooking) {
         console.log("🎉 Booking confirmed in Database.");
+        // TRIGGER THE EMAIL HERE
+    try {
+      const user = await User.findById(updatedBooking.user);
+      const userEmail = user?.email;
+      const payerEmail = updatedBooking.payerEmail || event.resource.payer?.email_address;
+
+      await sendBookingConfirmationEmail(
+        payerEmail, 
+        userEmail, 
+        updatedBooking, 
+        updatedBooking.listing
+      );
+      console.log("📧 Confirmation email triggered from Webhook.");
+    } catch (emailErr) {
+      console.error("❌ Email trigger failed:", emailErr.message);
+    }
       } else {
         // Check if it was already confirmed or truly missing
         const alreadyConfirmed = await Booking.findOne({

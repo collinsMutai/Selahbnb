@@ -103,7 +103,7 @@ const PaypalPaymentSuccess = () => {
               Payment Successful! 🎉
             </h2>
             <p style={styles.text}>
-              Your booking is confirmed. Redirecting you to your trips...
+              Your booking is confirmed. Redirecting you to your bookings...
             </p>
             <div style={styles.successCheck}>✓</div>
           </>
