@@ -33,8 +33,8 @@ export const createBooking = async (req, res) => {
     }
 
     // Use consistent timezone for date conversion
-    const checkInDate = moment.tz(checkIn, "America/Denver");
-    const checkOutDate = moment.tz(checkOut, "America/Denver");
+    const checkInDate = moment.tz(checkIn, "America/Denver").startOf("day");
+    const checkOutDate = moment.tz(checkOut, "America/Denver").startOf("day");
 
     // 1. Check for overlapping bookings (Confirmed or active Holds)
     const overlappingBooking = await Booking.findOne({
@@ -49,15 +49,13 @@ export const createBooking = async (req, res) => {
       overlappingBooking &&
       overlappingBooking.user.toString() !== req.user._id.toString()
     ) {
-      return res
-        .status(400)
-        .json({ message: "Dates are already booked or currently held by another guest." });
+      return res.status(400).json({
+        message: "Dates are already booked or currently held by another guest.",
+      });
     }
 
     // 2. Calculate the number of nights
-    const numberOfDays = Math.ceil(
-      (new Date(checkOutDate) - new Date(checkInDate)) / (1000 * 60 * 60 * 24)
-    );
+    const numberOfDays = checkOutDate.diff(checkInDate, "days");
 
     if (numberOfDays <= 0) {
       return res
@@ -66,14 +64,14 @@ export const createBooking = async (req, res) => {
     }
 
     // 3. Pricing Calculation
-    const TAX_RATE = 0.112; // 11.2%
+    const TAX_RATE = 0.112;
     const subtotal = listing.price * numberOfDays;
-    const taxAmount = Number((subtotal * TAX_RATE).toFixed(2));
-    const totalPrice = Number((subtotal + taxAmount).toFixed(2));
+    const totalPrice = Math.round(subtotal * (1 + TAX_RATE) * 100) / 100;
+    const taxAmount = Math.round((totalPrice - subtotal) * 100) / 100;
 
     // 4. Create a unique transaction ID and 30-MINUTE HOLD
     const paymentTransactionId = uuidv4();
-    
+
     // UPDATED: Hold changed to 30 minutes for better user experience
     const holdExpiration = moment().add(30, "minutes").toDate();
 
@@ -89,7 +87,7 @@ export const createBooking = async (req, res) => {
       children,
       infants,
       pets,
-      subtotal,
+      subtotal: Number(subtotal.toFixed(2)),
       tax: taxAmount,
       totalPrice,
       numberOfDays,
@@ -116,7 +114,7 @@ export const createBooking = async (req, res) => {
         approvalLink: paymentResponse.data.approvalLink,
       });
     } else {
-      // If PayPal fails, we don't necessarily want to delete the booking yet, 
+      // If PayPal fails, we don't necessarily want to delete the booking yet,
       // but we should let the user know.
       res
         .status(paymentResponse.status)
@@ -199,7 +197,6 @@ export const getUserBookings = async (req, res) => {
   }
 };
 
-
 // Get a single booking by ID (Crucial for the success page polling)
 export const getBookingById = async (req, res) => {
   try {
@@ -210,8 +207,10 @@ export const getBookingById = async (req, res) => {
       return res.status(400).json({ message: "Invalid Booking ID format" });
     }
 
-    const booking = await Booking.findById(id)
-      .populate("listing", "title location price images host");
+    const booking = await Booking.findById(id).populate(
+      "listing",
+      "title location price images host"
+    );
 
     if (!booking) {
       return res.status(404).json({ message: "Booking not found" });
@@ -222,7 +221,9 @@ export const getBookingById = async (req, res) => {
     const isHost = booking.listing.host.toString() === req.user._id.toString();
 
     if (!isOwner && !isHost && !req.user.isAdmin) {
-      return res.status(403).json({ message: "Not authorized to view this booking" });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to view this booking" });
     }
 
     res.json(booking);

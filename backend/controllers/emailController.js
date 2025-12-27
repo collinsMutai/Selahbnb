@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import moment from 'moment'; // For better date formatting
+import moment from 'moment-timezone';
 
 dotenv.config();
 
@@ -22,8 +22,8 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
   const { title, location } = listingDetails;
 
   // Format the check-in and check-out dates
-  const formattedCheckIn = moment(checkIn).format('MMMM Do YYYY, h:mm A');
-  const formattedCheckOut = moment(checkOut).format('MMMM Do YYYY, h:mm A');
+  const formattedCheckIn = moment(checkIn).tz("America/Denver").format('MMMM Do YYYY, [at] 3:00 PM');
+  const formattedCheckOut = moment(checkOut).tz("America/Denver").format('MMMM Do YYYY, [at] 11:00 AM');
 
   // Selah Springs contact details
   // const contactEmail = 'selahsprings48@gmail.com';
