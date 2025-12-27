@@ -1,7 +1,15 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
+import axios from "axios";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+import { setUser, login, logout } from "./redux/userSlice";
+
+// Page Imports
 import Home from "./pages/Home";
-import "./App.css";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Places from "./components/Places/Places";
@@ -10,39 +18,31 @@ import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
 import AdminDashboard from "./pages/Admin";
 import Bookings from "./components/Bookings/Bookings";
 
-// Extra imports for auth logic
-import { jwtDecode } from "jwt-decode";
-import axios from "axios";
-
-// Import ToastContainer for global toasts
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-// Redux imports
-import { useDispatch, useSelector } from "react-redux";
-import { setUser, login, logout } from "./redux/userSlice";
-
-// Set your API URL
 const apiUrl = process.env.REACT_APP_API_URL;
+
+// --- PROTECTED ROUTE COMPONENT ---
+const ProtectedRoute = ({ children }) => {
+  const { isLoggedIn } = useSelector((state) => state.user);
+  return isLoggedIn ? children : <Navigate to="/" />;
+};
 
 function App() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.user);
+  const { user, isLoggedIn } = useSelector((state) => state.user);
+  const [loading, setLoading] = useState(true); // Prevent flash of unauth state
 
-  // --- 1. Logout Helper ---
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     dispatch(logout());
   }, [dispatch]);
 
-  // --- 2. Refresh Logic (Handles the 7-day Cookie) ---
   const refreshSession = useCallback(async () => {
     try {
       const response = await axios.post(
         `${apiUrl}/users/refresh-token`,
         {},
-        { withCredentials: true } // CRITICAL: Sends the 7-day httpOnly cookie
+        { withCredentials: true }
       );
       
       const { accessToken } = response.data;
@@ -50,16 +50,13 @@ function App() {
       
       localStorage.setItem("token", accessToken);
       dispatch(login({ user: storedUser, token: accessToken }));
-      console.log("Session refreshed successfully");
       return accessToken;
     } catch (error) {
-      console.error("7-day refresh token expired or invalid");
       handleLogout();
       return null;
     }
   }, [dispatch, handleLogout]);
 
-  // --- 3. Auth Watcher (Boot check + Expiry Timer) ---
   useEffect(() => {
     const initializeAuth = async () => {
       const token = localStorage.getItem("token");
@@ -70,31 +67,28 @@ function App() {
           const decoded = jwtDecode(token);
           const currentTime = Date.now() / 1000;
 
-          // If token is already expired (or expires in < 1 minute)
           if (decoded.exp < currentTime + 60) {
             await refreshSession();
           } else {
-            // Token is still valid, sync with Redux
             const parsedUser = JSON.parse(storedUser);
-            dispatch(setUser(parsedUser));
             dispatch(login({ user: parsedUser, token }));
 
-            // Set a timer to auto-refresh 5 minutes before the 1-hour token dies
             const timeLeft = (decoded.exp - currentTime - 300) * 1000;
-            const timer = setTimeout(() => {
-              refreshSession();
-            }, Math.max(timeLeft, 0));
-
+            const timer = setTimeout(() => refreshSession(), Math.max(timeLeft, 0));
+            setLoading(false);
             return () => clearTimeout(timer);
           }
         } catch (err) {
           handleLogout();
         }
       }
+      setLoading(false);
     };
 
     initializeAuth();
   }, [dispatch, refreshSession, handleLogout]);
+
+  if (loading) return null; // Or a full-screen spinner
 
   return (
     <Router>
@@ -103,11 +97,20 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/places" element={<Places />} />
         <Route path="/contact" element={<ContactPage />} />
-        <Route path="/paypalpayment/success" element={<PaypalPaymentSuccess />} />
-
+        
+        {/* Protected Routes */}
+        <Route 
+          path="/paypalpayment/success" 
+          element={<ProtectedRoute><PaypalPaymentSuccess /></ProtectedRoute>} 
+        />
+        
         <Route
           path="/bookings"
-          element={user?.role === "admin" ? <Navigate to="/admin" /> : <Bookings />}
+          element={
+            <ProtectedRoute>
+              {user?.role === "admin" ? <Navigate to="/admin" /> : <Bookings />}
+            </ProtectedRoute>
+          }
         />
 
         <Route
@@ -116,12 +119,7 @@ function App() {
         />
       </Routes>
       <Footer />
-      
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        toastContainerClassName="toast-container"
-      />
+      <ToastContainer position="top-right" autoClose={5000} />
     </Router>
   );
 }

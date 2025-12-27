@@ -33,48 +33,45 @@ router.post("/refund", refundPaypalPayment); // New route to handle refund reque
 // Route to handle PayPal webhooks
 router.post("/webhook", async (req, res) => {
   console.log("🚀 WEBHOOK HIT!");
-  const event = JSON.parse(req.body.toString());
-  console.log("✅ Event Type:", event.event_type);
 
   try {
-    // 1. HANDLE APPROVAL: This is where we tell PayPal to capture the funds
-    if (event.event_type === "CHECKOUT.ORDER.APPROVED") {
-      const orderId = event.resource.id;
-      console.log("Order Approved! Triggering Capture for ID:", orderId);
+    const webhookId = process.env.PAYPAL_WEBHOOK_ID; 
+    const isValid = await verifyPaypalWebhook(req, webhookId);
 
-      // Get your access token (ensure this helper is imported)
-      const accessToken = await getPaypalAccessToken();
-
-      // 🚀 THIS CALL TRIGGERS THE 'PAYMENT.CAPTURE.COMPLETED' WEBHOOK
-      await axios.post(
-        `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`,
-        {}, // Empty body required
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-            "PayPal-Request-Id": orderId, // Helps prevent accidental double-captures
-          },
-        }
-      );
-
-      console.log("Capture command sent to PayPal.");
+    if (!isValid) {
+      console.error("❌ Invalid Webhook Signature.");
+      return res.status(400).send("Verification Failed");
     }
 
-    // 2. HANDLE COMPLETION: This is where we update our database
+    const event = JSON.parse(req.body.toString());
+    console.log("✅ Verified Event:", event.event_type);
+
+    // STEP A: If User Approves, but Controller hasn't hit yet, move the money
+    if (event.event_type === "CHECKOUT.ORDER.APPROVED") {
+      const orderId = event.resource.id;
+      const accessToken = await getPaypalAccessToken();
+
+      console.log("💸 Auto-capturing funds for approved order:", orderId);
+      
+      try {
+        await axios.post(
+          `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`,
+          {},
+          { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } }
+        );
+      } catch (capErr) {
+        // If it's already captured, we don't care, just proceed
+        console.log("Capture already initiated by Controller.");
+      }
+    }
+
+    // STEP B: Final source of truth - update DB and notify user
     if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
-      const orderId =
-        event.resource.supplementary_data?.related_ids?.order_id ||
-        event.resource.parent_payment ||
-        (event.links &&
-          event.links
-            .find((l) => l.rel === "up")
-            ?.href.split("/")
-            .pop());
+      const orderId = event.resource.supplementary_data?.related_ids?.order_id || 
+                     (event.links?.find(l => l.rel === "up")?.href.split("/").pop());
 
-      console.log("💰 Payment Captured for Order:", orderId);
+      console.log("💰 Capture Completed. Finalizing Booking:", orderId);
 
-      // Only update if it's NOT already confirmed to prevent double-processing
       const updatedBooking = await Booking.findOneAndUpdate(
         { paypalOrderId: orderId, status: { $ne: "Confirmed" } },
         {
@@ -86,48 +83,27 @@ router.post("/webhook", async (req, res) => {
       ).populate("listing");
 
       if (updatedBooking) {
-        console.log("🎉 Booking confirmed in Database.");
-        // TRIGGER THE EMAIL HERE
-    try {
-      const user = await User.findById(updatedBooking.user);
-      const userEmail = user?.email;
-      const payerEmail = updatedBooking.payerEmail || event.resource.payer?.email_address;
-
-      await sendBookingConfirmationEmail(
-        payerEmail, 
-        userEmail, 
-        updatedBooking, 
-        updatedBooking.listing
-      );
-      console.log("📧 Confirmation email triggered from Webhook.");
-    } catch (emailErr) {
-      console.error("❌ Email trigger failed:", emailErr.message);
-    }
-      } else {
-        // Check if it was already confirmed or truly missing
-        const alreadyConfirmed = await Booking.findOne({
-          paypalOrderId: orderId,
-          status: "Confirmed",
-        });
-        if (alreadyConfirmed) {
-          console.log(
-            "ℹ️ Webhook received, but booking was already confirmed."
+        console.log("🎉 Booking confirmed via Webhook.");
+        try {
+          const user = await User.findById(updatedBooking.user);
+          await sendBookingConfirmationEmail(
+            updatedBooking.payerEmail || event.resource.payer?.email_address, 
+            user?.email, 
+            updatedBooking, 
+            updatedBooking.listing
           );
-        } else {
-          console.log("⚠️ Order ID not found in any booking record:", orderId);
+        } catch (emailErr) {
+          console.error("❌ Email failed:", emailErr.message);
         }
       }
     }
 
-    // Always send 200 to PayPal so they stop retrying the webhook
     res.status(200).send("Webhook Handled");
   } catch (err) {
-    // Log detailed error info if it's an Axios error from the capture call
-    console.error("Webhook Logic Error:", err.response?.data || err.message);
-    res.status(500).send("Internal Server Error");
+    console.error("Webhook Error:", err.message);
+    res.status(200).send("Error"); 
   }
 });
-
 // Route to save PayPal transaction and send emails
 router.post("/transactions", async (req, res) => {
   console.log("req", req);

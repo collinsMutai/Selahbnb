@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom";
-import { TailSpin } from "react-loader-spinner"; // Using the spinner from earlier
-
-const apiUrl = process.env.REACT_APP_API_URL;
+import { TailSpin } from "react-loader-spinner";
+import api from "../api/axiosInstance"; // Your interceptor-enabled instance
 
 const PaypalPaymentSuccess = () => {
   const navigate = useNavigate();
@@ -16,6 +14,7 @@ const PaypalPaymentSuccess = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const bookingId = params.get("bookingId");
+    const orderId = params.get("token"); // PayPal Order ID from URL
 
     if (!bookingId) {
       console.error("❌ No bookingId found in URL redirect");
@@ -25,37 +24,29 @@ const PaypalPaymentSuccess = () => {
 
     const checkBookingStatus = async () => {
       try {
-        // 1. Get the raw string directly from localStorage
-        let token = localStorage.getItem("token");
-
-        if (!token) {
-          console.error("❌ No token found in localStorage");
-          setStatus("error");
-          return;
+        // --- STEP 1: INITIAL SYNC (Run once) ---
+        // Path is relative to baseURL: http://localhost:5000/api
+        if (pollCount.current === 0 && orderId) {
+          try {
+            // Path becomes: http://localhost:5000/api/paypal/capture
+            await api.post("/paypal/capture", { orderId });
+            console.log("📡 Sync triggered for Order:", orderId);
+          } catch (e) {
+            console.log("ℹ️ Sync already handled by Webhook or previously triggered.");
+          }
         }
 
-        // Clean the token (removes extra quotes if they exist)
-        token = token.replace(/^"|"$/g, '');
-
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        // 2. Request the current status
-        const { data } = await axios.get(
-          `${apiUrl}/bookings/${bookingId}`,
-          config
-        );
+        // --- STEP 2: POLL FOR BOOKING STATUS ---
+        // Path becomes: http://localhost:5000/api/bookings/:id
+        const { data } = await api.get(`/bookings/${bookingId}`);
 
         if (data.status === "Confirmed") {
-          console.log("✅ Booking confirmed! Redirecting...");
+          console.log("✅ Booking confirmed via polling!");
           setStatus("confirmed");
-          timeoutRef.current = setTimeout(() => navigate("/bookings"), 3000);
+          timeoutRef.current = setTimeout(() => navigate("/bookings"), 4000);
         } else {
-          // If still "Hold", wait 3 seconds and try again
-          console.log(`⏳ Current status: ${data.status}. Polling...`);
+          console.log(`⏳ Status: ${data.status}. Polling attempt ${pollCount.current + 1}...`);
+          
           if (pollCount.current < maxPolls) {
             pollCount.current += 1;
             timeoutRef.current = setTimeout(checkBookingStatus, 3000);
@@ -64,7 +55,9 @@ const PaypalPaymentSuccess = () => {
           }
         }
       } catch (err) {
-        console.error("❌ Polling Error:", err.response?.data?.message || err.message);
+        // If it's a 401, the interceptor handles it. 
+        // If it's something else (404/500), we show the error state.
+        console.error("❌ Sync/Poll Error:", err.response?.data?.message || err.message);
         setStatus("error");
       }
     };

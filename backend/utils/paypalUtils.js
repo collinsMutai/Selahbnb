@@ -58,7 +58,7 @@ export const verifyPaypalWebhook = async (req, webhookId) => {
         },
       }
     );
-
+console.log("🔍 PayPal Verification Result:", response.data.verification_status); // ADD THIS
     return response.data.verification_status === 'SUCCESS';
   } catch (error) {
     console.error('Error verifying webhook signature:', error.response?.data || error.message);
