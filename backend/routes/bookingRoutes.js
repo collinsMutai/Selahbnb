@@ -5,7 +5,8 @@ import {
   getUserBookings, 
   getListingBookings, 
   updateBookingStatus, 
-  getListingAvailability 
+  getListingAvailability,
+  getBookingById
 } from "../controllers/bookingController.js";
 // Import both protect and optionalProtect
 import { protect, optionalProtect } from "../middleware/authMiddleware.js";
@@ -17,6 +18,8 @@ router.post("/", protect, createBooking);
 
 // Protected routes for getting user bookings and listing bookings
 router.get("/user", protect, getUserBookings);
+// This must come AFTER /user so it doesn't treat 'user' as an ID
+router.get("/:id", protect, getBookingById);
 router.get("/listing/:id", protect, getListingBookings);
 
 // Only hosts or admins can update booking status

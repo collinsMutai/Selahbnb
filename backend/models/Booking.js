@@ -33,15 +33,20 @@ const bookingSchema = new mongoose.Schema(
     paymentTransactionId: { type: String, required: true },
     paypalOrderId: { type: String },
     captureId: { type: String },
-    holdExpiration: { type: Date }, // Holds the expiration time for the hold
+    holdExpiration: { type: Date }, 
   },
   { timestamps: true }
 );
 
-// Create a TTL index with a partial filter expression
+// 1. Optimized TTL Index: 
+// Setting expireAfterSeconds to 0 means "Delete exactly at the time stored in holdExpiration"
 bookingSchema.index(
   { holdExpiration: 1 },
-  { expireAfterSeconds: 900, partialFilterExpression: { status: "Hold" } }
+  { expireAfterSeconds: 0, partialFilterExpression: { status: "Hold" } }
 );
+
+// 2. Search Index:
+// Speeds up checking if dates are already taken/held for a specific listing
+bookingSchema.index({ listing: 1, status: 1, checkIn: 1, checkOut: 1 });
 
 export default mongoose.model("Booking", bookingSchema);

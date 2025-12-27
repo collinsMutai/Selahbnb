@@ -31,6 +31,7 @@ app.use("/api/paypal/webhook", express.raw({ type: "application/json" }));
 
 // Apply general body parsers after
 app.use(express.json());  // For other API routes that require JSON body parsing
+app.use(express.urlencoded({ extended: true }));
 
 // Your route handlers
 app.use("/api/users", userRoutes);

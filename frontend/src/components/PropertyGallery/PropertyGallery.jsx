@@ -15,6 +15,7 @@ const PropertyGallery = () => {
     "./Selah_Logo.png",
     "./colorado-springs-pioneers-museum.jpg",
     "./garden-of-gods.jpg",
+    "./airforceacademy.avif"
 
   ];
 

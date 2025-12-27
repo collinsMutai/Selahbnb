@@ -224,11 +224,9 @@ const Form = () => {
 
   return (
     <form className="booking-form-only" onSubmit={handleSubmit} ref={formRef}>
-       {formData.totalPrice &&
-                formData.startDate &&
-                formData.endDate && (
-                  <h4>Total Price: ${formData.totalPrice}</h4>
-                )}
+      {formData.totalPrice && formData.startDate && formData.endDate && (
+        <h4>Total Price: ${formData.totalPrice}</h4>
+      )}
       {/* Name */}
       <div className="input-container">
         <FaUser className="input-icon" />
