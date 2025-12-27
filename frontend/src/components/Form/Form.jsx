@@ -21,6 +21,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { enUS } from "date-fns/locale";
 
 import "./Form.css";
+import api from "../../api/axiosInstance";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -60,14 +61,7 @@ const Form = () => {
   const fetchAvailability = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        `${apiUrl}/bookings/listings/${listingId}/availability`,
-        {
-          headers: {
-            Authorization: token ? `Bearer ${token}` : "",
-          },
-        }
-      );
+      const res = await api.get(`/bookings/listings/${listingId}/availability`);
       setBookedRanges(res.data.bookedDates || []);
     } catch (err) {
       console.error("Error fetching availability", err);
@@ -182,12 +176,7 @@ const Form = () => {
     };
 
     try {
-      const response = await axios.post(`${apiUrl}/bookings`, payload, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await api.post(`/bookings`, payload);
 
       if (response.status === 201 && response.data.approvalLink) {
         dispatch(setBookingData(payload));
