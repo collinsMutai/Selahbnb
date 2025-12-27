@@ -22,8 +22,11 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
   const { title, location } = listingDetails;
 
   // Format the check-in and check-out dates
-  const formattedCheckIn = moment(checkIn).tz("America/Denver").format('MMMM Do YYYY, [at] 3:00 PM');
-  const formattedCheckOut = moment(checkOut).tz("America/Denver").format('MMMM Do YYYY, [at] 11:00 AM');
+ // Inside sendBookingConfirmationEmail function
+const formattedCheckIn = `${moment(checkIn).tz("America/Denver").format('MMMM Do YYYY')} at 3:00 PM`;
+const formattedCheckOut = `${moment(checkOut).tz("America/Denver").format('MMMM Do YYYY')} at 11:00 AM`;
+
+// Note: Removed the comma and ensured [at] is used to escape the 'a' character
 
   // Selah Springs contact details
   // const contactEmail = 'selahsprings48@gmail.com';
@@ -31,34 +34,55 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
   const contactPhone = '+17194920042';
 
   const mailOptions = {
-    from: process.env.EMAIL_USER, // Sender address
-    to: payerEmail, // Primary recipient's email address (payer)
-    cc: userEmail, // CC the user's email address
-    subject: `Booking Confirmation - ${title} at ${location}`, // Subject line
-    html: `
-      <h1>Booking Confirmation</h1>
-      <p>Dear ${name},</p>
-      <p>Your booking for <strong>${title}</strong> at <strong>${location}</strong> has been confirmed.</p>
+  from: process.env.EMAIL_USER,
+  to: payerEmail,
+  cc: userEmail,
+  subject: `Confirmed: Your Stay at ${title}`,
+  html: `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        .card { border: 1px solid #ddd; padding: 25px; border-radius: 12px; font-family: "DM Sans", sans-serif; color: #34495e; max-width: 600px; margin: auto; }
+        .header { color: #148992; font-family: "Jost", sans-serif; font-size: 24px; margin-bottom: 20px; }
+        .details-box { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #148992; }
+        .footer { font-size: 13px; color: #7f8c8d; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+        .price-list { list-style: none; padding: 0; }
+        .price-list li { margin: 5px 0; display: flex; justify-content: space-between; }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h1 class="header">Booking Confirmed!</h1>
+        <p>Hi ${name},</p>
+        <p>Get ready for your stay at <strong>${title}</strong> in <strong>${location}</strong>. Your payment has been processed and your dates are officially reserved.</p>
 
-      <h3>Booking Details:</h3>
-      <ul>
-        <li><strong>Check-in:</strong> ${formattedCheckIn}</li>
-        <li><strong>Check-out:</strong> ${formattedCheckOut}</li>
-        <li><strong>Subtotal:</strong> $${Number(subtotal).toFixed(2)}</li>
-        <li><strong>Tax:</strong> $${Number(tax).toFixed(2)}</li>
-        <li><strong>Total price:</strong> $${Number(totalPrice).toFixed(2)}</li>
-        <li><strong>Payment Transaction ID:</strong> ${paymentTransactionId}</li>
-      </ul>
+        <div class="details-box">
+          <p><strong>Check-in:</strong> ${formattedCheckIn}</p>
+          <p><strong>Check-out:</strong> ${formattedCheckOut}</p>
+        </div>
 
-      <p>We look forward to hosting you! If you have any questions, feel free to contact us:</p>
+        <h3>Payment Summary</h3>
+        <ul class="price-list">
+          <li><span>Subtotal:</span> <span>$${Number(subtotal).toFixed(2)}</span></li>
+          <li><span>Tax:</span> <span>$${Number(tax).toFixed(2)}</span></li>
+          <li style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 10px;">
+            <span>Total Paid:</span> <span>$${Number(totalPrice).toFixed(2)}</span>
+          </li>
+        </ul>
+        <p style="font-size: 11px; color: #999;">Transaction ID: ${paymentTransactionId}</p>
 
-      <p><strong>Selah Springs Contact Information:</strong></p>
-      <p>Email: <a href="mailto:${contactEmail}">${contactEmail}</a></p>
-      <p>Phone: <a href="tel:${contactPhone}">${contactPhone}</a></p>
-
-      <p>Best regards,<br>The Booking Team</p>
-    `, // HTML body
-  };
+        <p>If you have any questions before your arrival, simply reply to this email or call <a href="tel:${contactPhone}">${contactPhone}</a>.</p>
+        
+        <div class="footer">
+          <p>Selah Springs Lodge | Colorado Springs, Colorado</p>
+          <img src="https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png" width="150" alt="Selah Logo">
+        </div>
+      </div>
+    </body>
+    </html>
+  `
+};
 
   // Retry logic for sending the email (max 3 attempts)
   const maxRetries = 3;
