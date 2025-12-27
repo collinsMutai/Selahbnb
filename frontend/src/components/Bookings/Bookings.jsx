@@ -19,7 +19,7 @@ const Bookings = () => {
 
   // ✅ Pagination States
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 5;
+  const perPage = 3;
 
   useEffect(() => {
     const fetchBookings = async () => {

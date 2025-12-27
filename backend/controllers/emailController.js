@@ -75,8 +75,8 @@ const formattedCheckOut = `${moment(checkOut).tz("America/Denver").format('MMMM 
         <p>If you have any questions before your arrival, simply reply to this email or call <a href="tel:${contactPhone}">${contactPhone}</a>.</p>
         
         <div class="footer">
-          <p>Selah Springs Lodge | Colorado Springs, Colorado</p>
-          <img src="https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png" width="150" alt="Selah Logo">
+        <img src="https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png" width="150" alt="Selah Logo">
+        <p>Selah Springs Lodge | Colorado Springs, Colorado</p>
         </div>
       </div>
     </body>
