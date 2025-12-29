@@ -1,189 +1,76 @@
-/* AdminDashboard.css */
-.admin-dashboard {
-  padding: 20px;
-  padding-top: 180px;
-  min-height: 100vh; /* Ensures the page takes at least the full height of the screen */
+/* Layout */
+.admin-layout {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Ensures content starts from the top */
-  align-items: center;
-  margin: 0 auto; /* Centers content horizontally */
-  max-width: 1200px; /* Optional: Limits the max width of the content */
+  min-height: 100vh;
+  background: #f5f6f8;
 }
 
-h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
+/* Sidebar */
+.admin-sidebar {
+  width: 240px;
+  background: #148992;
+  color: white;
+  padding: 20px;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.sidebar-title {
+  font-size: 22px;
+  margin-bottom: 30px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-menu li {
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.sidebar-menu li:hover,
+.sidebar-menu li.active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Content */
+.admin-content {
+  margin-left: 240px;
+  padding: 30px;
+  width: calc(100% - 240px);
 }
 
 h2 {
-  font-size: 1.5em;
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 
-.filter-section {
+/* Loading / Error */
+.loading,
+.error {
+  height: 100vh;
   display: flex;
   align-items: center;
-  margin-bottom: 20px;
-  gap: 10px;
-  flex-wrap: wrap; /* Allow elements to wrap on smaller screens */
-  justify-content: center; /* Centers content on smaller screens */
-}
-
-.search-input {
-  padding: 8px;
-  width: 250px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  max-width: 100%; /* Ensures the input doesn't overflow */
-}
-
-.filter-dropdown {
-  padding: 8px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  max-width: 100%; /* Ensures the dropdown doesn't overflow */
-}
-
-/* Table styles */
-.booking-table,
-.paypal-transaction-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  max-width: 100%; /* Ensure the table width stays within the viewport */
-}
-
-.booking-table th,
-.booking-table td,
-.paypal-transaction-table th,
-.paypal-transaction-table td {
-  padding: 10px;
-  text-align: left;
-  border: 1px solid #ddd;
-}
-
-.booking-table th,
-.paypal-transaction-table th {
-  background-color: #f4f4f4;
-  color: #333;
-}
-
-.booking-table td,
-.paypal-transaction-table td {
-  background-color: #fff;
-}
-
-.booking-table tr:hover,
-.paypal-transaction-table tr:hover {
-  background-color: #f1f1f1;
-}
-
-.booking-table .btn,
-.paypal-transaction-table .btn {
-  padding: 5px 10px;
-  margin: 0 5px;
-  border: none;
-  cursor: pointer;
-}
-
-.booking-table .btn-refund,
-.paypal-transaction-table .btn-refund {
-  background-color: #ff9800;
-  color: white;
-}
-
-.booking-table .btn:hover,
-.paypal-transaction-table .btn:hover {
-  opacity: 0.8;
-}
-
-/* Pagination Controls Styling */
-.pagination-controls {
-  display: flex;
   justify-content: center;
-  margin-top: 20px;
-  gap: 10px;
 }
 
-.pagination-controls button {
-  padding: 8px 16px;
-  background-color: #148992;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.pagination-controls button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.pagination-controls span {
-  align-self: center;
-  font-size: 16px;
-}
-
-/* Mobile responsiveness */
+/* Mobile */
 @media (max-width: 768px) {
-  /* Adjust table for smaller screens */
-  .booking-table,
-  .paypal-transaction-table {
-    font-size: 14px; /* Reduce text size */
+  .admin-layout {
+    flex-direction: column;
   }
 
-  /* Add wrapper for the table to handle horizontal scrolling */
-  .table-wrapper {
+  .admin-sidebar {
+    position: relative;
     width: 100%;
-    overflow-x: auto; /* Allows horizontal scrolling on smaller screens */
-    padding-left: 10px; /* Add left padding */
-    padding-right: 10px; /* Add right padding */
   }
 
-  .filter-section {
-    flex-direction: column; /* Stack search and filter inputs */
-    align-items: flex-start; /* Align items to the left */
-  }
-
-  .search-input,
-  .filter-dropdown {
-    width: 100%; /* Ensure input and dropdown take full width */
-    margin-bottom: 10px; /* Add spacing between inputs */
-  }
-
-  h1 {
-    font-size: 1.6em; /* Reduce font size for smaller screens */
-  }
-
-  h2 {
-    font-size: 1.3em; /* Reduce font size for smaller screens */
-  }
-
-  .pagination-controls button {
-    padding: 6px 12px; /* Make pagination buttons smaller */
-  }
-
-  .pagination-controls span {
-    font-size: 14px; /* Reduce font size for pagination */
-  }
-}
-
-/* Extra small devices (portrait phones, less than 576px) */
-@media (max-width: 576px) {
-  .search-input {
-    width: 100%; /* Ensure the search input takes up full width */
-  }
-
-  .filter-dropdown {
-    width: 100%; /* Ensure the filter dropdown takes up full width */
-  }
-
-  .pagination-controls button {
-    padding: 5px 10px; /* Even smaller padding for smaller screens */
-  }
-
-  .pagination-controls span {
-    font-size: 12px; /* Smaller pagination text */
+  .admin-content {
+    margin-left: 0;
+    width: 100%;
   }
 }

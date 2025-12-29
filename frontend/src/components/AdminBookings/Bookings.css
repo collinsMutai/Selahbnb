@@ -1,0 +1,49 @@
+.table-wrapper {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  overflow-x: auto;
+}
+
+.booking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.booking-table th,
+.booking-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.booking-table th {
+  background: #f0f0f0;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.pagination-controls button {
+  padding: 8px 14px;
+  border: none;
+  background: #148992;
+  color: white;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  background: #ccc;
+}
+
+.loading,
+.error {
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

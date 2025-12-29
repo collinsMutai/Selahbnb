@@ -21,95 +21,72 @@ const sendBookingConfirmationEmail = async (payerEmail, userEmail, bookingDetail
   const { name, checkIn, checkOut, subtotal, tax, totalPrice, paymentTransactionId } = bookingDetails;
   const { title, location } = listingDetails;
 
-  // Format the check-in and check-out dates
- // Inside sendBookingConfirmationEmail function
-const formattedCheckIn = `${moment(checkIn).tz("America/Denver").format('MMMM Do YYYY')} at 3:00 PM`;
-const formattedCheckOut = `${moment(checkOut).tz("America/Denver").format('MMMM Do YYYY')} at 11:00 AM`;
+  const formattedCheckIn = `${moment(checkIn).tz("America/Denver").format('MMMM Do YYYY')} at 3:00 PM`;
+  const formattedCheckOut = `${moment(checkOut).tz("America/Denver").format('MMMM Do YYYY')} at 11:00 AM`;
 
-// Note: Removed the comma and ensured [at] is used to escape the 'a' character
-
-  // Selah Springs contact details
-  // const contactEmail = 'selahsprings48@gmail.com';
-   const contactEmail = 'selahsprings48@gmail.com';
+  const adminEmail = 'collinsfrontend@gmail.com';
   const contactPhone = '+17194920042';
 
+  // Ensure we don't send to the same email twice if payerEmail and userEmail are identical
+  const recipients = [...new Set([payerEmail, userEmail])].filter(Boolean);
+
   const mailOptions = {
-  from: process.env.EMAIL_USER,
-  to: payerEmail,
-  cc: userEmail,
-  subject: `Confirmed: Your Stay at ${title}`,
-  html: `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        .card { border: 1px solid #ddd; padding: 25px; border-radius: 12px; font-family: "DM Sans", sans-serif; color: #34495e; max-width: 600px; margin: auto; }
-        .header { color: #148992; font-family: "Jost", sans-serif; font-size: 24px; margin-bottom: 20px; }
-        .details-box { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #148992; }
-        .footer { font-size: 13px; color: #7f8c8d; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
-        .price-list { list-style: none; padding: 0; }
-        .price-list li { margin: 5px 0; display: flex; justify-content: space-between; }
-      </style>
-    </head>
-    <body>
-      <div class="card">
-        <h1 class="header">Booking Confirmed!</h1>
-        <p>Hi ${name},</p>
-        <p>Get ready for your stay at <strong>${title}</strong> in <strong>${location}</strong>. Your payment has been processed and your dates are officially reserved.</p>
+    from: adminEmail,
+    to: recipients,        // ⚡ Sends to both the payer and the account holder
+    bcc: adminEmail,       // ⚡ Blind copy to admin
+    subject: `Confirmed: Your Stay at ${title}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          .card { border: 1px solid #ddd; padding: 25px; border-radius: 12px; font-family: "DM Sans", sans-serif; color: #34495e; max-width: 600px; margin: auto; }
+          .header { color: #148992; font-family: "Jost", sans-serif; font-size: 24px; margin-bottom: 20px; }
+          .details-box { background-color: #f9f9f9; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #148992; }
+          .footer { font-size: 13px; color: #7f8c8d; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+          .price-list { list-style: none; padding: 0; }
+          .price-list li { margin: 5px 0; display: flex; justify-content: space-between; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1 class="header">Booking Confirmed!</h1>
+          <p>Hi ${name},</p>
+          <p>Your dates are officially reserved for <strong>${title}</strong>.</p>
 
-        <div class="details-box">
-          <p><strong>Check-in:</strong> ${formattedCheckIn}</p>
-          <p><strong>Check-out:</strong> ${formattedCheckOut}</p>
+          <div class="details-box">
+            <p><strong>Check-in:</strong> ${formattedCheckIn}</p>
+            <p><strong>Check-out:</strong> ${formattedCheckOut}</p>
+            <p><strong>Location:</strong> ${location}</p>
+          </div>
+
+          <h3>Payment Summary</h3>
+          <ul class="price-list">
+            <li><span>Subtotal:</span> <span>$${Number(subtotal).toFixed(2)}</span></li>
+            <li><span>Tax:</span> <span>$${Number(tax).toFixed(2)}</span></li>
+            <li style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 10px;">
+              <span>Total Paid:</span> <span>$${Number(totalPrice).toFixed(2)}</span>
+            </li>
+          </ul>
+          <p style="font-size: 11px; color: #999;">Transaction ID: ${paymentTransactionId}</p>
+          
+          <div class="footer">
+            <img src="https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png" width="150" alt="Selah Logo">
+            <p>Selah Springs Lodge | Colorado Springs, Colorado</p>
+          </div>
         </div>
-
-        <h3>Payment Summary</h3>
-        <ul class="price-list">
-          <li><span>Subtotal:</span> <span>$${Number(subtotal).toFixed(2)}</span></li>
-          <li><span>Tax:</span> <span>$${Number(tax).toFixed(2)}</span></li>
-          <li style="font-weight: bold; border-top: 1px solid #ddd; padding-top: 5px; margin-top: 10px;">
-            <span>Total Paid:</span> <span>$${Number(totalPrice).toFixed(2)}</span>
-          </li>
-        </ul>
-        <p style="font-size: 11px; color: #999;">Transaction ID: ${paymentTransactionId}</p>
-
-        <p>If you have any questions before your arrival, simply reply to this email or call <a href="tel:${contactPhone}">${contactPhone}</a>.</p>
-        
-        <div class="footer">
-        <img src="https://selahspringslodge.com/static/media/Selah_Logo.7fee93c37c0ef3580664.png" width="150" alt="Selah Logo">
-        <p>Selah Springs Lodge | Colorado Springs, Colorado</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
-};
-
-  // Retry logic for sending the email (max 3 attempts)
-  const maxRetries = 3;
-  let attempt = 0;
-
-  const sendEmailWithRetry = async () => {
-    while (attempt < maxRetries) {
-      try {
-        // Attempt to send the email
-        await transporter.sendMail(mailOptions);
-        console.log('Booking confirmation email sent successfully!');
-        break; // Exit loop after successful email send
-      } catch (error) {
-        attempt++;
-        console.error(`Attempt ${attempt} failed:`, error);
-        
-        if (attempt >= maxRetries) {
-          console.error('Max retries reached. Failed to send email.');
-        } else {
-          console.log('Retrying...');
-        }
-      }
-    }
+      </body>
+      </html>
+    `
   };
 
-  // Execute the retry logic
-  await sendEmailWithRetry();
+  // Execution with simple retry
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Success: Confirmation sent to ${recipients.join(', ')}`);
+  } catch (error) {
+    console.error("❌ Email failed after multiple attempts:", error.message);
+  }
 };
 
 // Send monthly charge email function with retry logic

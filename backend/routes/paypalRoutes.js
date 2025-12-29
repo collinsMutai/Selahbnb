@@ -35,7 +35,7 @@ router.post("/webhook", async (req, res) => {
   console.log("🚀 WEBHOOK HIT!");
 
   try {
-    const webhookId = process.env.PAYPAL_WEBHOOK_ID; 
+    const webhookId = process.env.PAYPAL_WEBHOOK_ID;
     const isValid = await verifyPaypalWebhook(req, webhookId);
 
     if (!isValid) {
@@ -52,12 +52,17 @@ router.post("/webhook", async (req, res) => {
       const accessToken = await getPaypalAccessToken();
 
       console.log("💸 Auto-capturing funds for approved order:", orderId);
-      
+
       try {
         await axios.post(
           `https://api-m.sandbox.paypal.com/v2/checkout/orders/${orderId}/capture`,
           {},
-          { headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" } }
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+          }
         );
       } catch (capErr) {
         // If it's already captured, we don't care, just proceed
@@ -66,42 +71,58 @@ router.post("/webhook", async (req, res) => {
     }
 
     // STEP B: Final source of truth - update DB and notify user
-    if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
-      const orderId = event.resource.supplementary_data?.related_ids?.order_id || 
-                     (event.links?.find(l => l.rel === "up")?.href.split("/").pop());
+    // --- STEP B: FINALIZE COMPLETED CAPTURES ---
+if (event.event_type === "PAYMENT.CAPTURE.COMPLETED") {
+  const orderId = event.resource.supplementary_data?.related_ids?.order_id || 
+                 (event.links?.find(l => l.rel === "up")?.href.split("/").pop());
 
-      console.log("💰 Capture Completed. Finalizing Booking:", orderId);
+  const captureId = event.resource.id;
 
-      const updatedBooking = await Booking.findOneAndUpdate(
-        { paypalOrderId: orderId, status: { $ne: "Confirmed" } },
-        {
-          status: "Confirmed",
-          paymentStatus: "Completed",
-          paymentTransactionId: event.resource.id,
-        },
-        { new: true }
-      ).populate("listing");
+  console.log("💰 Capture Completed. Updating DB for Order:", orderId);
 
-      if (updatedBooking) {
-        console.log("🎉 Booking confirmed via Webhook.");
-        try {
-          const user = await User.findById(updatedBooking.user);
-          await sendBookingConfirmationEmail(
-            updatedBooking.payerEmail || event.resource.payer?.email_address, 
-            user?.email, 
-            updatedBooking, 
-            updatedBooking.listing
-          );
-        } catch (emailErr) {
-          console.error("❌ Email failed:", emailErr.message);
-        }
-      }
+  const updatedBooking = await Booking.findOneAndUpdate(
+    { 
+      paypalOrderId: orderId, 
+      status: { $ne: "Confirmed" } 
+    },
+    {
+      status: "Confirmed",
+      paymentStatus: "Completed",
+      paymentTransactionId: captureId,
+      captureId: captureId,
+      $unset: { holdExpiration: "" } 
+    },
+    { new: true }
+  ).populate("listing").populate("user"); // ⚡ Crucial: populates user email
+
+  if (updatedBooking) {
+    try {
+      // 1. Get Payer Email from PayPal's event data
+      const payerEmail = event.resource.payer?.email_address || updatedBooking.user?.email;
+      
+      // 2. Get Account Email from your Database (populated above)
+      const userEmail = updatedBooking.user?.email;
+
+      console.log(`📧 Sending confirmation to Payer: ${payerEmail} and User: ${userEmail}`);
+
+      await sendBookingConfirmationEmail(
+        payerEmail, 
+        userEmail, 
+        updatedBooking, 
+        updatedBooking.listing
+      );
+      
+      console.log("🎉 Webhook process complete.");
+    } catch (emailErr) {
+      console.error("❌ Email failed:", emailErr.message);
     }
+  }
+}
 
     res.status(200).send("Webhook Handled");
   } catch (err) {
     console.error("Webhook Error:", err.message);
-    res.status(200).send("Error"); 
+    res.status(200).send("Error");
   }
 });
 // Route to save PayPal transaction and send emails
