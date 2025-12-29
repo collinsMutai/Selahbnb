@@ -23,6 +23,7 @@ import ContactPage from "./pages/Contact";
 import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
 import AdminDashboard from "./pages/Admin";
 import Bookings from "./components/Bookings/Bookings";
+import Users from "./components/Users/Users";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -36,7 +37,7 @@ const ProtectedRoute = ({ children }) => {
 const Layout = ({ children }) => {
   const location = useLocation();
 
-  // hide navbar/footer on admin paths
+  // Hide navbar/footer on admin paths
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
@@ -123,6 +124,7 @@ function App() {
             }
           />
 
+          {/* Redirect users to admin dashboard if logged in as admin */}
           <Route
             path="/bookings"
             element={
@@ -136,16 +138,20 @@ function App() {
             }
           />
 
+          {/* Admin Dashboard Route */}
           <Route
             path="/admin"
             element={
-              user?.role === "admin" ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/" />
-              )
+              user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />
             }
-          />
+          >
+            <Route path="bookings" element={<Bookings />} />
+            <Route path="users" element={<Users />} />
+            <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
+          </Route>
+
+          {/* User Route */}
+          <Route path="/users" element={<Users />} />
         </Routes>
       </Layout>
 

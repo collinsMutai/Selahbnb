@@ -33,9 +33,28 @@
   cursor: pointer;
 }
 
-.sidebar-menu li:hover,
-.sidebar-menu li.active {
+/* NavLink active class */
+.sidebar-menu li .active {
   background: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Hover effects for links */
+.sidebar-menu li:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-menu li a {
+  color: white; /* Ensure the link text is white */
+  text-decoration: none; /* Remove underline by default */
+  font-size: 16px;
+  display: block;
+}
+
+.sidebar-menu li a:hover {
+  text-decoration: underline; /* Underline on hover */
+  color: #d0f1f1; /* Slightly lighter color on hover */
 }
 
 /* Content */
