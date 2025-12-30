@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux"; // Import useDispatch hook
+import { useDispatch } from "react-redux";
 import Bookings from "../components/AdminBookings/Bookings";
 import Users from "../components/Users/Users";
-import { logout } from "../redux/userSlice"; // Import the logout action
+import { logout } from "../redux/userSlice";
 import "./Admin.css";
 
 const Admin = () => {
   const [userData, setUserData] = useState(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true); // State to manage sidebar visibility
-  const dispatch = useDispatch();  // Dispatch action to Redux store
-  const navigate = useNavigate();  // Use to navigate to another route
+  const [sidebarOpen, setSidebarOpen] = useState(true); // Sidebar state to manage visibility
+  const dispatch = useDispatch(); // Redux dispatch hook
+  const navigate = useNavigate(); // React Router navigate hook
 
-  // Fetch user data from localStorage when the component mounts
+  // Fetch user data from localStorage on mount
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("user"));
     if (data) {
-      console.log("User data fetched:", data); // Log the entire user data object
-      setUserData(data); // Set user data to state
+      console.log("User data fetched:", data);
+      setUserData(data);
     } else {
       console.log("No user data found in localStorage");
     }
@@ -25,14 +25,11 @@ const Admin = () => {
 
   // Logout handler
   const handleLogout = () => {
-    // Dispatch logout action to Redux store
     dispatch(logout());
-
-    // Navigate to home page after logout
-    navigate("/");
+    navigate("/"); // Redirect to home page after logout
   };
 
-  // Toggle Sidebar visibility
+  // Toggle sidebar visibility
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -52,7 +49,7 @@ const Admin = () => {
                 <path d="M13.45 11.55l2.05 -2.05" />
                 <path d="M6.4 20a9 9 0 1 1 11.2 0z" />
               </svg>
-              Bookings
+              {sidebarOpen && <span>Bookings</span>}
             </NavLink>
           </li>
 
@@ -65,13 +62,18 @@ const Admin = () => {
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
               </svg>
-              Users
+              {sidebarOpen && <span>Users</span>}
             </NavLink>
           </li>
 
           <li>
             <NavLink to="settings" className={({ isActive }) => (isActive ? "active" : "")}>
-              Settings
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 2v20" />
+                <path d="M2 12h20" />
+              </svg>
+              {sidebarOpen && <span>Settings</span>}
             </NavLink>
           </li>
         </ul>
@@ -96,7 +98,7 @@ const Admin = () => {
         </div>
       </aside>
 
-      {/* Content (MAIN AREA) */}
+      {/* Main Content */}
       <main className="admin-content">
         {/* Toggle Sidebar Button */}
         <div className="toggle-sidebar-btn" onClick={toggleSidebar}>

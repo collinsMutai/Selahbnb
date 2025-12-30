@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation
+  useLocation,
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { jwtDecode } from "jwt-decode";
@@ -60,6 +60,7 @@ function App() {
     dispatch(logout());
   }, [dispatch]);
 
+  // Refresh the token by sending the refresh token to the backend
   const refreshSession = useCallback(async () => {
     try {
       const response = await axios.post(
@@ -76,7 +77,7 @@ function App() {
       return accessToken;
     } catch (error) {
       handleLogout();
-      return null;
+      return null; // In case of an error, log out the user
     }
   }, [dispatch, handleLogout]);
 
@@ -91,11 +92,14 @@ function App() {
           const currentTime = Date.now() / 1000;
 
           if (decoded.exp < currentTime + 60) {
+            // Token is about to expire, refresh it
             await refreshSession();
           } else {
+            // Token is still valid, continue
             dispatch(login({ user: JSON.parse(storedUser), token }));
           }
-        } catch {
+        } catch (err) {
+          console.error("Error decoding token:", err);
           handleLogout();
         }
       }
@@ -105,7 +109,7 @@ function App() {
     initializeAuth();
   }, [dispatch, refreshSession, handleLogout]);
 
-  if (loading) return null;
+  if (loading) return null; // Render nothing while checking auth state
 
   return (
     <Router>
