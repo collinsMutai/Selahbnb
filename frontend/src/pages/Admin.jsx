@@ -8,6 +8,7 @@ import "./Admin.css";
 
 const Admin = () => {
   const [userData, setUserData] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true); // State to manage sidebar visibility
   const dispatch = useDispatch();  // Dispatch action to Redux store
   const navigate = useNavigate();  // Use to navigate to another route
 
@@ -27,35 +28,25 @@ const Admin = () => {
     // Dispatch logout action to Redux store
     dispatch(logout());
 
- 
     // Navigate to home page after logout
     navigate("/");
+  };
+
+  // Toggle Sidebar visibility
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
   };
 
   return (
     <div className="admin-layout">
       {/* Sidebar */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <h2 className="sidebar-title">Admin Panel</h2>
 
         <ul className="sidebar-menu">
           <li>
-            <NavLink
-              to="bookings"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-dashboard"
-              >
+            <NavLink to="bookings" className={({ isActive }) => (isActive ? "active" : "")}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M12 13m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
                 <path d="M13.45 11.55l2.05 -2.05" />
@@ -66,22 +57,8 @@ const Admin = () => {
           </li>
 
           <li>
-            <NavLink
-              to="users"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-users"
-              >
+            <NavLink to="users" className={({ isActive }) => (isActive ? "active" : "")}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
                 <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
@@ -93,42 +70,22 @@ const Admin = () => {
           </li>
 
           <li>
-            <NavLink
-              to="settings"
-              className={({ isActive }) => (isActive ? "active" : "")}
-            >
+            <NavLink to="settings" className={({ isActive }) => (isActive ? "active" : "")}>
               Settings
             </NavLink>
           </li>
         </ul>
 
         {/* Avatar and Logout */}
-          <div className="sidebar-footer">
-          {/* Avatar Image */}
+        <div className="sidebar-footer">
           {userData && userData.profilePicture ? (
-            <img
-              src={userData.profilePicture} // Use the profile picture URL from userData
-              alt="User Avatar"
-              className="avatar-img"
-            />
+            <img src={userData.profilePicture} alt="User Avatar" className="avatar-img" />
           ) : (
-            <p>Loading...</p> // Optionally, show a loading text while the image is not available
+            <p>Loading...</p>
           )}
 
-          {/* Logout Link */}
           <NavLink onClick={handleLogout} className="logout-link">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="icon icon-tabler icons-tabler-outline icon-tabler-logout"
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
               <path d="M9 12h12l-3 -3" />
@@ -139,8 +96,15 @@ const Admin = () => {
         </div>
       </aside>
 
-      {/* Content (RIGHT SIDE) */}
+      {/* Content (MAIN AREA) */}
       <main className="admin-content">
+        {/* Toggle Sidebar Button */}
+        <div className="toggle-sidebar-btn" onClick={toggleSidebar}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12h18M3 6h18M3 18h18" />
+          </svg>
+        </div>
+
         <Routes>
           <Route index element={<Navigate to="bookings" replace />} />
           <Route path="bookings" element={<Bookings />} />
