@@ -2,94 +2,199 @@
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #f5f6f8;
+  background: #f5f6f8; /* Light background for the content area */
 }
 
 /* Sidebar */
 .admin-sidebar {
   width: 240px;
-  background: #148992;
+  background: #148992; /* Sidebar background color */
   color: white;
   padding: 20px;
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
+  overflow-y: auto; /* Allows scrolling if content exceeds screen height */
+  z-index: 1000; /* Ensures the sidebar stays on top */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Pushes footer (avatar and logout) to the bottom */
 }
 
+/* Sidebar Title */
 .sidebar-title {
   font-size: 22px;
   margin-bottom: 30px;
+  font-weight: bold;
+  color: #fff; /* White color for the sidebar title */
 }
 
+/* Sidebar Menu */
 .sidebar-menu {
   list-style: none;
   padding: 0;
+  flex-grow: 1; /* Ensures the menu takes up the remaining space */
 }
 
 .sidebar-menu li {
-  padding: 12px;
+  display: flex; /* Align items vertically using flex */
+  align-items: center; /* Vertically align icon and text */
+  justify-content: flex-start; /* Align items to the left */
+  padding: 12px 20px; /* Consistent padding */
   border-radius: 6px;
   cursor: pointer;
+  width: 100%; /* Ensure li elements take up full width */
+  position: relative; /* Needed for pseudo-element positioning */
+  transition: background 0.2s ease; /* Smooth transition for background color */
 }
 
-/* NavLink active class */
-.sidebar-menu li .active {
-  background: rgba(255, 255, 255, 0.2);
-  font-weight: bold;
-  text-decoration: underline;
-}
-
-/* Hover effects for links */
-.sidebar-menu li:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
+/* Sidebar Menu Link */
 .sidebar-menu li a {
-  color: white; /* Ensure the link text is white */
+  display: flex;
+  align-items: center; /* Align icon and text vertically */
+  color: white; /* Link text color */
   text-decoration: none; /* Remove underline by default */
   font-size: 16px;
-  display: block;
+  width: 100%; /* Ensure the links take up the full width */
+  padding: 12px 20px;
+  border-radius: 6px;
 }
 
-.sidebar-menu li a:hover {
-  text-decoration: underline; /* Underline on hover */
-  color: #d0f1f1; /* Slightly lighter color on hover */
+/* Active Link Style */
+.sidebar-menu li a.active {
+  background: rgba(255, 255, 255, 0.2); /* Active background color */
+  color: white !important; /* Ensure active link text is white */
+  font-weight: bold; /* Make active link bold */
+  position: relative;
+  border-radius: 5px;
+  border-left: 3px solid #fff; /* Add left border to active links */
+  padding-left: 18px; /* Space for the left border */
 }
 
-/* Content */
+/* Active Link Extra Spacing */
+.sidebar-menu li.active::before {
+  content: ''; /* Pseudo-element for extra spacing */
+  position: absolute;
+  top: -6px; /* Adjust the top padding */
+  left: -6px; /* Adjust the left padding */
+  right: -6px; /* Adjust the right padding */
+  bottom: -6px; /* Adjust the bottom padding */
+  background-color: rgba(255, 255, 255, 0.2); /* Same background as active state */
+  border-radius: 6px; /* Maintain consistent border-radius */
+  z-index: -1; /* Keep it behind the text */
+}
+
+/* Sidebar Icons */
+.sidebar-menu li svg {
+  margin-right: 10px; /* Space between icon and text */
+  vertical-align: middle; /* Aligns the icon with the text */
+  width: 20px; /* Icon size */
+  height: 20px;
+}
+
+/* Active Icon Style */
+.sidebar-menu li a.active svg {
+  color: #fff !important; /* Active icon color */
+}
+
+/* Content Area */
 .admin-content {
-  margin-left: 240px;
+  margin-left: 240px; /* Leave space for the sidebar */
   padding: 30px;
-  width: calc(100% - 240px);
+  width: calc(100% - 240px); /* Adjust content width based on sidebar size */
+  background-color: #ffffff; /* White background for content */
 }
 
+/* Header Styles */
 h2 {
   margin: 20px 0;
+  color: #333; /* Dark text for headings */
 }
 
-/* Loading / Error */
+/* Loading / Error States */
 .loading,
 .error {
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 24px;
+  color: #148992; /* Color for loading/error text */
 }
 
-/* Mobile */
+/* Avatar and Logout Section */
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  padding-bottom: 30px; /* Added space at the bottom of the footer */
+}
+
+.avatar-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%; /* Circular avatar */
+  margin-bottom: 15px;
+  object-fit: cover; /* Ensures the image covers the circle */
+  border: 2px solid #fff; /* White border around the avatar */
+}
+
+
+
+/* Logout Link */
+.logout-link {
+  display: flex;
+  align-items: center;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.logout-link:hover {
+  color: #ecf0f1;
+}
+
+.logout-link svg {
+  margin-right: 8px;
+  width: 20px; /* Icon size */
+  height: 20px;
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .admin-layout {
-    flex-direction: column;
+    flex-direction: column; /* Stack content and sidebar vertically */
   }
 
   .admin-sidebar {
-    position: relative;
+    position: relative; /* Make the sidebar take full width */
     width: 100%;
+    height: auto; /* Adjust height for mobile view */
+    padding: 15px; /* Reduce padding for smaller screens */
+  }
+
+  .sidebar-title {
+    font-size: 1.5rem; /* Smaller title size on mobile */
+  }
+
+  .sidebar-menu li {
+    margin-bottom: 10px; /* Add spacing between items on mobile */
   }
 
   .admin-content {
-    margin-left: 0;
-    width: 100%;
+    margin-left: 0; /* Remove left margin for mobile */
+    width: 100%; /* Take full width on mobile */
+    padding: 15px; /* Reduce content padding */
+  }
+
+  .sidebar-menu li a {
+    font-size: 14px; /* Smaller text size on mobile */
+  }
+
+  .sidebar-menu li svg {
+    width: 18px; /* Smaller icons on mobile */
+    height: 18px;
   }
 }

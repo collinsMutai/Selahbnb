@@ -1,10 +1,37 @@
-import React from "react";
-import { NavLink, Routes, Route, Navigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"; // Import useDispatch hook
 import Bookings from "../components/AdminBookings/Bookings";
 import Users from "../components/Users/Users";
+import { logout } from "../redux/userSlice"; // Import the logout action
 import "./Admin.css";
 
 const Admin = () => {
+  const [userData, setUserData] = useState(null);
+  const dispatch = useDispatch();  // Dispatch action to Redux store
+  const navigate = useNavigate();  // Use to navigate to another route
+
+  // Fetch user data from localStorage when the component mounts
+  useEffect(() => {
+    const data = JSON.parse(localStorage.getItem("user"));
+    if (data) {
+      console.log("User data fetched:", data); // Log the entire user data object
+      setUserData(data); // Set user data to state
+    } else {
+      console.log("No user data found in localStorage");
+    }
+  }, []);
+
+  // Logout handler
+  const handleLogout = () => {
+    // Dispatch logout action to Redux store
+    dispatch(logout());
+
+ 
+    // Navigate to home page after logout
+    navigate("/");
+  };
+
   return (
     <div className="admin-layout">
       {/* Sidebar */}
@@ -17,6 +44,23 @@ const Admin = () => {
               to="bookings"
               className={({ isActive }) => (isActive ? "active" : "")}
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-dashboard"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M12 13m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                <path d="M13.45 11.55l2.05 -2.05" />
+                <path d="M6.4 20a9 9 0 1 1 11.2 0z" />
+              </svg>
               Bookings
             </NavLink>
           </li>
@@ -26,6 +70,24 @@ const Admin = () => {
               to="users"
               className={({ isActive }) => (isActive ? "active" : "")}
             >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-users"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
+                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
+              </svg>
               Users
             </NavLink>
           </li>
@@ -39,18 +101,50 @@ const Admin = () => {
             </NavLink>
           </li>
         </ul>
+
+        {/* Avatar and Logout */}
+          <div className="sidebar-footer">
+          {/* Avatar Image */}
+          {userData && userData.profilePicture ? (
+            <img
+              src={userData.profilePicture} // Use the profile picture URL from userData
+              alt="User Avatar"
+              className="avatar-img"
+            />
+          ) : (
+            <p>Loading...</p> // Optionally, show a loading text while the image is not available
+          )}
+
+          {/* Logout Link */}
+          <NavLink onClick={handleLogout} className="logout-link">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-logout"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+              <path d="M9 12h12l-3 -3" />
+              <path d="M18 15l3 -3" />
+            </svg>
+            Logout
+          </NavLink>
+        </div>
       </aside>
 
       {/* Content (RIGHT SIDE) */}
       <main className="admin-content">
         <Routes>
-          {/* Default admin route */}
           <Route index element={<Navigate to="bookings" replace />} />
-
           <Route path="bookings" element={<Bookings />} />
           <Route path="users" element={<Users />} />
-
-          {/* Optional */}
           <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
         </Routes>
       </main>
