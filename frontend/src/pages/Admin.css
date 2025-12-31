@@ -25,8 +25,8 @@
 
 /* Sidebar (closed, reduced width with only icons visible) */
 .admin-sidebar.closed {
-  overflow: hidden;
-  width: 100px; /* Reduced width when closed */
+  transform: translateX(-100%); /* Moves sidebar off the screen */
+  width: 0; /* Reduces width to zero */
 }
 
 /* Sidebar Menu */
@@ -38,25 +38,25 @@
 
 /* Sidebar Menu Item */
 .sidebar-menu li {
-  display: flex; /* Align items vertically using flex */
+  display: flex;
   align-items: center; /* Vertically align icon and text */
   justify-content: flex-start; /* Align items to the left */
-  padding: 12px 20px; /* Consistent padding */
+  padding: 12px 20px;
   border-radius: 6px;
   cursor: pointer;
-  width: 100%; /* Ensure li elements take up full width */
-  position: relative; /* Needed for pseudo-element positioning */
-  transition: background 0.2s ease; /* Smooth transition for background color */
+  width: 100%;
+  position: relative;
+  transition: background 0.2s ease;
 }
 
 /* Sidebar Menu Link */
 .sidebar-menu li a {
   display: flex;
-  align-items: center; /* Al ign icon and text vertically */
-  color: white; /* Link text color */
-  text-decoration: none; /* Remove underline by default */
+  align-items: center;
+  color: white;
+  text-decoration: none;
   font-size: 16px;
-  width: 100%; /* Ensure the links take up the full width */
+  width: 100%;
   padding: 12px 20px;
   border-radius: 6px;
 }
@@ -64,7 +64,7 @@
 /* Active Link Style */
 .sidebar-menu li a.active {
   background: rgba(255, 255, 255, 0.2); /* Active background color */
-  color: white !important; /* Ensure active link text is white */
+  color: white !important;
   font-weight: bold; /* Make active link bold */
   position: relative;
   border-radius: 5px;
@@ -74,63 +74,67 @@
 
 /* Sidebar Icons */
 .sidebar-menu li svg {
-  margin-right: 10px; /* Space between icon and text */
-  vertical-align: middle; /* Aligns the icon with the text */
-  width: 20px; /* Icon size */
-  height: 20px;
+  margin-right: 10px;
+  vertical-align: middle;
+  width: 25px;
+  height: 25px;
 }
 
 /* Active Icon Style */
 .sidebar-menu li a.active svg {
-  color: #fff !important; /* Active icon color */
+  color: #fff !important;
 }
 
 /* Hide Text When Sidebar is Closed */
 .sidebar-menu li span {
-  display: inline-block; /* Default: text is shown */
+  display: inline-block;
 }
 
 /* Show Icons Only in Closed Sidebar */
 .admin-sidebar.closed .sidebar-menu li span {
-  display: none; /* Hide text when the sidebar is closed */
+  display: none;
 }
 
 .admin-sidebar.closed .sidebar-title {
-  display: none; /* Hide text when the sidebar is closed */
+  display: none;
 }
 
 .admin-sidebar.closed .sidebar-footer .avatar-img{
-  display: none; /* Hide text when the sidebar is closed */
+  display: none;
 }
 
 .admin-sidebar.closed .sidebar-footer .logout-link span{
-  display: none; /* Hide text when the sidebar is closed */
+  display: none;
 }
 
-/* Show Icons Only in Closed Sidebar */
-.admin-sidebar.closed .sidebar-menu li a svg {
-  height: 50px !important;
-  width: 50px !important;
+.admin-sidebar.closed .sidebar-menu li svg {
+  height: 30px;
+  width: 30px;
   margin-right: 0;
 }
 
-
 .admin-sidebar.closed .sidebar-menu li {
-  padding: 2px; /* Reduced padding when the sidebar is closed */
+  padding: 12px; /* Reduced padding when the sidebar is closed */
 }
+
+.admin-sidebar.closed .sidebar-menu li a {
+  padding: 5px; /* Reduced padding when the sidebar is closed */
+}
+
 /* Content Area */
 .admin-content {
-  margin-left: 240px; /* Default left margin for the sidebar */
+  margin-left: 240px;
   padding: 30px;
   width: calc(100% - 240px); /* Adjust content width based on sidebar size */
-  background-color: #ffffff; /* White background for content */
-  transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for content shift */
+  background-color: #ffffff;
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  box-sizing: border-box; /* Ensure padding is included in the width calculation */
 }
 
 /* Adjust content when sidebar is closed */
 .admin-sidebar.closed ~ .admin-content {
-  margin-left: 100px; /* Adjust for smaller width when sidebar is closed */
-  width: calc(100% - 100px); /* Adjust content width */
+  margin-left: 0; /* Remove left margin when sidebar is closed */
+  width: 100%; /* Use full width when sidebar is closed */
 }
 
 /* Avatar and Logout Section */
@@ -139,19 +143,18 @@
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
-  padding-bottom: 30px; /* Added space at the bottom of the footer */
+  padding-bottom: 30px;
 }
 
 .avatar-img {
   width: 50px;
   height: 50px;
-  border-radius: 50%; /* Circular avatar */
+  border-radius: 50%;
   margin-bottom: 15px;
-  object-fit: cover; /* Ensures the image covers the circle */
-  border: 2px solid #fff; /* White border around the avatar */
+  object-fit: cover;
+  border: 2px solid #fff;
 }
 
-/* Logout Link */
 .logout-link {
   display: flex;
   align-items: center;
@@ -166,6 +169,36 @@
 
 .logout-link svg {
   margin-right: 8px;
-  width: 20px; /* Icon size */
+  width: 20px;
   height: 20px;
+}
+
+/* For Mobile Devices */
+@media (max-width: 768px) {
+  /* Sidebar on mobile */
+  .admin-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0; /* Sidebar hidden by default on mobile */
+  }
+
+  .admin-sidebar.open {
+    width: 240px; /* Show sidebar when open */
+    transform: translateX(0);
+  }
+
+  .admin-layout {
+    display: block; /* Stack layout on mobile */
+  }
+
+  .admin-content {
+    margin-left: 0;
+    width: 100%; /* Full width content */
+  }
+
+  .toggle-sidebar-btn {
+    display: block; /* Show the toggle button on mobile */
+  }
 }
