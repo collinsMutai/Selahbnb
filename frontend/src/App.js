@@ -24,6 +24,7 @@ import PaypalPaymentSuccess from "./pages/PaypalPaymentSuccess";
 import AdminDashboard from "./pages/Admin";
 import Bookings from "./components/Bookings/Bookings";
 import Users from "./components/Users/Users";
+import Analytics from "./components/Analytics/Analytics";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -115,10 +116,12 @@ function App() {
     <Router>
       <Layout>
         <Routes>
+          {/* Main Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/places" element={<Places />} />
           <Route path="/contact" element={<ContactPage />} />
 
+          {/* Protected Routes */}
           <Route
             path="/paypalpayment/success"
             element={
@@ -128,33 +131,22 @@ function App() {
             }
           />
 
-          {/* Redirect users to admin dashboard if logged in as admin */}
-          <Route
-            path="/bookings"
-            element={
-              <ProtectedRoute>
-                {user?.role === "admin" ? (
-                  <Navigate to="/admin" />
-                ) : (
-                  <Bookings />
-                )}
-              </ProtectedRoute>
-            }
-          />
-
-          {/* Admin Dashboard Route */}
+          {/* Admin Route with redirection */}
           <Route
             path="/admin"
             element={
               user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />
             }
           >
+            {/* Nested admin routes */}
+            <Route index element={<Navigate to="bookings" replace />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="users" element={<Users />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
           </Route>
 
-          {/* User Route */}
+          {/* Non-admin Routes */}
           <Route path="/users" element={<Users />} />
         </Routes>
       </Layout>

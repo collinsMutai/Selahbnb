@@ -182,11 +182,13 @@
     left: 0;
     bottom: 0;
     width: 0; /* Sidebar hidden by default on mobile */
+    transform: translateX(-100%);
+    transition: width 0.3s ease, transform 0.3s ease; /* Smooth animation for opening */
   }
 
   .admin-sidebar.open {
     width: 240px; /* Show sidebar when open */
-    transform: translateX(0);
+    transform: translateX(0); /* Ensure it slides in */
   }
 
   .admin-layout {
