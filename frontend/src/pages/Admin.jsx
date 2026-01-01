@@ -57,6 +57,33 @@ const Admin = () => {
         <ul className="sidebar-menu">
           <li>
             <NavLink
+              to="analytics"
+              className={({ isActive }) => (isActive ? "active" : "")}
+              onClick={handleLinkClick}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="icon icon-tabler icons-tabler-outline icon-tabler-chart-bar"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 13a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                <path d="M15 9a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v10a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                <path d="M9 5a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v14a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" />
+                <path d="M4 20h14" />
+              </svg>
+              {sidebarOpen && <span>Analytics</span>}
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
               to="bookings"
               className={({ isActive }) => (isActive ? "active" : "")}
               onClick={handleLinkClick}
@@ -108,34 +135,7 @@ const Admin = () => {
             </NavLink>
           </li>
 
-          <li>
-            <NavLink
-              to="analytics"
-              className={({ isActive }) => (isActive ? "active" : "")}
-              onClick={handleLinkClick}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
-              </svg>
-              {sidebarOpen && <span>Analytics</span>}
-            </NavLink>
-          </li>
-
-          <li>
+          {/* <li>
             <NavLink
               to="settings"
               className={({ isActive }) => (isActive ? "active" : "")}
@@ -158,7 +158,7 @@ const Admin = () => {
               </svg>
               {sidebarOpen && <span>Settings</span>}
             </NavLink>
-          </li>
+          </li> */}
         </ul>
 
         {/* Avatar and Logout */}
@@ -215,11 +215,12 @@ const Admin = () => {
         </div>
 
         <Routes>
-          <Route index element={<Navigate to="bookings" replace />} />
+          <Route index element={<Navigate to="analytics" replace />} />
+          <Route path="analytics" element={<Analytics />} />
+          {/* <Route index element={<Navigate to="bookings" replace />} /> */}
           <Route path="bookings" element={<Bookings />} />
           <Route path="users" element={<Users />} />
-          <Route path="analytics" element={<Analytics />} />
-          <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
+          {/* <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} /> */}
         </Routes>
       </main>
     </div>
