@@ -3,29 +3,47 @@ import User from "../models/User.js";
 
 export const getAnalytics = async (req, res) => {
   try {
-    // Total Bookings
     const totalBookings = await Booking.countDocuments();
-
-    // Booking Status Breakdown
     const bookingStatusCount = await Booking.aggregate([
-      { $group: { _id: "$status", count: { $sum: 1 } } }
+      { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
-
-    // Revenue Breakdown
     const totalRevenue = await Booking.aggregate([
-      { $group: { _id: null, total: { $sum: "$totalPrice" } } }
+      { $group: { _id: null, total: { $sum: "$totalPrice" } } },
     ]);
-
-    // User Demographics (adults, children, infants, pets)
+    const totalRevenueByMonth = await Booking.aggregate([
+      {
+        $project: {
+          month: { $month: "$checkIn" },
+          year: { $year: "$checkIn" },
+          totalPrice: 1,
+        },
+      },
+      {
+        $group: {
+          _id: { month: "$month", year: "$year" },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      { $sort: { "_id.year": 1, "_id.month": 1 } },
+    ]);
     const userDemographics = await Booking.aggregate([
-      { $group: { _id: null, totalAdults: { $sum: "$adults" }, totalChildren: { $sum: "$children" }, totalInfants: { $sum: "$infants" }, totalPets: { $sum: "$pets" } } }
+      {
+        $group: {
+          _id: null,
+          totalAdults: { $sum: "$adults" },
+          totalChildren: { $sum: "$children" },
+          totalInfants: { $sum: "$infants" },
+          totalPets: { $sum: "$pets" },
+        },
+      },
     ]);
 
     res.json({
       totalBookings,
       bookingStatusCount,
       totalRevenue: totalRevenue[0]?.total || 0,
-      userDemographics: userDemographics[0] || {}
+      totalRevenueByMonth, // Added this data
+      userDemographics: userDemographics[0] || {},
     });
   } catch (error) {
     console.error("Error fetching analytics:", error);

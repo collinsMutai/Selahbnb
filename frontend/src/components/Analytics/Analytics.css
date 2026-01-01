@@ -4,11 +4,54 @@
 }
 
 .chart-container {
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 20px;
 }
 
-.chart-container h3 {
-  text-align: center;
+.chart-container > div {
+  width: 300px;  /* Set fixed width for each chart container */
+  height: 300px;  /* Set fixed height for each chart container */
+  box-sizing: border-box;
+  padding: 10px;
+  overflow: hidden; /* Prevent overflow if the chart exceeds the container */
+  background-color: #fff;  /* Optional: makes chart container white */
+  border: 1px solid #ddd;  /* Optional: adds a border around the chart container */
+  border-radius: 8px;  /* Optional: rounds the corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  /* Optional: adds a subtle shadow */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Ensure canvas fills the container's size */
+.chart-container > div canvas {
+  width: 100% !important;  /* Force canvas to fill its container */
+  height: 100% !important; /* Force canvas to fill its container */
+}
+
+/* Mobile: 100% width for smaller screens */
+@media (max-width: 768px) {
+  .chart-container > div {
+    width: 100%;  /* Full width for mobile */
+    height: 250px;  /* Smaller height on mobile */
+  }
+}
+
+/* Tablet: 2 items per row */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .chart-container > div {
+    width: 48%;  /* 2 items per row */
+    height: 250px;  /* Smaller height on tablet */
+  }
+}
+
+/* Desktop: 3 items per row */
+@media (min-width: 1024px) {
+  .chart-container > div {
+    width: 30%;  /* 3 items per row */
+    height: 300px;  /* Fixed height for desktop */
+  }
 }
