@@ -10,6 +10,8 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 import paypalRoutes from "./routes/paypalRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
+import chatbotRoutes from "./routes/chatbotRoutes.js";
+
 
 dotenv.config();
 connectDB();
@@ -42,6 +44,9 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/paypal", paypalRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/chatbot", chatbotRoutes);
+
+
 
 // Test route to check if server is running
 app.get("/", (req, res) => {

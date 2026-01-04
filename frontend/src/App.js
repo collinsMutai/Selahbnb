@@ -25,8 +25,12 @@ import AdminDashboard from "./pages/Admin";
 import Bookings from "./components/Bookings/Bookings";
 import Users from "./components/Users/Users";
 import Analytics from "./components/Analytics/Analytics";
+import ListingChatbot from "./components/ListingChatbot/ListingChatbot";
+
 
 const apiUrl = process.env.REACT_APP_API_URL;
+const GLOBAL_LISTING_ID = "695025737ee434d532c393eb";
+
 
 // ---------- Protected Route ----------
 const ProtectedRoute = ({ children }) => {
@@ -149,6 +153,8 @@ function App() {
           {/* Non-admin Routes */}
           <Route path="/users" element={<Users />} />
         </Routes>
+            {/* ✅ GLOBAL CHATBOT */}
+    <ListingChatbot listingId={GLOBAL_LISTING_ID} />
       </Layout>
 
       <ToastContainer position="top-right" autoClose={5000} />
