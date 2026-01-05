@@ -4,10 +4,23 @@ import moment from "moment-timezone";
 import * as chrono from "chrono-node";
 
 /**
- * 🔎 Simple intent detection
+ * 🔎 Simple intent detection (FIXED)
  */
 const detectIntent = (message) => {
-  const msg = message.toLowerCase();
+  const msg = message.toLowerCase().trim();
+
+  // Normalize odd date orders: "dec 2025 25" → "dec 25 2025"
+  const normalizedMsg = msg.replace(
+    /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)\s+(\d{4})\s+(\d{1,2})\b/i,
+    "$1 $3 $2"
+  );
+
+  // ✅ DATE DETECTION FIRST (important)
+  const parsedDates = chrono.parse(normalizedMsg, new Date(), {
+    forwardDate: true,
+  });
+
+  if (parsedDates.length > 0) return "CHECK_DATE";
 
   if (msg.includes("available") || msg.includes("availability")) return "AVAILABILITY";
   if (msg.includes("price") || msg.includes("cost") || msg.includes("rate")) return "PRICING";
@@ -16,10 +29,6 @@ const detectIntent = (message) => {
   if (msg.includes("description") || msg.includes("about")) return "DESCRIPTION";
   if (msg.includes("book") || msg.includes("reserve")) return "BOOKING_HELP";
 
-  // Natural language date detection (tomorrow, jan 4, next friday)
-  const parsedDates = chrono.parse(msg);
-  if (parsedDates.length > 0) return "CHECK_DATE";
-
   return "GENERAL";
 };
 
@@ -27,7 +36,7 @@ const detectIntent = (message) => {
  * 📅 Find next available date (up to 30 days ahead)
  */
 const findNextAvailableDate = async (listingId, requestedDate) => {
-  let date = moment.tz(requestedDate, "America/Denver");
+  let date = moment.tz(requestedDate, "America/Denver").startOf("day");
 
   for (let i = 0; i < 30; i++) {
     const overlapping = await Booking.findOne({
@@ -72,22 +81,34 @@ export const chatWithListingBot = async (req, res) => {
 
     // ---------------- CHECK DATE ----------------
     if (intent === "CHECK_DATE") {
-      const parsed = chrono.parse(message);
+      const parsed = chrono.parse(message, new Date(), { forwardDate: true });
 
-      if (!parsed.length) {
+      if (!parsed.length || !parsed[0].start) {
         return res.json({
-          reply: "Please provide a valid date.",
+          reply: "Please provide a valid future date.",
         });
       }
 
-      const requestedDate = parsed[0].start.date();
-      const dateStr = moment(requestedDate).format("YYYY-MM-DD");
+      const requestedDate = moment
+        .tz(parsed[0].start.date(), "America/Denver")
+        .startOf("day");
+
+      const today = moment.tz("America/Denver").startOf("day");
+
+      // 🚫 Block past dates
+      if (requestedDate.isBefore(today)) {
+        return res.json({
+          reply: "❌ You can’t check past dates. Please choose a future date.",
+        });
+      }
+
+      const dateStr = requestedDate.format("YYYY-MM-DD");
 
       const overlapping = await Booking.findOne({
         listing: listingId,
         status: { $in: ["Confirmed", "Hold"] },
-        checkIn: { $lt: moment(requestedDate).add(1, "day").toDate() },
-        checkOut: { $gt: moment(requestedDate).toDate() },
+        checkIn: { $lt: requestedDate.clone().add(1, "day").toDate() },
+        checkOut: { $gt: requestedDate.toDate() },
       });
 
       if (!overlapping) {
@@ -96,7 +117,10 @@ export const chatWithListingBot = async (req, res) => {
         });
       }
 
-      const alternative = await findNextAvailableDate(listingId, requestedDate);
+      const alternative = await findNextAvailableDate(
+        listingId,
+        requestedDate.toDate()
+      );
 
       if (alternative) {
         return res.json({
@@ -136,7 +160,7 @@ export const chatWithListingBot = async (req, res) => {
       });
     }
 
-    // ---------------- CONTACT (HARDCODED) ----------------
+    // ---------------- CONTACT ----------------
     if (intent === "CONTACT") {
       return res.json({
         reply:
