@@ -269,3 +269,94 @@ export const updateBookingStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const adminBlockDates = async (req, res) => {
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ message: "Admin only" });
+    }
+
+    const { listingId } = req.params;
+    const { startDate, endDate, reason } = req.body;
+
+    const checkIn = moment.tz(startDate, "America/Denver").startOf("day");
+    const checkOut = moment.tz(endDate, "America/Denver").startOf("day");
+
+    if (!checkOut.isAfter(checkIn)) {
+      return res.status(400).json({ message: "Invalid date range" });
+    }
+
+    // prevent overlap (same logic as guests)
+    const overlap = await Booking.findOne({
+      listing: listingId,
+      status: { $in: ["Confirmed", "Hold"] },
+      checkIn: { $lt: checkOut.toDate() },
+      checkOut: { $gt: checkIn.toDate() },
+    });
+
+    if (overlap) {
+      return res.status(400).json({ message: "Dates already blocked" });
+    }
+
+    const adminBlock = await Booking.create({
+      listing: listingId,
+      user: req.user._id, // admin user
+      name: "ADMIN BLOCK",
+      phone: "N/A",
+      adults: 0,
+      children: 0,
+      infants: 0,
+      pets: 0,
+      checkIn,
+      checkOut,
+      subtotal: 0,
+      tax: 0,
+      totalPrice: 0,
+      numberOfDays: checkOut.diff(checkIn, "days"),
+      paymentTransactionId: `ADMIN-${Date.now()}`,
+      status: "Confirmed",
+      paymentStatus: "Completed",
+      createdBy: "admin",
+      blockReason: reason,
+    });
+
+    res.status(201).json(adminBlock);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+export const adminRemoveBlock = async (req, res) => {
+  try {
+    if (!req.user.isAdmin) {
+      return res.status(403).json({ message: "Admin only" });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+
+    if (!booking || booking.createdBy !== "admin") {
+      return res.status(404).json({ message: "Admin block not found" });
+    }
+
+    await booking.deleteOne();
+    res.json({ message: "Blocked dates removed" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+export const getAdminCalendar = async (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ message: "Admin only" });
+  }
+
+  const bookings = await Booking.find({
+    listing: req.params.listingId,
+    status: "Confirmed",
+  }).select("checkIn checkOut createdBy blockReason user");
+
+  res.json(bookings);
+};

@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // ✅ Keep as you requested
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,11 +26,10 @@ import Bookings from "./components/Bookings/Bookings";
 import Users from "./components/Users/Users";
 import Analytics from "./components/Analytics/Analytics";
 import ListingChatbot from "./components/ListingChatbot/ListingChatbot";
-
+import AdminCalendar from "./components/AdminCalendar/AdminCalendar"; // ✅ Import calendar
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const GLOBAL_LISTING_ID = "695025737ee434d532c393eb";
-
 
 // ---------- Protected Route ----------
 const ProtectedRoute = ({ children }) => {
@@ -41,8 +40,6 @@ const ProtectedRoute = ({ children }) => {
 // ---------- Layout Wrapper ----------
 const Layout = ({ children }) => {
   const location = useLocation();
-
-  // Hide navbar/footer on admin paths
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
@@ -65,7 +62,6 @@ function App() {
     dispatch(logout());
   }, [dispatch]);
 
-  // Refresh the token by sending the refresh token to the backend
   const refreshSession = useCallback(async () => {
     try {
       const response = await axios.post(
@@ -82,7 +78,7 @@ function App() {
       return accessToken;
     } catch (error) {
       handleLogout();
-      return null; // In case of an error, log out the user
+      return null;
     }
   }, [dispatch, handleLogout]);
 
@@ -97,10 +93,8 @@ function App() {
           const currentTime = Date.now() / 1000;
 
           if (decoded.exp < currentTime + 60) {
-            // Token is about to expire, refresh it
             await refreshSession();
           } else {
-            // Token is still valid, continue
             dispatch(login({ user: JSON.parse(storedUser), token }));
           }
         } catch (err) {
@@ -114,7 +108,7 @@ function App() {
     initializeAuth();
   }, [dispatch, refreshSession, handleLogout]);
 
-  if (loading) return null; // Render nothing while checking auth state
+  if (loading) return null;
 
   return (
     <Router>
@@ -135,26 +129,30 @@ function App() {
             }
           />
 
-          {/* Admin Route with redirection */}
+          {/* Admin Route with nested routes */}
           <Route
             path="/admin"
             element={
               user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />
             }
           >
-            {/* Nested admin routes */}
             <Route index element={<Navigate to="bookings" replace />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="users" element={<Users />} />
             <Route path="analytics" element={<Analytics />} />
+            <Route
+              path="calendar"
+              element={<AdminCalendar listingId={GLOBAL_LISTING_ID} />}
+            /> {/* ✅ Calendar route */}
             <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
           </Route>
 
-          {/* Non-admin Routes */}
+          {/* Non-admin fallback */}
           <Route path="/users" element={<Users />} />
         </Routes>
-            {/* ✅ GLOBAL CHATBOT */}
-    <ListingChatbot listingId={GLOBAL_LISTING_ID} />
+
+        {/* Global Chatbot */}
+        <ListingChatbot listingId={GLOBAL_LISTING_ID} />
       </Layout>
 
       <ToastContainer position="top-right" autoClose={5000} />
