@@ -1,14 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-const AdminCalendar = ({ listingId }) => {
+// Define the global listing ID
+const GLOBAL_LISTING_ID = "695025737ee434d532c393eb";
+
+const AdminCalendar = () => {
   const [calendar, setCalendar] = useState([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
 
   // Get token from localStorage
-  const token = JSON.parse(localStorage.getItem("user"))?.accessToken;
+const token = localStorage.getItem("token");
+console.log('token',token);
+
+
 
   // Axios instance with Authorization header
   const api = axios.create({
@@ -21,7 +27,7 @@ const AdminCalendar = ({ listingId }) => {
   // 🔄 Fetch calendar data
   const fetchCalendar = async () => {
     try {
-      const res = await api.get(`/admin/listings/${listingId}/calendar`);
+      const res = await api.get(`/bookings/admin/listings/${GLOBAL_LISTING_ID}/calendar`);
       setCalendar(res.data);
     } catch (err) {
       console.error("Error fetching calendar:", err);
@@ -29,14 +35,15 @@ const AdminCalendar = ({ listingId }) => {
   };
 
   useEffect(() => {
-    if (listingId) fetchCalendar();
-  }, [listingId]);
+    fetchCalendar();
+  }, []);
 
   // ➕ Block dates
   const handleBlock = async (e) => {
     e.preventDefault();
+
     try {
-      await api.post(`/admin/listings/${listingId}/block-dates`, {
+      await api.post(`/bookings/admin/listings/${GLOBAL_LISTING_ID}/block-dates`, {
         startDate,
         endDate,
         reason,
@@ -54,7 +61,7 @@ const AdminCalendar = ({ listingId }) => {
   const handleDelete = async (id) => {
     if (!window.confirm("Remove this block?")) return;
     try {
-      await api.delete(`/admin/bookings/${id}`);
+      await api.delete(`/bookings/admin/bookings/${id}`);
       fetchCalendar();
     } catch (err) {
       console.error("Error deleting block:", err);

@@ -7,7 +7,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode"; // ✅ Keep as you requested
+import { jwtDecode } from "jwt-decode";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -25,12 +25,10 @@ import AdminDashboard from "./pages/Admin";
 import Bookings from "./components/Bookings/Bookings";
 import Users from "./components/Users/Users";
 import Analytics from "./components/Analytics/Analytics";
-import ListingChatbot from "./components/ListingChatbot/ListingChatbot";
-import AdminCalendar from "./components/AdminCalendar/AdminCalendar"; // ✅ Import calendar
+import AdminCalendar from "./components/AdminCalendar/AdminCalendar"; // ✅ Import AdminCalendar
 
 const apiUrl = process.env.REACT_APP_API_URL;
 const GLOBAL_LISTING_ID = "695025737ee434d532c393eb";
-
 // ---------- Protected Route ----------
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useSelector((state) => state.user);
@@ -40,6 +38,8 @@ const ProtectedRoute = ({ children }) => {
 // ---------- Layout Wrapper ----------
 const Layout = ({ children }) => {
   const location = useLocation();
+
+  // Hide navbar/footer on admin paths
   const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
@@ -97,8 +97,7 @@ function App() {
           } else {
             dispatch(login({ user: JSON.parse(storedUser), token }));
           }
-        } catch (err) {
-          console.error("Error decoding token:", err);
+        } catch {
           handleLogout();
         }
       }
@@ -114,12 +113,10 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          {/* Main Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/places" element={<Places />} />
           <Route path="/contact" element={<ContactPage />} />
 
-          {/* Protected Routes */}
           <Route
             path="/paypalpayment/success"
             element={
@@ -129,30 +126,41 @@ function App() {
             }
           />
 
-          {/* Admin Route with nested routes */}
+          {/* Redirect users to admin dashboard if logged in as admin */}
+          <Route
+            path="/bookings"
+            element={
+              <ProtectedRoute>
+                {user?.role === "admin" ? (
+                  <Navigate to="/admin" />
+                ) : (
+                  <Bookings />
+                )}
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Admin Dashboard Route */}
           <Route
             path="/admin"
             element={
               user?.role === "admin" ? <AdminDashboard /> : <Navigate to="/" />
             }
           >
-            <Route index element={<Navigate to="bookings" replace />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="users" element={<Users />} />
             <Route path="analytics" element={<Analytics />} />
             <Route
               path="calendar"
               element={<AdminCalendar listingId={GLOBAL_LISTING_ID} />}
-            /> {/* ✅ Calendar route */}
+            />{" "}
+            {/* ✅ Calendar route */}
             <Route path="settings" element={<h2>Settings (Coming Soon)</h2>} />
           </Route>
 
-          {/* Non-admin fallback */}
+          {/* User Route */}
           <Route path="/users" element={<Users />} />
         </Routes>
-
-        {/* Global Chatbot */}
-        <ListingChatbot listingId={GLOBAL_LISTING_ID} />
       </Layout>
 
       <ToastContainer position="top-right" autoClose={5000} />

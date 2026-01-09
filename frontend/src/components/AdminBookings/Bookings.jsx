@@ -42,6 +42,32 @@ const Bookings = () => {
   const paginate = (data, page) =>
     data.slice((page - 1) * perPage, page * perPage);
 
+  const handleRefund = async (bookingId) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/paypal/refund`,
+        { bookingId },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      alert("Refund processed successfully");
+      // Refresh bookings after successful refund
+      setBookings((prevBookings) =>
+        prevBookings.map((booking) =>
+          booking._id === bookingId
+            ? { ...booking, status: "Refunded", paymentStatus: "Refunded" }
+            : booking
+        )
+      );
+    } catch (error) {
+      alert("Error processing refund");
+      console.error(error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="loading">
@@ -67,6 +93,7 @@ const Bookings = () => {
               <th>Total</th>
               <th>Status</th>
               <th>Payment</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -79,6 +106,16 @@ const Bookings = () => {
                 <td>${b.totalPrice}</td>
                 <td>{b.status}</td>
                 <td>{b.paymentStatus}</td>
+                <td>
+                  {b.paymentStatus === "Completed" && (
+                    <button
+                      className="refund-btn"
+                      onClick={() => handleRefund(b._id)}
+                    >
+                      Refund
+                    </button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
