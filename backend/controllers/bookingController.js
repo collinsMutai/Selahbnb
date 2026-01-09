@@ -273,7 +273,6 @@ export const updateBookingStatus = async (req, res) => {
 
 export const adminBlockDates = async (req, res) => {
   try {
-    // Check if the user has 'admin' role
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin only" });
     }
@@ -282,7 +281,7 @@ export const adminBlockDates = async (req, res) => {
     const { startDate, endDate, reason } = req.body;
 
     const checkIn = moment.tz(startDate, "America/Denver").startOf("day");
-    const checkOut = moment.tz(endDate, "America/Denver").startOf("day");
+    const checkOut = moment.tz(endDate, "America/Denver").endOf("day"); // Ensure the entire check-out day is included
 
     if (!checkOut.isAfter(checkIn)) {
       return res.status(400).json({ message: "Invalid date range" });
@@ -327,9 +326,9 @@ export const adminBlockDates = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
 export const adminRemoveBlock = async (req, res) => {
   try {
-    // Check if the user has 'admin' role
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin only" });
     }
@@ -341,13 +340,13 @@ export const adminRemoveBlock = async (req, res) => {
     }
 
     await booking.deleteOne();
-    res.json({ message: "Blocked dates removed" });
+    res.json({ message: "Blocked dates removed", deletedBlock: booking });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
 export const getAdminCalendar = async (req, res) => {
-  // Check if the user has 'admin' role
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin only" });
   }
