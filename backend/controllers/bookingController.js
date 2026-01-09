@@ -273,7 +273,8 @@ export const updateBookingStatus = async (req, res) => {
 
 export const adminBlockDates = async (req, res) => {
   try {
-    if (!req.user.isAdmin) {
+    // Check if the user has 'admin' role
+    if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin only" });
     }
 
@@ -287,7 +288,7 @@ export const adminBlockDates = async (req, res) => {
       return res.status(400).json({ message: "Invalid date range" });
     }
 
-    // prevent overlap (same logic as guests)
+    // Prevent overlap (same logic as guests)
     const overlap = await Booking.findOne({
       listing: listingId,
       status: { $in: ["Confirmed", "Hold"] },
@@ -326,12 +327,10 @@ export const adminBlockDates = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
-
-
 export const adminRemoveBlock = async (req, res) => {
   try {
-    if (!req.user.isAdmin) {
+    // Check if the user has 'admin' role
+    if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin only" });
     }
 
@@ -347,9 +346,9 @@ export const adminRemoveBlock = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
-
 export const getAdminCalendar = async (req, res) => {
-  if (!req.user.isAdmin) {
+  // Check if the user has 'admin' role
+  if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin only" });
   }
 

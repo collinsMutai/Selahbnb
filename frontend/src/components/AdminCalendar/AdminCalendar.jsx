@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-// Define the global listing ID
 const GLOBAL_LISTING_ID = "695025737ee434d532c393eb";
 
 const AdminCalendar = () => {
@@ -10,61 +9,108 @@ const AdminCalendar = () => {
   const [endDate, setEndDate] = useState("");
   const [reason, setReason] = useState("");
 
-  // Get token from localStorage
-const token = localStorage.getItem("token");
-console.log('token',token);
-
-
-
-  // Axios instance with Authorization header
-  const api = axios.create({
-    baseURL: process.env.REACT_APP_API_URL,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  // 🔄 Fetch calendar data
+  // Function to fetch calendar data
   const fetchCalendar = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. Redirecting to login...");
+      window.location.href = "/"; // Or use React Router: history.push("/login")
+      return;
+    }
+
     try {
-      const res = await api.get(`/bookings/admin/listings/${GLOBAL_LISTING_ID}/calendar`);
+      const api = axios.create({
+        baseURL: process.env.REACT_APP_API_URL, // Make sure your API URL is set in .env
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const res = await api.get(
+        `/bookings/admin/listings/${GLOBAL_LISTING_ID}/calendar`
+      );
       setCalendar(res.data);
     } catch (err) {
-      console.error("Error fetching calendar:", err);
+      console.error("Error fetching calendar:", err.response || err);
+      if (err.response && err.response.status === 401) {
+        console.error("Token expired or invalid. Redirecting to login...");
+        window.location.href = "/login"; // Or use React Router: history.push("/login")
+      }
     }
   };
 
+  // Check token existence and fetch calendar when component mounts
   useEffect(() => {
-    fetchCalendar();
-  }, []);
+    const token = localStorage.getItem("token");
 
-  // ➕ Block dates
+    if (!token) {
+      console.error("No token found. Redirecting to login...");
+      window.location.href = "/"; // Or use React Router: history.push("/login")
+    } else {
+      fetchCalendar();
+    }
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // ➕ Block dates form handler
   const handleBlock = async (e) => {
     e.preventDefault();
 
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. Redirecting to login...");
+      window.location.href = "/login"; // Or use React Router: history.push("/login")
+      return;
+    }
+
     try {
-      await api.post(`/bookings/admin/listings/${GLOBAL_LISTING_ID}/block-dates`, {
-        startDate,
-        endDate,
-        reason,
+      const api = axios.create({
+        baseURL: process.env.REACT_APP_API_URL,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      await api.post(
+        `/bookings/admin/listings/${GLOBAL_LISTING_ID}/block-dates`,
+        {
+          startDate,
+          endDate,
+          reason,
+        }
+      );
+
       setStartDate("");
       setEndDate("");
       setReason("");
-      fetchCalendar();
+      fetchCalendar(); // Refresh the calendar after blocking the dates
     } catch (err) {
-      console.error("Error blocking dates:", err);
+      console.error("Error blocking dates:", err.response || err);
     }
   };
 
   // ❌ Remove admin block
   const handleDelete = async (id) => {
     if (!window.confirm("Remove this block?")) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No token found. Redirecting to login...");
+      window.location.href = "/login"; // Or use React Router: history.push("/login")
+      return;
+    }
+
     try {
+      const api = axios.create({
+        baseURL: process.env.REACT_APP_API_URL,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       await api.delete(`/bookings/admin/bookings/${id}`);
-      fetchCalendar();
+      fetchCalendar(); // Refresh the calendar after removing the block
     } catch (err) {
-      console.error("Error deleting block:", err);
+      console.error("Error deleting block:", err.response || err);
     }
   };
 
@@ -113,7 +159,9 @@ console.log('token',token);
               <td>{item.checkOut.slice(0, 10)}</td>
               <td>{item.createdBy === "admin" ? "🟥 Block" : "🟦 Booking"}</td>
               <td>
-                {item.createdBy === "admin" ? item.blockReason || "—" : item.user?.name}
+                {item.createdBy === "admin"
+                  ? item.blockReason || "—"
+                  : item.user?.name}
               </td>
               <td>
                 {item.createdBy === "admin" && (
