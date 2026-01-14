@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 // Define the schema for the PayPal transaction
 const paypalTransactionSchema = new mongoose.Schema({
@@ -20,12 +20,12 @@ const paypalTransactionSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD', // Default currency
+    default: "USD", // Default currency
   },
   status: {
     type: String,
-    enum: ['CREATED', 'COMPLETED', 'CANCELLED', 'PENDING', 'REFUNDED'],
-    default: 'CREATED', // Initial status
+    enum: ["CREATED", "COMPLETED", "CANCELLED", "PENDING", "REFUNDED"],
+    default: "CREATED", // Initial status
   },
   approvalLink: {
     type: String,
@@ -37,6 +37,9 @@ const paypalTransactionSchema = new mongoose.Schema({
   },
 });
 
-const PaypalTransaction = mongoose.model('PaypalTransaction', paypalTransactionSchema);
+const PaypalTransaction = mongoose.model(
+  "PaypalTransaction",
+  paypalTransactionSchema
+);
 
 export default PaypalTransaction;
